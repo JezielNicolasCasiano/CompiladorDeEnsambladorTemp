@@ -3,6 +3,7 @@ package jeziel.compiladordeensamblador.controlador;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import jeziel.compiladordeensamblador.modelo.LectorDeArchivos;
@@ -18,12 +19,11 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
     @FXML
     private MenuItem seleccionarArchivo;
+    @FXML
+    private TextArea codigoArea;
 
 
-    @Override
-    public void SeleccionarArchivo() {
 
-    }
 
     @FXML
     public void SeleccionarUnArchivo(){ //Metodo que instancia un fileChooser para seleccionar el archivo. Es onAction de SeleccionarArchivo
@@ -40,7 +40,14 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 throw new RuntimeException(ex);
             }
         });
+    }
 
+    @Override
+    public void rellenarCodigo() {
+        for(int i = 0; i<la.getLineas().size(); i++){
+            codigoArea.setText(la.getLineas().get(i));
+            codigoArea.setText("\n");
+        }
     }
 
     @Override

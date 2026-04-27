@@ -10,9 +10,10 @@ import java.util.List;
 public class LectorDeArchivos{
     private File file;
     private List<String> lineas;
+    private LectorDeArchivosListener listener;
 
     public LectorDeArchivos(LectorDeArchivosListener listener){
-
+        this.listener = listener;
     }
 
 
@@ -26,9 +27,11 @@ public class LectorDeArchivos{
     }
 
     //Metodo que establece el nuevo archivo y sus lienas en String
-    public List<String> setFile(File file) throws IOException {
+    public void setFile(File file) throws IOException {
         this.file = file;
-        lineas = Files.readAllLines(Path.of(file.getAbsolutePath()));
+    }
+
+    public List<String> getLineas() {
         return lineas;
     }
 }
