@@ -29,6 +29,8 @@ public class LectorDeArchivos{
     //Metodo que establece el nuevo archivo y sus lienas en String
     public void setFile(File file) throws IOException {
         this.file = file;
+        this.lineas = Files.readAllLines(Path.of(file.getAbsolutePath()));
+        listener.rellenarCodigo();
     }
 
     public List<String> getLineas() {

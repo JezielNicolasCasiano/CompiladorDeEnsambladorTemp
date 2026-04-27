@@ -45,8 +45,8 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     @Override
     public void rellenarCodigo() {
         for(int i = 0; i<la.getLineas().size(); i++){
-            codigoArea.setText(la.getLineas().get(i));
-            codigoArea.setText("\n");
+            codigoArea.appendText(la.getLineas().get(i));
+            codigoArea.appendText("\n");
         }
     }
 
