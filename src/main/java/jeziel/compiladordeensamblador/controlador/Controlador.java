@@ -11,16 +11,17 @@ import jeziel.compiladordeensamblador.modelo.LectorDeArchivos;
 import jeziel.compiladordeensamblador.modelo.LectorDeArchivosListener;
 import jeziel.compiladordeensamblador.modelo.lexer.Lexer;
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
+import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class Controlador implements LectorDeArchivosListener, Initializable {
     private LectorDeArchivos la;
     private Lexer le;
+    private final Map<TokenType, String> descripciones = new EnumMap<>(TokenType.class);
 
     @FXML
     private MenuItem seleccionarArchivo;
@@ -66,7 +67,15 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             int indiceFin = Math.min(indiceInicio + 25, tokens.size());
 
             for (int i = indiceInicio; i < indiceFin; i++) {
-                paginaTemporal.appendText(tokens.get(i).toString() + "\n");
+                String descripcion;
+
+                if (tokens.get(i).getType() == TokenType.NUMERO) {
+                    descripcion = "Constante (numérica " + String.valueOf(tokens.get(i).getSub()).toLowerCase() + ")";
+                } else {
+
+                    descripcion = descripciones.getOrDefault(tokens.get(i).getType(), "Elemento inválido");
+                }
+                paginaTemporal.appendText(String.format("%-15s ; %s\n", tokens.get(i).getValue(), descripcion));;
             }
 
             return paginaTemporal;
@@ -101,6 +110,19 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         la = new LectorDeArchivos(this);
         codigoArea.setEditable(false);
+
+        descripciones.put(TokenType.INSTRUCCION, "Instrucción");
+        descripciones.put(TokenType.DIRECTIVA, "Pseudoinstrucción");
+        descripciones.put(TokenType.REGISTRO, "Registro");
+        descripciones.put(TokenType.IDENTIFICADOR, "Símbolo");
+        descripciones.put(TokenType.ETIQUETA, "Símbolo");
+        descripciones.put(TokenType.SEPARADOR, "Símbolo");
+        descripciones.put(TokenType.CORCHETE_ABRE, "Símbolo");
+        descripciones.put(TokenType.CORCHETE_CIERRA, "Símbolo");
+        descripciones.put(TokenType.PARENTESIS_ABRE, "Símbolo");
+        descripciones.put(TokenType.PARENTESIS_CIERRA, "Símbolo");
+        descripciones.put(TokenType.CARACTER, "Constante (caracter)");
+        descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
 
     }
 }

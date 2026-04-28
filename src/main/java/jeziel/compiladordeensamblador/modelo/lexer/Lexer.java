@@ -27,7 +27,10 @@ public class Lexer {
                 }
 
                 Token token = nextToken();
-                tokens.add(token);
+                assert token != null;
+                if (token.getType() != TokenType.COMENTARIO){
+                    tokens.add(token);
+                }
 
             }
             currentPosition = 0;
@@ -40,9 +43,15 @@ public class Lexer {
         if (currentPosition >= input.get(currentLine).length()) {
             return null;
         }
-        
+
         String[] tokenPatterns = {
                 ";[^\r\n]*",
+                "(?i)\\.?(code|data|stack)\\s+segment\\b", //Agregado cosas aqui para detectar los eelmentos compuestos
+                "(?i)(byte|word)\\s+ptr\\b",
+                "(?i)dup\\s*\\([^)]*\\)",
+                "\\[[^\\]]*\\]",
+                "\"[^\"]*\"",
+                "'[^']*'",                                  //Termina aqui los elementos nuevos
                 "[a-zA-Z_][a-zA-Z0-9_]*:",
                 "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE)\\b",
                 "(?i)\\b(ORG|END|DB|DW|EQU|SEGMENT|ENDS|STACK|DATA|CODE|DUP|BYTE PTR|WORD PTR|MACRO|ENDM|PROC|ENDP)\\b",
@@ -57,10 +66,18 @@ public class Lexer {
                 "\\]",
                 "\\(",
                 "\\)"
+
+
         };
 
         TokenType[] tokenTypes = {
                 TokenType.COMENTARIO,
+                TokenType.DIRECTIVA, //Agragado por los elementos nuevos
+                TokenType.DIRECTIVA,
+                TokenType.DIRECTIVA,
+                TokenType.IDENTIFICADOR,
+                TokenType.CARACTER,
+                TokenType.CARACTER, //Agregado por los elementos nuevos
                 TokenType.ETIQUETA,
                 TokenType.INSTRUCCION,
                 TokenType.DIRECTIVA,
