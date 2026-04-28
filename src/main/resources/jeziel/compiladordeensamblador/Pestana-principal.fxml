@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
@@ -35,16 +34,10 @@
             </ScrollPane>
          </left>
          <right>
-            <Pagination fx:id="divisionPagina" prefHeight="524.0" prefWidth="395.0" stylesheets="@estilos.css" BorderPane.alignment="CENTER">
-               <styleClass>
-                  <String fx:value="control-box" />
-                  <String fx:value="bullet-button" />
-                  <String fx:value="number-button" />
-               </styleClass>
-            </Pagination>
+            <Pagination fx:id="divisionPagina" prefHeight="524.0" prefWidth="364.0" stylesheets="@estilos.css" BorderPane.alignment="CENTER" />
          </right>
          <center>
-            <Pagination fx:id="numeracionPagina" prefHeight="524.0" prefWidth="61.0" BorderPane.alignment="CENTER" />
+            <Pagination fx:id="numeracionPagina" prefHeight="524.0" prefWidth="35.0" BorderPane.alignment="CENTER" />
          </center>
       </BorderPane>
    </children>

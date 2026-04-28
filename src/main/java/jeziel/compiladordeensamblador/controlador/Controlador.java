@@ -56,12 +56,14 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     public void paginar(List<Token> tokens){
         int numeroDePaginas = (int) Math.ceil((double) tokens.size() / 25);
         divisionPagina.setPageCount(numeroDePaginas == 0 ? 1 : numeroDePaginas);
+        numeracionPagina.currentPageIndexProperty().unbindBidirectional(divisionPagina.currentPageIndexProperty());
+        numeracionPagina.currentPageIndexProperty().bindBidirectional(divisionPagina.currentPageIndexProperty());
         divisionPagina.setPageFactory(pageIndex ->{
             TextArea paginaTemporal = new TextArea();
             paginaTemporal.setEditable(false);
             paginaTemporal.getStyleClass().add("content");
             int indiceInicio = pageIndex * 25;
-            int indiceFin = Math.min(indiceInicio + 25, numeroDePaginas);
+            int indiceFin = Math.min(indiceInicio + 25, tokens.size());
 
             for (int i = indiceInicio; i < indiceFin; i++) {
                 paginaTemporal.appendText(tokens.get(i).toString() + "\n");
@@ -74,7 +76,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             paginaTemporal.setEditable(false);
             paginaTemporal.getStyleClass().add("content");
             int indiceInicio = pageIndex * 25;
-            int indiceFin = Math.min(indiceInicio + 25, numeroDePaginas);
+            int indiceFin = Math.min(indiceInicio + 25, tokens.size());
 
             for (int i = indiceInicio; i < indiceFin; i++) {
                 paginaTemporal.appendText(String.valueOf(i));
