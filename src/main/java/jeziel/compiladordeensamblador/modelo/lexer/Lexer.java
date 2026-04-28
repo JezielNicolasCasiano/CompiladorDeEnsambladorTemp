@@ -5,38 +5,42 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Lexer {
-    private String input;
     private int currentPosition;
+    private int currentLine;
+    private List<String> input;
 
-    public Lexer(String input) {
+    public Lexer(List<String> input) {
         this.input = input;
         this.currentPosition = 0;
+        this.currentLine = 0;
     }
 
     public List<Token> tokenize() {
         List<Token> tokens = new ArrayList<>();
+        while (currentLine < input.size()) {
+            while (currentPosition < input.get(currentLine).length()) {
+                char currentChar = input.get(currentLine).charAt(currentPosition);
 
-        while (currentPosition < input.length()) {
-            char currentChar = input.charAt(currentPosition);
+                if (Character.isWhitespace(currentChar)) {
+                    currentPosition++;
+                    continue;
+                }
 
-            if (Character.isWhitespace(currentChar)) {
-                currentPosition++;
-                continue;
+                Token token = nextToken();
+                if (token != null) {
+                    tokens.add(token);
+                } else {
+                    throw new RuntimeException("Caracter Desconocido: " + currentChar);
+
+                }
             }
-
-            Token token = nextToken();
-            if (token != null) {
-                tokens.add(token);
-            } else {
-                throw new RuntimeException("Caracter Desconocido: " + currentChar);
-            }
+            currentLine++;
         }
-
         return tokens;
     }
 
     private Token nextToken() {
-        if (currentPosition >= input.length()) {
+        if (currentPosition >= input.get(currentLine).length()) {
             return null;
         }
 
@@ -78,7 +82,7 @@ public class Lexer {
 
         for (int i = 0; i < tokenPatterns.length; i++) {
             Pattern pattern = Pattern.compile("^" + tokenPatterns[i]);
-            Matcher matcher = pattern.matcher(input.substring(currentPosition));
+            Matcher matcher = pattern.matcher(input.get(currentLine).substring(currentPosition));
 
             if (matcher.find()) {
                 String value = matcher.group();
