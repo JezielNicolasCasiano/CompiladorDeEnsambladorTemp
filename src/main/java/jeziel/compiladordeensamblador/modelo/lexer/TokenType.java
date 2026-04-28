@@ -18,5 +18,6 @@ public enum TokenType {
     CORCHETE_ABRE,    // [
     CORCHETE_CIERRA,  // ]
     PARENTESIS_ABRE,  // (
-    PARENTESIS_CIERRA // )
+    PARENTESIS_CIERRA, // )
+    DESCONOCIDO
 }

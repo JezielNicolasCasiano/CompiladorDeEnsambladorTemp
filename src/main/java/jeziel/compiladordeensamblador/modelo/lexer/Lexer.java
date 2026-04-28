@@ -27,11 +27,8 @@ public class Lexer {
                 }
 
                 Token token = nextToken();
-                if (token != null) {
-                    tokens.add(token);
-                } else {
-                    throw new RuntimeException("Caracter Desconocido: " + currentChar);
-                }
+                tokens.add(token);
+
             }
             currentPosition = 0;
             currentLine++;
@@ -43,7 +40,6 @@ public class Lexer {
         if (currentPosition >= input.get(currentLine).length()) {
             return null;
         }
-        String value = "";
         
         String[] tokenPatterns = {
                 ";[^\r\n]*",
@@ -84,16 +80,22 @@ public class Lexer {
         for (int i = 0; i < tokenPatterns.length; i++) {
             Pattern pattern = Pattern.compile("^" + tokenPatterns[i]);
             Matcher matcher = pattern.matcher(input.get(currentLine).substring(currentPosition));
-            value = matcher.group();
+
             
             if (matcher.find()) {
+                String value = matcher.group();
                 currentPosition += value.length();
                 Enum<?> subtype = resolveSubtype(tokenTypes[i], value);
                 return new Token(tokenTypes[i], value, subtype);
             }
         }
-        
-        return new Token(null, value);
+
+        String textoSobrante = input.get(currentLine).substring(currentPosition);
+        String[] partes = textoSobrante.split("\\s+", 2);
+        String palabraDesconocida = partes[0];
+        currentPosition += palabraDesconocida.length();
+
+        return new Token(TokenType.DESCONOCIDO, palabraDesconocida);
     }
 
     private Enum<?> resolveSubtype(TokenType type, String value) {
