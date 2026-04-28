@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Pagination?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -23,28 +25,26 @@
             </MenuBar>
          </top>
          <left>
-            <ScrollPane fx:id="codigoScrollPane" prefHeight="524.0" prefWidth="332.0" BorderPane.alignment="CENTER">
+            <ScrollPane fx:id="codigoScrollPane" prefHeight="524.0" prefWidth="448.0" BorderPane.alignment="CENTER">
               <content>
-                <AnchorPane fx:id="codigoAnchor" minHeight="0.0" minWidth="0.0" prefHeight="521.0" prefWidth="330.0">
+                <AnchorPane fx:id="codigoAnchor" minHeight="0.0" minWidth="0.0" prefHeight="521.0" prefWidth="445.0">
                      <children>
-                        <TextArea fx:id="codigoArea" prefHeight="523.0" prefWidth="330.0" styleClass="content" />
+                        <TextArea fx:id="codigoArea" prefHeight="523.0" prefWidth="446.0" styleClass="content" />
                      </children></AnchorPane>
               </content>
             </ScrollPane>
          </left>
          <right>
-            <ScrollPane fx:id="codigoSeparadoScrollPane" prefHeight="524.0" prefWidth="315.0" BorderPane.alignment="CENTER">
-              <content>
-                <AnchorPane fx:id="codigoSeparadoAnchor" minHeight="0.0" minWidth="0.0" prefHeight="521.0" prefWidth="313.0" />
-              </content>
-            </ScrollPane>
+            <Pagination fx:id="divisionPagina" prefHeight="524.0" prefWidth="395.0" stylesheets="@estilos.css" BorderPane.alignment="CENTER">
+               <styleClass>
+                  <String fx:value="control-box" />
+                  <String fx:value="bullet-button" />
+                  <String fx:value="number-button" />
+               </styleClass>
+            </Pagination>
          </right>
          <center>
-            <ScrollPane fx:id="contadorScrollPane" prefHeight="524.0" prefWidth="307.0" BorderPane.alignment="CENTER">
-              <content>
-                <AnchorPane fx:id="contadorAnchor" minHeight="0.0" minWidth="0.0" prefHeight="522.0" prefWidth="235.0" />
-              </content>
-            </ScrollPane>
+            <Pagination fx:id="numeracionPagina" prefHeight="524.0" prefWidth="61.0" BorderPane.alignment="CENTER" />
          </center>
       </BorderPane>
    </children>

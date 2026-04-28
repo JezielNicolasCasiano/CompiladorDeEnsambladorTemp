@@ -36,10 +36,13 @@ public class Token {
 
     @Override
     public String toString() {
-        return "Token{type=" + type
+        /*return "Token{type=" + type
                 + ", value='" + value + "'"
                 + (subtype != null ? ", subtype=" + subtype : "")
-                + "}";
+                + "}"; */ //Debugger
+
+        return value + ";" + (subtype != null ? subtype : type);
+
     }
 
 }
