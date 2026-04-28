@@ -31,9 +31,9 @@ public class Lexer {
                     tokens.add(token);
                 } else {
                     throw new RuntimeException("Caracter Desconocido: " + currentChar);
-
                 }
             }
+            currentPosition = 0;
             currentLine++;
         }
         return tokens;
@@ -43,7 +43,8 @@ public class Lexer {
         if (currentPosition >= input.get(currentLine).length()) {
             return null;
         }
-
+        String value = "";
+        
         String[] tokenPatterns = {
                 ";[^\r\n]*",
                 "[a-zA-Z_][a-zA-Z0-9_]*:",
@@ -83,16 +84,16 @@ public class Lexer {
         for (int i = 0; i < tokenPatterns.length; i++) {
             Pattern pattern = Pattern.compile("^" + tokenPatterns[i]);
             Matcher matcher = pattern.matcher(input.get(currentLine).substring(currentPosition));
-
+            value = matcher.group();
+            
             if (matcher.find()) {
-                String value = matcher.group();
                 currentPosition += value.length();
                 Enum<?> subtype = resolveSubtype(tokenTypes[i], value);
                 return new Token(tokenTypes[i], value, subtype);
             }
         }
-
-        return null;
+        
+        return new Token(null, value);
     }
 
     private Enum<?> resolveSubtype(TokenType type, String value) {
