@@ -1,0 +1,8 @@
+#codigoArea {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 11pt;
+}
+
+#codigoArea .content {
+    -fx-padding: 10px;
+}

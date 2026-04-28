@@ -28,19 +28,20 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     @FXML
     public void SeleccionarUnArchivo(){ //Metodo que instancia un fileChooser para seleccionar el archivo. Es onAction de SeleccionarArchivo
         FileChooser fileChooser = new FileChooser();
-        seleccionarArchivo.setOnAction(e -> {
-            File selectedFile = fileChooser.showOpenDialog(seleccionarArchivo.getParentPopup().getScene().getWindow());
-            //Debugger
-            if (selectedFile != null) {
-                System.out.println("Archivo seleccionado: " + selectedFile.getAbsolutePath());
-            }
-            try {
-                la.setFile(selectedFile);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+        File selectedFile = fileChooser.showOpenDialog(seleccionarArchivo.getParentPopup().getScene().getWindow());
+        //Debugger
+        if (selectedFile != null) {
+            System.out.println("Archivo seleccionado: " + selectedFile.getAbsolutePath());
+        }
+        try {
+            codigoArea.clear();
+            la.setFile(selectedFile);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
+
+
 
     @Override
     public void rellenarCodigo() {
@@ -53,5 +54,6 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         la = new LectorDeArchivos(this);
+        codigoArea.setEditable(false);
     }
 }
