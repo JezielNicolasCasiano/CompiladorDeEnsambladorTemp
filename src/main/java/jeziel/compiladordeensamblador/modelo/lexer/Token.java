@@ -41,7 +41,7 @@ public class Token {
                 + (subtype != null ? ", subtype=" + subtype : "")
                 + "}"; */ //Debugger
 
-        return  value + "         ;" + (subtype != null ? subtype : type);
+        return  value + "         ;" + type;
 
     }
 

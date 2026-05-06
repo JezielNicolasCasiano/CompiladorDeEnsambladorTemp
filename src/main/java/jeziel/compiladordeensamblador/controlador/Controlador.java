@@ -76,6 +76,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                     descripcion = descripciones.getOrDefault(tokens.get(i).getType(), "Elemento inválido");
                 }
                 paginaTemporal.appendText(String.format("%-15s ; %s\n", tokens.get(i).getValue(), descripcion));;
+                //paginaTemporal.appendText(tokens.get(i).toString() + "\n");
             }
 
             return paginaTemporal;
