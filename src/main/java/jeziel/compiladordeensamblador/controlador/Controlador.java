@@ -84,8 +84,12 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
             for (int i = indiceInicio; i < indiceFin; i++) {
                 String descripcion;
+                /*if (tokens.get(i).getType() == TokenType.ETIQUETA){
+                    String value = tokens.get(i).getValue();
+                    tokens.get(i).setValue(value + ":");
+                }*/
 
-                if (tokens.get(i).getType() == TokenType.NUMERO) {
+                if (tokens.get(i).getType() == TokenType.CONSTANTE) {
                     descripcion = "Constante (numérica " + String.valueOf(tokens.get(i).getSub()).toLowerCase() + ")";
                 } else {
                     descripcion = descripciones.getOrDefault(tokens.get(i).getType(), "Elemento inválido");
@@ -134,6 +138,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         descripciones.put(TokenType.INSTRUCCION, "Instrucción");
         descripciones.put(TokenType.PSEUDOINSTRUCCION, "Pseudoinstrucción");
         descripciones.put(TokenType.REGISTRO, "Registro");
+        descripciones.put(TokenType.VARIABLE, "Símbolo");
         descripciones.put(TokenType.IDENTIFICADOR, "Símbolo");
         descripciones.put(TokenType.ETIQUETA, "Símbolo");
         descripciones.put(TokenType.SEPARADOR, "Símbolo");

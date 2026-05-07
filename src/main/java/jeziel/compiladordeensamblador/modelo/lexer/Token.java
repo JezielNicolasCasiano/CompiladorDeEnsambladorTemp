@@ -29,6 +29,9 @@ public class Token {
     public Enum<?> getSub() {
         return subtype;
     }
+    public void setValue(String value){
+        this.value = value;
+    }
 
     public void setSubtype(Enum<?> subtype) {
         this.subtype = subtype;
