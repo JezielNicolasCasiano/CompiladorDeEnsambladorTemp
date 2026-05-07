@@ -85,16 +85,16 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             for (int i = indiceInicio; i < indiceFin; i++) {
                 String descripcion;
 
-                /*if (tokens.get(i).getType() == TokenType.NUMERO) {
+                if (tokens.get(i).getType() == TokenType.NUMERO) {
                     descripcion = "Constante (numérica " + String.valueOf(tokens.get(i).getSub()).toLowerCase() + ")";
                 } else {
                     descripcion = descripciones.getOrDefault(tokens.get(i).getType(), "Elemento inválido");
-                }*/
-                if(tokens.get(i).getSub() != null){
+                }
+                /*if(tokens.get(i).getSub() != null){
                     descripcion = tokens.get(i).getSub().name();
                 }else {
                     descripcion = tokens.get(i).getType().name();
-                }
+                }*/
                 paginaTemporal.appendText(String.format("%-25s ; %s\n", tokens.get(i).getValue(), descripcion));
             }
             return paginaTemporal;
@@ -131,7 +131,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         la = new LectorDeArchivos(this);
         codigoArea.setEditable(false);
 
-        /*descripciones.put(TokenType.INSTRUCCION, "Instrucción");
+        descripciones.put(TokenType.INSTRUCCION, "Instrucción");
         descripciones.put(TokenType.PSEUDOINSTRUCCION, "Pseudoinstrucción");
         descripciones.put(TokenType.REGISTRO, "Registro");
         descripciones.put(TokenType.IDENTIFICADOR, "Símbolo");
@@ -142,7 +142,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         descripciones.put(TokenType.PARENTESIS_ABRE, "Símbolo");
         descripciones.put(TokenType.PARENTESIS_CIERRA, "Símbolo");
         descripciones.put(TokenType.CARACTER, "Constante (caracter)");
-        descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");*/
+        descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
 
     }
 }
