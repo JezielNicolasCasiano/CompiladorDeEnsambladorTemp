@@ -38,20 +38,25 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     @FXML
     public void SeleccionarUnArchivo(){ //Metodo que instancia un fileChooser para seleccionar el archivo. Es onAction de SeleccionarArchivo
         FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos de Ensamblador (*.asm)", "*.asm");
+        fileChooser.getExtensionFilters().add(extFilter);
         File selectedFile = fileChooser.showOpenDialog(seleccionarArchivo.getParentPopup().getScene().getWindow());
-        //Debugger
-        if (selectedFile != null) {
-            System.out.println("Archivo seleccionado: " + selectedFile.getAbsolutePath());
-        }
-        try {
-            codigoArea.clear();
-            la.setFile(selectedFile);
 
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+
+        if(selectedFile != null) {
+            try {
+                codigoArea.clear();
+                la.setFile(selectedFile);
+
+                le = new Lexer(la.getLineas());
+                paginar(le.tokenize());
+
+            } catch (IOException ex) {
+                throw new RuntimeException("Error al intentar leer el archivo .asm", ex);
+            }
+        } else {
+            System.out.println("Selección de archivo cancelada por el usuario.");
         }
-        le = new Lexer(la.getLineas());
-        paginar(le.tokenize());
     }
 
     public void paginar(List<Token> tokens){
