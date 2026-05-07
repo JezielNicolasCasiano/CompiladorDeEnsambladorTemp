@@ -67,7 +67,8 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         divisionPagina.setPageFactory(pageIndex ->{
             TextArea paginaTemporal = new TextArea();
             paginaTemporal.setEditable(false);
-            paginaTemporal.getStyleClass().add("content");
+            paginaTemporal.getStyleClass().add("area-paginacion");
+
             int indiceInicio = pageIndex * 25;
             int indiceFin = Math.min(indiceInicio + 25, tokens.size());
 
@@ -77,19 +78,16 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 if (tokens.get(i).getType() == TokenType.NUMERO) {
                     descripcion = "Constante (numérica " + String.valueOf(tokens.get(i).getSub()).toLowerCase() + ")";
                 } else {
-
                     descripcion = descripciones.getOrDefault(tokens.get(i).getType(), "Elemento inválido");
                 }
-                paginaTemporal.appendText(String.format("%-15s ; %s\n", tokens.get(i).getValue(), descripcion));;
-                //paginaTemporal.appendText(tokens.get(i).toString() + "\n");
+                paginaTemporal.appendText(String.format("%-25s ; %s\n", tokens.get(i).getValue(), descripcion));
             }
-
             return paginaTemporal;
         });
         numeracionPagina.setPageFactory(pageIndex ->{
             TextArea paginaTemporal = new TextArea();
             paginaTemporal.setEditable(false);
-            paginaTemporal.getStyleClass().add("content");
+            paginaTemporal.getStyleClass().add("area-paginacion");
             int indiceInicio = pageIndex * 25;
             int indiceFin = Math.min(indiceInicio + 25, tokens.size());
 

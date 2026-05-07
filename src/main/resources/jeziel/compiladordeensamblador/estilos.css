@@ -53,3 +53,12 @@
     visibility: hidden !important;
 
 }
+
+.area-paginacion {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 11pt;
+}
+
+.area-paginacion .content {
+    -fx-padding: 10px;
+}
