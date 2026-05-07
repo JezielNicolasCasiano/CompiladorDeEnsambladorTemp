@@ -48,6 +48,7 @@ public class Lexer {
                 "[a-zA-Z][a-zA-Z0-9_]{0,9}:",
                 "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT)\\b",
                 "(?i)(BYTE PTR|WORD PTR|ORG|END|DB|DW|EQU|SEGMENT|ENDS|STACK|DATA|CODE|DUP|MACRO|ENDM|PROC|ENDP)\\b",
+                "\\.(?i)(STACK|DATA|CODE|MODEL|STARTUP|EXIT)",
                 "(?i)\\b(AX|BX|CX|DX|SI|DI|BP|SP|AH|AL|BH|BL|CH|CL|DH|DL|CS|DS|SS|ES)\\b",
                 "0[0-9A-Fa-f]+[hH]",
                 "0[0-1]+[bB]",
@@ -58,7 +59,8 @@ public class Lexer {
                 "\\[",
                 "\\]",
                 "\\(",
-                "\\)"
+                "\\)",
+                "\""           //"\"[^\"]*\"" para cadenas (por si acaso)
         };
 
         TokenType[] tokenTypes = {
@@ -66,17 +68,19 @@ public class Lexer {
                 TokenType.ETIQUETA,
                 TokenType.INSTRUCCION,
                 TokenType.PSEUDOINSTRUCCION,
+                TokenType.PSEUDOINSTRUCCION,
                 TokenType.REGISTRO,
-                TokenType.NUMERO,
-                TokenType.NUMERO,
-                TokenType.NUMERO,
+                TokenType.CONSTANTE,
+                TokenType.CONSTANTE,
+                TokenType.CONSTANTE,
                 TokenType.CARACTER,
-                TokenType.IDENTIFICADOR,
+                TokenType.VARIABLE,
                 TokenType.SEPARADOR,
                 TokenType.CORCHETE_ABRE,
                 TokenType.CORCHETE_CIERRA,
                 TokenType.PARENTESIS_ABRE,
-                TokenType.PARENTESIS_CIERRA
+                TokenType.PARENTESIS_CIERRA,
+                TokenType.COMILLA
         };
 
         for (int i = 0; i < tokenPatterns.length; i++) {
@@ -90,11 +94,11 @@ public class Lexer {
                         ? input.get(currentLine).charAt(endPos)
                         : 0;
 
-                if (tokenTypes[i] == TokenType.NUMERO && Character.isLetter(nextChar)) {
+                if (tokenTypes[i] == TokenType.CONSTANTE && Character.isLetter(nextChar)) {
                     break;
                 }
 
-                if (tokenTypes[i] == TokenType.IDENTIFICADOR && nextChar == ':') {
+                if (tokenTypes[i] == TokenType.VARIABLE && nextChar == ':') {
                     break;
                 }
 
@@ -127,10 +131,10 @@ public class Lexer {
                 try { return TokenSubtype.Registro.valueOf(upper); }
                 catch (IllegalArgumentException e) { return null; }
 
-            case NUMERO:
-                if (upper.endsWith("H")) return TokenSubtype.Numero.HEXADECIMAL;
-                if (upper.endsWith("B")) return TokenSubtype.Numero.BINARIO;
-                return TokenSubtype.Numero.DECIMAL;
+            case CONSTANTE:
+                if (upper.endsWith("H")) return TokenSubtype.Constante.HEXADECIMAL;
+                if (upper.endsWith("B")) return TokenSubtype.Constante.BINARIO;
+                return TokenSubtype.Constante.DECIMAL;
 
             default:
                 return null;

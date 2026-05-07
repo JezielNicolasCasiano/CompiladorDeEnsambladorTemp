@@ -4,7 +4,10 @@ package jeziel.compiladordeensamblador.modelo.lexer;
 public enum TokenType {
     // Instrucciones
     INSTRUCCION,
-    PSEUDOINSTRUCCION, //PseudoInstruccion
+    PSEUDOINSTRUCCION,
+    CONSTANTE,
+    COMILLA,
+    VARIABLE,//PseudoInstruccion
     // Ensamblador
     REGISTRO,
     IDENTIFICADOR,

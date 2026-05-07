@@ -23,7 +23,9 @@ public class TokenSubtype {
         ENDM,
         // Procedimientos
         PROC,
-        ENDP
+        ENDP,
+        //
+        OFFSET
     }
     enum Registro {
         // 16 bits
@@ -38,9 +40,10 @@ public class TokenSubtype {
         CS, DS, SS, ES
     }
 
-    enum Numero {
+    enum Constante {
         DECIMAL,
         HEXADECIMAL,
         BINARIO
     }
+
 }
