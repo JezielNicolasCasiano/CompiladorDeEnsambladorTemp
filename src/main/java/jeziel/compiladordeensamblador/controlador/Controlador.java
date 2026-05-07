@@ -126,7 +126,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         la = new LectorDeArchivos(this);
         codigoArea.setEditable(false);
 
-        descripciones.put(TokenType.INSTRUCCION, "Instrucción");
+        /*descripciones.put(TokenType.INSTRUCCION, "Instrucción");
         descripciones.put(TokenType.DIRECTIVA, "Pseudoinstrucción");
         descripciones.put(TokenType.REGISTRO, "Registro");
         descripciones.put(TokenType.IDENTIFICADOR, "Símbolo");
@@ -137,7 +137,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         descripciones.put(TokenType.PARENTESIS_ABRE, "Símbolo");
         descripciones.put(TokenType.PARENTESIS_CIERRA, "Símbolo");
         descripciones.put(TokenType.CARACTER, "Constante (caracter)");
-        descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
+        descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");*/
 
     }
 }

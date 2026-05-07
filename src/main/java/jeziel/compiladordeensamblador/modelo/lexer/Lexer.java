@@ -28,10 +28,9 @@ public class Lexer {
 
                 Token token = nextToken();
                 assert token != null;
-                if (token.getType() != TokenType.COMENTARIO){
+                if (token.getType() != TokenType.COMENTARIO) {
                     tokens.add(token);
                 }
-
             }
             currentPosition = 0;
             currentLine++;
@@ -46,41 +45,27 @@ public class Lexer {
 
         String[] tokenPatterns = {
                 ";[^\r\n]*",
-                "(?i)\\.?(code|data|stack)\\s+segment\\b", //Agregado cosas aqui para detectar los eelmentos compuestos
-                "(?i)(byte|word)\\s+ptr\\b",
-                "(?i)dup\\s*\\([^)]*\\)",
-                "\\[[^\\]]*\\]",
-                "\"[^\"]*\"",
-                "'[^']*'",                                  //Termina aqui los elementos nuevos
-                "[a-zA-Z_][a-zA-Z0-9_]*:",
-                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE)\\b",
-                "(?i)\\b(ORG|END|DB|DW|EQU|SEGMENT|ENDS|STACK|DATA|CODE|DUP|BYTE PTR|WORD PTR|MACRO|ENDM|PROC|ENDP)\\b",
+                "[a-zA-Z][a-zA-Z0-9_]{0,9}:",
+                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT)\\b",
+                "(?i)(BYTE PTR|WORD PTR|ORG|END|DB|DW|EQU|SEGMENT|ENDS|STACK|DATA|CODE|DUP|MACRO|ENDM|PROC|ENDP)\\b",
                 "(?i)\\b(AX|BX|CX|DX|SI|DI|BP|SP|AH|AL|BH|BL|CH|CL|DH|DL|CS|DS|SS|ES)\\b",
-                "[0-9A-Fa-f]+[hH]",
-                "[0-1]+[bB]",
+                "0[0-9A-Fa-f]+[hH]",
+                "0[0-1]+[bB]",
                 "[0-9]+",
                 "'.'",
-                "[a-zA-Z_][a-zA-Z0-9_]*",
+                "[a-zA-Z][a-zA-Z0-9_]{0,9}",
                 ",",
                 "\\[",
                 "\\]",
                 "\\(",
                 "\\)"
-
-
         };
 
         TokenType[] tokenTypes = {
                 TokenType.COMENTARIO,
-                TokenType.DIRECTIVA, //Agragado por los elementos nuevos
-                TokenType.DIRECTIVA,
-                TokenType.DIRECTIVA,
-                TokenType.IDENTIFICADOR,
-                TokenType.CARACTER,
-                TokenType.CARACTER, //Agregado por los elementos nuevos
                 TokenType.ETIQUETA,
                 TokenType.INSTRUCCION,
-                TokenType.DIRECTIVA,
+                TokenType.PSEUDOINSTRUCCION,
                 TokenType.REGISTRO,
                 TokenType.NUMERO,
                 TokenType.NUMERO,
@@ -98,10 +83,22 @@ public class Lexer {
             Pattern pattern = Pattern.compile("^" + tokenPatterns[i]);
             Matcher matcher = pattern.matcher(input.get(currentLine).substring(currentPosition));
 
-            
             if (matcher.find()) {
                 String value = matcher.group();
-                currentPosition += value.length();
+                int endPos = currentPosition + value.length();
+                char nextChar = endPos < input.get(currentLine).length()
+                        ? input.get(currentLine).charAt(endPos)
+                        : 0;
+
+                if (tokenTypes[i] == TokenType.NUMERO && Character.isLetter(nextChar)) {
+                    break;
+                }
+
+                if (tokenTypes[i] == TokenType.IDENTIFICADOR && nextChar == ':') {
+                    break;
+                }
+
+                currentPosition = endPos;
                 Enum<?> subtype = resolveSubtype(tokenTypes[i], value);
                 return new Token(tokenTypes[i], value, subtype);
             }
@@ -122,7 +119,7 @@ public class Lexer {
                 try { return TokenSubtype.Instruccion.valueOf(upper); }
                 catch (IllegalArgumentException e) { return null; }
 
-            case DIRECTIVA:
+            case PSEUDOINSTRUCCION:
                 try { return TokenSubtype.Directiva.valueOf(upper.replace(" ", "_")); }
                 catch (IllegalArgumentException e) { return null; }
 
