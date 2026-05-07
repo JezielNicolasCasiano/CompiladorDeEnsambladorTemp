@@ -46,7 +46,7 @@ public class Lexer {
         String[] tokenPatterns = {
                 ";[^\r\n]*",
                 "[a-zA-Z][a-zA-Z0-9_]{0,9}:",
-                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT)\\b",
+                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT|OFFSET)\\b",
                 "(?i)(BYTE PTR|WORD PTR|ORG|END|DB|DW|EQU|SEGMENT|ENDS|STACK|DATA|CODE|DUP|MACRO|ENDM|PROC|ENDP)\\b",
                 "\\.(?i)(STACK|DATA|CODE|MODEL|STARTUP|EXIT)",
                 "(?i)\\b(AX|BX|CX|DX|SI|DI|BP|SP|AH|AL|BH|BL|CH|CL|DH|DL|CS|DS|SS|ES)\\b",
@@ -124,7 +124,7 @@ public class Lexer {
                 catch (IllegalArgumentException e) { return null; }
 
             case PSEUDOINSTRUCCION:
-                try { return TokenSubtype.Directiva.valueOf(upper.replace(" ", "_")); }
+                try { return TokenSubtype.Directiva.valueOf(upper.replace(" ", "_").replace(".", "")); }
                 catch (IllegalArgumentException e) { return null; }
 
             case REGISTRO:
