@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<AnchorPane prefHeight="551.0" prefWidth="884.0" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.Controlador">
+<AnchorPane prefHeight="554.0" prefWidth="1008.0" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.Controlador">
    <children>
       <BorderPane prefHeight="551.0" prefWidth="884.0">
          <top>
@@ -34,7 +34,7 @@
             </ScrollPane>
          </left>
          <right>
-            <Pagination fx:id="divisionPagina" prefHeight="524.0" prefWidth="364.0" stylesheets="@estilos.css" BorderPane.alignment="CENTER" />
+            <Pagination fx:id="divisionPagina" prefHeight="524.0" prefWidth="492.0" stylesheets="@estilos.css" BorderPane.alignment="CENTER" />
          </right>
          <center>
             <Pagination fx:id="numeracionPagina" prefHeight="524.0" prefWidth="35.0" BorderPane.alignment="CENTER" />

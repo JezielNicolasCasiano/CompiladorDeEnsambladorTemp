@@ -54,11 +54,11 @@
 
 }
 
-.area-paginacion {
-    -fx-font-family: "Consolas";
-    -fx-font-size: 11pt;
+.text-area.area-paginacion {
+    -fx-font-family: "monospace" !important;
+    -fx-font-size: 10pt !important;
 }
 
-.area-paginacion .content {
+.text-area.area-paginacion .content {
     -fx-padding: 10px;
 }

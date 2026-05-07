@@ -1,5 +1,6 @@
 package jeziel.compiladordeensamblador.controlador;
 
+import javafx.scene.control.Alert;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.MenuItem;
@@ -38,12 +39,18 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     @FXML
     public void SeleccionarUnArchivo(){ //Metodo que instancia un fileChooser para seleccionar el archivo. Es onAction de SeleccionarArchivo
         FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Archivos de Ensamblador (*.asm)", "*.asm");
-        fileChooser.getExtensionFilters().add(extFilter);
         File selectedFile = fileChooser.showOpenDialog(seleccionarArchivo.getParentPopup().getScene().getWindow());
 
 
         if(selectedFile != null) {
+            if (!selectedFile.getName().toLowerCase().endsWith(".asm")) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Archivo no válido");
+                alert.setHeaderText(null);
+                alert.setContentText("Por favor, selecciona únicamente un archivo con extensión .asm");
+                alert.showAndWait();
+                return;
+            }
             try {
                 codigoArea.clear();
                 la.setFile(selectedFile);
@@ -52,10 +59,12 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 paginar(le.tokenize());
 
             } catch (IOException ex) {
-                throw new RuntimeException("Error al intentar leer el archivo .asm", ex);
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Error de Lectura");
+                    alert.setHeaderText("No se pudo cargar el archivo");
+                    alert.setContentText("Ocurrió un problema técnico: " + ex.getMessage());
+                    alert.showAndWait();
             }
-        } else {
-            System.out.println("Selección de archivo cancelada por el usuario.");
         }
     }
 
@@ -67,6 +76,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         divisionPagina.setPageFactory(pageIndex ->{
             TextArea paginaTemporal = new TextArea();
             paginaTemporal.setEditable(false);
+            paginaTemporal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 11pt;");
             paginaTemporal.getStyleClass().add("area-paginacion");
 
             int indiceInicio = pageIndex * 25;
@@ -87,6 +97,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         numeracionPagina.setPageFactory(pageIndex ->{
             TextArea paginaTemporal = new TextArea();
             paginaTemporal.setEditable(false);
+            paginaTemporal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 11pt;");
             paginaTemporal.getStyleClass().add("area-paginacion");
             int indiceInicio = pageIndex * 25;
             int indiceFin = Math.min(indiceInicio + 25, tokens.size());
