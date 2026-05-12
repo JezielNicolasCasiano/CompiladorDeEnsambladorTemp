@@ -12,7 +12,6 @@ public enum TokenType {
     REGISTRO,
     IDENTIFICADOR,
     ETIQUETA,
-    NUMERO,
     CARACTER,
     COMENTARIO,
     INTERRUPCION,
@@ -22,5 +21,6 @@ public enum TokenType {
     CORCHETE_CIERRA,  // ]
     PARENTESIS_ABRE,  // (
     PARENTESIS_CIERRA, // )
-    DESCONOCIDO
+    DESCONOCIDO,
+    CADENA
 }

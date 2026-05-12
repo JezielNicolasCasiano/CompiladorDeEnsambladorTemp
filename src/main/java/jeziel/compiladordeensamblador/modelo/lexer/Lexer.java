@@ -46,15 +46,16 @@ public class Lexer {
         String[] tokenPatterns = {
                 ";[^\r\n]*",
                 "[a-zA-Z][a-zA-Z0-9_]{0,9}:",
-                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT|OFFSET)\\b",
-                "(?i)(BYTE PTR|WORD PTR|ORG|END|DB|DW|EQU|ENDS|DUP|MACRO|ENDM|PROC|ENDP)\\b",
+                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|DUP|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT|OFFSET)\\b",
+                //"(?i)(DUP)+[^\r]*\\b",
+                "(?i)(BYTE PTR|WORD PTR|ORG|END|DB|DW|EQU|ENDS|MACRO|ENDM|PROC|ENDP)\\b",
                 "(?i)(.STACK|.CODE|.DATA)\\s+SEGMENT",
                 "(?i)(.STACK|.DATA|.CODE|.MODEL|.STARTUP|.EXIT)\\b",
                 "(?i)\\b(AX|BX|CX|DX|SI|DI|BP|SP|AH|AL|BH|BL|CH|CL|DH|DL|CS|DS|SS|ES)\\b",
                 "0[0-9A-Fa-f]{2}+[hH]",
                 "0[0-9A-Fa-f]{4}+[hH]",
-                "0[0-1]{7}+[bB]",
-                "0[0-1]{15}+[bB]",
+                "[0-1]{8}+[bB]",
+                "[0-1]{16}+[bB]",
                 "[0-9]+",
                 "'.'",
                 "[a-zA-Z][a-zA-Z0-9_]{0,9}",
@@ -63,7 +64,9 @@ public class Lexer {
                 "\\]",
                 "\\(",
                 "\\)",
-                "\""           //"\"[^\"]*\"" para cadenas (por si acaso)
+                "\"",           //"\"[^\"]*\"" para cadenas (por si acaso)
+                "\'[^\']\'",
+                "\"[^\"]*\""
         };
 
         TokenType[] tokenTypes = {
@@ -71,6 +74,7 @@ public class Lexer {
                 TokenType.ETIQUETA,
                 TokenType.INSTRUCCION,
                 TokenType.PSEUDOINSTRUCCION,
+                //TokenType.PSEUDOINSTRUCCION,
                 TokenType.PSEUDOINSTRUCCION,
                 TokenType.PSEUDOINSTRUCCION,
                 TokenType.REGISTRO,
@@ -82,11 +86,13 @@ public class Lexer {
                 TokenType.CARACTER,
                 TokenType.VARIABLE,
                 TokenType.SEPARADOR,
-                TokenType.CORCHETE_ABRE,
+               TokenType.CORCHETE_ABRE,
                 TokenType.CORCHETE_CIERRA,
                 TokenType.PARENTESIS_ABRE,
                 TokenType.PARENTESIS_CIERRA,
-                TokenType.COMILLA
+                TokenType.COMILLA,
+                TokenType.CADENA,
+                TokenType.CADENA
         };
 
         for (int i = 0; i < tokenPatterns.length; i++) {

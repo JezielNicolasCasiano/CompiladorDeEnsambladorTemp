@@ -84,21 +84,17 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
             for (int i = indiceInicio; i < indiceFin; i++) {
                 String descripcion;
-                /*if (tokens.get(i).getType() == TokenType.ETIQUETA){
-                    String value = tokens.get(i).getValue();
-                    tokens.get(i).setValue(value + ":");
-                }*/
 
-                if (tokens.get(i).getType() == TokenType.CONSTANTE) {
+                /*if (tokens.get(i).getType() == TokenType.CONSTANTE) {
                     descripcion = "Constante (numérica " + String.valueOf(tokens.get(i).getSub()).toLowerCase() + ")";
                 } else {
                     descripcion = descripciones.getOrDefault(tokens.get(i).getType(), "Elemento inválido");
-                }
-                /*if(tokens.get(i).getSub() != null){
+                }*/
+                if(tokens.get(i).getSub() != null){
                     descripcion = tokens.get(i).getSub().name();
                 }else {
                     descripcion = tokens.get(i).getType().name();
-                }*/
+                }
                 paginaTemporal.appendText(String.format("%-25s ; %s\n", tokens.get(i).getValue(), descripcion));
             }
             return paginaTemporal;
@@ -135,19 +131,21 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         la = new LectorDeArchivos(this);
         codigoArea.setEditable(false);
 
-        descripciones.put(TokenType.INSTRUCCION, "Instrucción");
+        /*descripciones.put(TokenType.INSTRUCCION, "Instrucción");
         descripciones.put(TokenType.PSEUDOINSTRUCCION, "Pseudoinstrucción");
         descripciones.put(TokenType.REGISTRO, "Registro");
         descripciones.put(TokenType.VARIABLE, "Símbolo");
         descripciones.put(TokenType.IDENTIFICADOR, "Símbolo");
-        descripciones.put(TokenType.ETIQUETA, "Símbolo");
+        descripciones.put(TokenType.ETIQUETA, "Etiqueta");
         descripciones.put(TokenType.SEPARADOR, "Símbolo");
         descripciones.put(TokenType.CORCHETE_ABRE, "Símbolo");
         descripciones.put(TokenType.CORCHETE_CIERRA, "Símbolo");
         descripciones.put(TokenType.PARENTESIS_ABRE, "Símbolo");
         descripciones.put(TokenType.PARENTESIS_CIERRA, "Símbolo");
         descripciones.put(TokenType.CARACTER, "Constante (caracter)");
-        descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
+        descripciones.put(TokenType.CADENA, "Constante (cadena)");
+        descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");*/
+
 
     }
 }
