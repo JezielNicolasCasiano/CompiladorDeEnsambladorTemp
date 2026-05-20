@@ -22,5 +22,6 @@ public enum TokenType {
     PARENTESIS_ABRE,  // (
     PARENTESIS_CIERRA, // )
     DESCONOCIDO,
-    CADENA
+    CADENA,
+    COMPUESTO
 }
