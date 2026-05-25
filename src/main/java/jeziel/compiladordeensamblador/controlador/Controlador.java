@@ -1,11 +1,14 @@
 package jeziel.compiladordeensamblador.controlador;
 
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Pagination;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import jeziel.compiladordeensamblador.modelo.LectorDeArchivos;
@@ -23,6 +26,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private LectorDeArchivos la;
     private Lexer le;
     private final Map<TokenType, String> descripciones = new EnumMap<>(TokenType.class);
+    private ControladorTablaCodigos conTabCode;
 
     @FXML
     private MenuItem seleccionarArchivo;
@@ -32,7 +36,8 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private Pagination numeracionPagina;
     @FXML
     private Pagination divisionPagina;
-
+    @FXML
+    private VBox contenedorTabla;
 
 
 
@@ -145,7 +150,18 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         descripciones.put(TokenType.CARACTER, "Constante (caracter)");
         descripciones.put(TokenType.CADENA, "Constante (cadena)");
         descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");*/
-
-
     }
+
+    @FXML
+    public void Codificar(){
+        try{
+            FXMLLoader codigos = new FXMLLoader(getClass().getResource("Tabla-codigos.fxml"));
+            Parent nodoTabla = codigos.load();
+            conTabCode = codigos.getController();
+            contenedorTabla.getChildren().add(2,nodoTabla);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
