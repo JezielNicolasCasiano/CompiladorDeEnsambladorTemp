@@ -50,10 +50,9 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
 
     @FXML
-    public void SeleccionarUnArchivo() { //Metodo que instancia un fileChooser para seleccionar el archivo. Es onAction de SeleccionarArchivo
+    public void SeleccionarUnArchivo() {
         FileChooser fileChooser = new FileChooser();
         File selectedFile = fileChooser.showOpenDialog(seleccionarArchivo.getParentPopup().getScene().getWindow());
-
 
         if (selectedFile != null) {
             if (!selectedFile.getName().toLowerCase().endsWith(".asm")) {
@@ -74,16 +73,13 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
                 listaCompletaDatos.clear();
 
-                columnaInstruccion.setVisible(false);
-                columnaParser.setVisible(false);
-
                 for (int i = 0; i < tokensActuales.size(); i++) {
                     Token t = tokensActuales.get(i);
                     String descripcion = (t.getType() == TokenType.CONSTANTE) ?
                             "Constante (numérica " + String.valueOf(t.getSub()).toLowerCase() + ")" :
                             descripciones.getOrDefault(t.getType(), "Elemento inválido");
 
-                    listaCompletaDatos.add(new Fila(i + 1, t.getValue(), descripcion, "", ""));
+                    listaCompletaDatos.add(new Fila(i + 1, t.getValue(), descripcion));
                 }
 
                 actualizarPaginacion();
@@ -122,21 +118,13 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         columnaContador.setCellValueFactory(new PropertyValueFactory<>("contador"));
         columnaContador.setPrefWidth(40);
 
-        TableColumn<Fila, String> columnaLexema = new TableColumn<>("Identificacion");
+        TableColumn<Fila, String> columnaLexema = new TableColumn<>("Identificación");
         columnaLexema.setCellValueFactory(new PropertyValueFactory<>("lexema"));
 
         TableColumn<Fila, String> columnaTipo = new TableColumn<>("Descripción");
         columnaTipo.setCellValueFactory(new PropertyValueFactory<>("tipoToken"));
 
-        columnaInstruccion = new TableColumn<>("Línea de Código");
-        columnaInstruccion.setCellValueFactory(new PropertyValueFactory<>("instruccionOriginal"));
-        columnaInstruccion.setVisible(false);
-
-        columnaParser = new TableColumn<>("Estado");
-        columnaParser.setCellValueFactory(new PropertyValueFactory<>("resultadoParser"));
-        columnaParser.setVisible(false);
-        tablaAnalisis.getColumns().addAll(columnaContador, columnaLexema, columnaTipo, columnaInstruccion, columnaParser);
-
+        tablaAnalisis.getColumns().addAll(columnaContador, columnaLexema, columnaTipo);
         tablaAnalisis.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         descripciones.put(TokenType.INSTRUCCION, "Instrucción");
@@ -154,56 +142,40 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         descripciones.put(TokenType.CADENA, "Constante (cadena)");
         descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
     }
-
     @FXML
-    public void codificar(){
-
-            if (tokensActuales == null || tokensActuales.isEmpty()) {
-                return; // No hacer nada si no hay código cargado
-            }
-
-            Parser parser = new Parser(tokensActuales);
-            ResultadoParser resultado = parser.parsear();
-            AnalizadorSemantico semantico = new AnalizadorSemantico();
-            semantico.analizar(resultado.getArbol());
-
-        for (int i = 0; i < tokensActuales.size(); i++) {
-            Token t = tokensActuales.get(i);
-            Fila fila = listaCompletaDatos.get(i);
-
-            fila.setInstruccionOriginal(t.getValue());
-
-            String estado = "Sintaxis Correcta";
-
-            if (t.getType() == TokenType.DESCONOCIDO) {
-                estado = "Error Léxico: Elemento no reconocido";
-            }
-
-            for (jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico error : resultado.getErrores()) {
-                if (error.getToken() == t) {
-                    estado = "Error Sintáctico: " + error.getMensaje();
-                    break;
-                }
-            }
-
-            fila.setResultadoParser(estado);
+    public void codificar() {
+        if (tokensActuales == null || tokensActuales.isEmpty()) {
+            return;
         }
 
-        tablaAnalisis.refresh();
-        columnaInstruccion.setVisible(true);
-        columnaParser.setVisible(true);
+        Parser parser = new Parser(tokensActuales);
+        ResultadoParser resultado = parser.parsear();
+        AnalizadorSemantico semantico = new AnalizadorSemantico();
+        semantico.analizar(resultado.getArbol());
 
-        try{
+        List<jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico> todosLosErrores = new ArrayList<>();
+
+        for (Token t : tokensActuales) {
+            if (t.getType() == TokenType.DESCONOCIDO) {
+                todosLosErrores.add(new jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico(t, "Error Léxico: Elemento no reconocido"));
+            }
+        }
+        todosLosErrores.addAll(resultado.getErrores());
+        todosLosErrores.addAll(semantico.getErrores());
+
+        tablaAnalisis.refresh();
+
+        try {
             FXMLLoader codigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
             Parent nodoTabla = codigos.load();
             conTabCode = codigos.getController();
             conTabCode.cargarSimbolos(semantico.getTablaSimbolos().obtenerTodos());
+
+            if (contenedorTabla.getChildren().size() > 1) {
+                contenedorTabla.getChildren().remove(0);
+            }
             contenedorTabla.getChildren().add(0, nodoTabla);
             contenedorTabla.setAlignment(javafx.geometry.Pos.CENTER);
-            javafx.stage.Window ventana = contenedorTabla.getScene().getWindow();
-            if (ventana instanceof javafx.stage.Stage stage) {
-                stage.sizeToScene();
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -211,17 +183,19 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         try {
             if (conTabMaquina == null) {
                 FXMLLoader loaderMaquina = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-maquina.fxml"));
-                javafx.scene.Parent nodoTablaMaquina = loaderMaquina.load();
+                Parent nodoTablaMaquina = loaderMaquina.load();
                 conTabMaquina = loaderMaquina.getController();
                 panelPrincipal.setRight(nodoTablaMaquina);
             }
 
             GeneradorDeCodigo generador = new GeneradorDeCodigo(semantico.getTablaSimbolos());
-            List<FilaMaquina> codigoGenerado = generador.generar(resultado.getArbol());
+
+            List<FilaMaquina> codigoGenerado = generador.generar(la.getLineas(), resultado.getArbol(), todosLosErrores);
+
             conTabMaquina.cargarDatosMaquina(codigoGenerado);
 
         } catch (IOException e) {
-            System.err.println("Error cargando la tabla de código máquina: " + e.getMessage());
+            System.err.println("Error cargando la tabla: " + e.getMessage());
         }
     }
 

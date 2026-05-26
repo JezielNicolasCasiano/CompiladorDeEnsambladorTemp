@@ -2,6 +2,7 @@ package jeziel.compiladordeensamblador.modelo;
 
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
+import jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico;
 import jeziel.compiladordeensamblador.modelo.parser.NodoAST;
 import jeziel.compiladordeensamblador.modelo.semantico.TablaSimbolo;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype;
@@ -19,32 +20,65 @@ public class GeneradorDeCodigo {
         this.locationCounter = 0x0470;
     }
 
-    public List<FilaMaquina> generar(List<NodoAST> arbol) {
+    public List<FilaMaquina> generar(List<String> lineasArchivo, List<NodoAST> arbol, List<ErrorSintactico> errores) {
         List<FilaMaquina> codigoMaquina = new ArrayList<>();
+        this.locationCounter = 0x0470;
 
-        for (NodoAST nodo : arbol) {
-            if (nodo.getTipo() == NodoAST.Tipo.INSTRUCCION) {
-                String contadorHex = String.format("%04X", locationCounter);
-                String codificacion = codificarInstruccion(nodo);
-                int bytesGenerados = codificacion.replace(" ", "").length() / 2;
-                locationCounter += bytesGenerados;
-
-                codigoMaquina.add(new FilaMaquina(contadorHex, codificacion));
+        for (String linea : lineasArchivo) {
+            String lineaTrim = linea.trim();
+            if (lineaTrim.isEmpty() || lineaTrim.startsWith(";")) {
+                continue;
             }
-            else if (nodo.getTipo() == NodoAST.Tipo.DIRECTIVA) {
-                String codificacion = codificarDirectiva(nodo);
 
-                if (!codificacion.isEmpty()) {
-                    String contadorHex = String.format("%04X", locationCounter);
-                    int bytesGenerados = codificacion.split(" ").length;
+            NodoAST nodo = buscarNodoParaLinea(linea, arbol);
+            ErrorSintactico error = buscarErrorParaLinea(linea, errores);
 
-                    codigoMaquina.add(new FilaMaquina(contadorHex, codificacion));
-                    locationCounter += bytesGenerados;
+            if (nodo != null) {
+                String contadorHex = String.format("%04X", locationCounter);
+                String codificacion = "";
+
+                if (nodo.getTipo() == NodoAST.Tipo.INSTRUCCION) {
+                    codificacion = codificarInstruccion(nodo);
+                    int bytes = codificacion.replace(" ", "").length() / 2;
+                    locationCounter += bytes;
+                } else if (nodo.getTipo() == NodoAST.Tipo.DIRECTIVA) {
+                     codificacion = codificarDirectiva(nodo);
+                    int bytes = codificacion.split(" ").length;
+                    if (!codificacion.isEmpty()) locationCounter += bytes;
+
+
+                    String estado = (error == null) ? "OK" : error.getMensaje();
+
+                    codigoMaquina.add(new FilaMaquina(
+                            String.format("%04X", locationCounter - (codificacion.isEmpty() ? 0 : bytes)),
+                            linea,
+                            codificacion.isEmpty() ? "---" : codificacion,
+                            estado
+                    ));
                 }
+                codigoMaquina.add(new FilaMaquina(contadorHex, linea, codificacion, "OK"));
+
+            } else if (error != null) {
+                codigoMaquina.add(new FilaMaquina("----", linea, "----", error.getMensaje()));
+            } else {
+                codigoMaquina.add(new FilaMaquina(String.format("%04X", locationCounter), linea, "", ""));
             }
         }
-
         return codigoMaquina;
+    }
+
+    private NodoAST buscarNodoParaLinea(String linea, List<NodoAST> arbol) {
+        for (NodoAST n : arbol) {
+            if (linea.contains(n.getToken().getValue())) return n;
+        }
+        return null;
+    }
+
+    private ErrorSintactico buscarErrorParaLinea(String linea, List<ErrorSintactico> errores) {
+        for (ErrorSintactico e : errores) {
+            if (e.getToken() != null && linea.contains(e.getToken().getValue())) return e;
+        }
+        return null;
     }
 
     private String codificarInstruccion(NodoAST instruccion) {
@@ -430,4 +464,52 @@ public class GeneradorDeCodigo {
         }
     }
 
+    private String reconstruirLinea(NodoAST nodo) {
+        StringBuilder sb = new StringBuilder();
+        if (nodo.getTipo() == NodoAST.Tipo.ETIQUETA) {
+            sb.append(nodo.getToken().getValue()).append(" ");
+            for (NodoAST hijo : nodo.getHijos()) sb.append(reconstruirLinea(hijo)).append(" ");
+        } else if (nodo.getTipo() == NodoAST.Tipo.INSTRUCCION) {
+            sb.append(nodo.getToken().getValue()).append(" ");
+            for (int i = 0; i < nodo.getHijos().size(); i++) {
+                sb.append(reconstruirLinea(nodo.getHijos().get(i)));
+                if (i < nodo.getHijos().size() - 1) sb.append(", "); // Inyectar coma
+            }
+        } else if (nodo.getTipo() == NodoAST.Tipo.DIRECTIVA) {
+            if (!nodo.getHijos().isEmpty() && nodo.getHijos().get(0).getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE) {
+                sb.append(nodo.getHijos().get(0).getToken().getValue()).append(" ");
+                sb.append(nodo.getToken().getValue()).append(" ");
+                for (int i = 1; i < nodo.getHijos().size(); i++) {
+                    sb.append(reconstruirLinea(nodo.getHijos().get(i)));
+                    if (i < nodo.getHijos().size() - 1) sb.append(", ");
+                }
+            } else {
+                sb.append(nodo.getToken().getValue()).append(" ");
+                for (NodoAST hijo : nodo.getHijos()) sb.append(reconstruirLinea(hijo)).append(" ");
+            }
+        } else if (nodo.getTipo() == NodoAST.Tipo.OPERANDO_MEMORIA) {
+            sb.append("[");
+            for (NodoAST hijo : nodo.getHijos()) sb.append(reconstruirLinea(hijo));
+            sb.append("]");
+        } else if (nodo.getTipo() == NodoAST.Tipo.OPERANDO_DUP) {
+            sb.append(nodo.getHijos().get(0).getToken().getValue()).append(" DUP(");
+            sb.append(nodo.getHijos().get(1).getToken().getValue()).append(")");
+        } else {
+            if (nodo.getToken() != null) sb.append(nodo.getToken().getValue());
+        }
+        return sb.toString().trim();
+    }
+
+    private String buscarError(NodoAST nodo, List<jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico> errores) {
+        if (nodo.getToken() != null) {
+            for (jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico e : errores) {
+                if (e.getToken() == nodo.getToken()) return e.getMensaje();
+            }
+        }
+        for (NodoAST hijo : nodo.getHijos()) {
+            String e = buscarError(hijo, errores);
+            if (!e.isEmpty()) return e;
+        }
+        return "";
+    }
 }

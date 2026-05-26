@@ -4,12 +4,14 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="524.0" prefWidth="280.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.ControladorTablaMaquina">
+<AnchorPane prefHeight="524.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.ControladorTablaMaquina">
     <children>
-        <TableView fx:id="tablaMaquina" layoutX="14.0" layoutY="14.0" prefHeight="524.0" prefWidth="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <TableView fx:id="tablaMaquina" layoutX="14.0" layoutY="14.0" prefHeight="524.0" prefWidth="550.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <columns>
-                <TableColumn fx:id="columnaContador" prefWidth="90.0" text="Contador" />
-                <TableColumn fx:id="columnaCodificacion" prefWidth="190.0" text="Código Máquina" />
+                <TableColumn fx:id="columnaContador" prefWidth="70.0" text="Contador" />
+                <TableColumn fx:id="columnaLinea" prefWidth="180.0" text="Línea Original" />
+                <TableColumn fx:id="columnaCodificacion" prefWidth="120.0" text="Cód. Máquina" />
+                <TableColumn fx:id="columnaError" prefWidth="180.0" text="Estado (Parser)" />
             </columns>
         </TableView>
     </children>

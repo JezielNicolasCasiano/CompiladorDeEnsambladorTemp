@@ -22,9 +22,10 @@ public class ControladorTablaCodigos implements Initializable {
     @FXML
     private TableColumn<Simbolo, String> columnaTipo;
     @FXML
-    private TableColumn<Simbolo, Integer> columnaValor;
+    private TableColumn<Simbolo, String> columnaValor;
     @FXML
-    private TableColumn<Simbolo, Integer> columnaTamano;
+    private TableColumn<Simbolo, String> columnaTamano;
+
     @FXML private TableColumn<Simbolo, String> columnaDireccion;
 
     @Override
@@ -33,9 +34,12 @@ public class ControladorTablaCodigos implements Initializable {
 
         columnaSimbolo.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         columnaTipo.setCellValueFactory(new PropertyValueFactory<>("tipo"));
-        columnaTamano.setCellValueFactory(new PropertyValueFactory<>("tamano"));
+        columnaValor.setCellValueFactory(new PropertyValueFactory<>("valor"));
+        columnaTamano.setCellValueFactory(new PropertyValueFactory<>("tamanoStr"));
+
         columnaDireccion.setCellValueFactory(new PropertyValueFactory<>("direccionHex"));
     }
+
     public void cargarSimbolos(Collection<Simbolo> simbolos) {
         ObservableList<Simbolo> listaSimbolos = FXCollections.observableArrayList(simbolos);
         tablaCodigos.setItems(listaSimbolos);

@@ -13,7 +13,7 @@ public class TablaSimbolo {
         }
 
         public boolean agregar(Simbolo simbolo) {
-            String clave = simbolo.getNombre().toUpperCase(); // En ensamblador, no hay case sensitivity
+            String clave = simbolo.getNombre().toUpperCase();
             if (tabla.containsKey(clave)) {
                 return false;
             }

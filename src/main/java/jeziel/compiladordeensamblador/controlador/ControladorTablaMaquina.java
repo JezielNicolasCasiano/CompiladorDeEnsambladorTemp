@@ -1,3 +1,4 @@
+
 package jeziel.compiladordeensamblador.controlador;
 
 import javafx.collections.FXCollections;
@@ -20,14 +21,20 @@ public class ControladorTablaMaquina implements Initializable {
     @FXML
     private TableColumn<FilaMaquina, String> columnaContador;
     @FXML
+    private TableColumn<FilaMaquina, String> columnaLinea;
+    @FXML
     private TableColumn<FilaMaquina, String> columnaCodificacion;
+    @FXML
+    private TableColumn<FilaMaquina, String> columnaError;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         tablaMaquina.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         columnaContador.setCellValueFactory(new PropertyValueFactory<>("contador"));
+        columnaLinea.setCellValueFactory(new PropertyValueFactory<>("lineaCompleta"));
         columnaCodificacion.setCellValueFactory(new PropertyValueFactory<>("codificacion"));
+        columnaError.setCellValueFactory(new PropertyValueFactory<>("error"));
     }
 
     public void cargarDatosMaquina(Collection<FilaMaquina> datos) {

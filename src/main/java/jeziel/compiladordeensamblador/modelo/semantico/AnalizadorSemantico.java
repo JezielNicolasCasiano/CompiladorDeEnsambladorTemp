@@ -29,7 +29,8 @@ import java.util.List;
             switch (nodo.getTipo()) {
                 case ETIQUETA:
                     String nombreEtiqueta = nodo.getToken().getValue().replace(":", "");
-                    Simbolo simEtiqueta = new Simbolo(nombreEtiqueta, "ETIQUETA", locationCounter, 0);
+                    // Etiqueta no tiene "valor" literal como tal, pero le pasamos "-"
+                    Simbolo simEtiqueta = new Simbolo(nombreEtiqueta, "ETIQUETA", "-", locationCounter, 0);
                     if (!tablaSimbolos.agregar(simEtiqueta)) {
                         erroresSemanticos.add(new ErrorSintactico(nodo.getToken(), "Símbolo redefinido: " + nombreEtiqueta));
                     }
@@ -65,20 +66,24 @@ import java.util.List;
                 case DATA_SEGMENT:
                 case CODE_SEGMENT:
                 case STACK_SEGMENT:
-                    // Todos los segmentos inician en 0470h
-                    this.locationCounter = BASE_ADDRESS;
-
-                    // Solo DATA en 0470h, los demás en 0000h
-            /*
-            if (subtipo == TokenSubtype.Directiva.DATA || subtipo == TokenSubtype.Directiva.DATA_SEGMENT) {
-                this.locationCounter = BASE_ADDRESS;
-            } else {
-                this.locationCounter = 0x0000;
-            }
-            */
                     break;
 
                 case ORG:
+                    if (!nodo.getHijos().isEmpty()) {
+                        String val = nodo.getHijos().get(0).getToken().getValue();
+                        this.locationCounter = parsearConstanteAEntero(val);
+                    }
+                    break;
+
+                case EQU:
+                    if (!nodo.getHijos().isEmpty() && nodo.getHijos().get(0).getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE) {
+                        String nombreVar = nodo.getHijos().get(0).getToken().getValue();
+                        String valorStr = nodo.getHijos().get(1).getToken().getValue();
+                        Simbolo simVar = new Simbolo(nombreVar, "CONSTANTE (EQU)", valorStr, 0, 0);
+                        if (!tablaSimbolos.agregar(simVar)) {
+                            erroresSemanticos.add(new ErrorSintactico(nodo.getToken(), "Símbolo redefinido: " + nombreVar));
+                        }
+                    }
                     break;
 
                 case DB:
@@ -88,19 +93,24 @@ import java.util.List;
                         int multiplicador = (subtipo == TokenSubtype.Directiva.DB) ? 1 : 2;
 
                         int cantValores = 0;
+                        StringBuilder valoresConcat = new StringBuilder();
+
                         for (int i = 1; i < nodo.getHijos().size(); i++) {
                             NodoAST operando = nodo.getHijos().get(i);
 
                             if (operando.getTipo() == NodoAST.Tipo.OPERANDO_DUP) {
                                 String repeticionesStr = operando.getHijos().get(0).getToken().getValue();
+                                String valorInterno = operando.getHijos().get(1).getToken().getValue();
                                 cantValores += parsearConstanteAEntero(repeticionesStr);
+                                valoresConcat.append(repeticionesStr).append(" DUP (").append(valorInterno).append(") ");
                             } else {
                                 cantValores += 1;
+                                valoresConcat.append(operando.getToken().getValue()).append(" ");
                             }
                         }
 
-                        String tipoStr = (multiplicador == 1) ? "8 bits" : "16 bits";
-                        Simbolo simVar = new Simbolo(nombreVar, tipoStr, locationCounter, multiplicador * cantValores);
+                        String tipoStr = "VARIABLE";
+                        Simbolo simVar = new Simbolo(nombreVar, tipoStr, valoresConcat.toString().trim(), locationCounter, multiplicador * cantValores);
 
                         if (!tablaSimbolos.agregar(simVar)) {
                             erroresSemanticos.add(new ErrorSintactico(nodo.getToken(), "Variable redefinida: " + nombreVar));
