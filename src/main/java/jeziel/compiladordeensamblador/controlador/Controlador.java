@@ -18,6 +18,7 @@ import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
 import jeziel.compiladordeensamblador.modelo.parser.Parser;
 import jeziel.compiladordeensamblador.modelo.parser.ResultadoParser;
+import jeziel.compiladordeensamblador.modelo.semantico.AnalizadorSemantico;
 
 import java.io.File;
 import java.io.IOException;
@@ -162,6 +163,8 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
             Parser parser = new Parser(tokensActuales);
             ResultadoParser resultado = parser.parsear();
+            AnalizadorSemantico semantico = new AnalizadorSemantico();
+            semantico.analizar(resultado.getArbol());
 
         for (int i = 0; i < tokensActuales.size(); i++) {
             Token t = tokensActuales.get(i);
