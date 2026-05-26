@@ -104,6 +104,10 @@ public class Parser {
             return parseDirectiva();
         }
 
+        if (check(TokenType.VARIABLE)) {
+            return parseDeclaracionVariable();
+        }
+
         Token t = consume();
         errores.add(new ErrorSintactico(t, "Token inesperado: '" + t.getValue() + "'"));
         return null;
@@ -133,6 +137,22 @@ public class Parser {
 
     NodoAST parseOperando() {
         return ParserOperandos.parse(this, errores);
+    }
+
+    private NodoAST parseDeclaracionVariable() {//Parche, idealmente tiene que ser una clase nueva
+        Token tokenVariable = consume(TokenType.VARIABLE);
+        NodoAST nodoVariable = new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, tokenVariable);
+
+        if (check(TokenType.PSEUDOINSTRUCCION)) {
+            NodoAST nodoDirectiva = parseDirectiva();
+
+            if (nodoDirectiva != null) {
+                nodoDirectiva.getHijos().add(0, nodoVariable);
+                return nodoDirectiva;
+            }
+        }
+        errores.add(new ErrorSintactico(getActual(), "Se esperaba directiva (DB, DW, EQU) después de la variable '" + tokenVariable.getValue() + "'"));
+        return null;
     }
 
     Token getActual()          { return actual(); }
