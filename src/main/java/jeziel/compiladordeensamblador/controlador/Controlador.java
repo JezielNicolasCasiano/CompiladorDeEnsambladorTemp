@@ -136,6 +136,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         columnaParser.setCellValueFactory(new PropertyValueFactory<>("resultadoParser"));
         columnaParser.setVisible(false);
         tablaAnalisis.getColumns().addAll(columnaContador, columnaLexema, columnaTipo, columnaInstruccion, columnaParser);
+
         tablaAnalisis.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         descripciones.put(TokenType.INSTRUCCION, "Instrucción");
