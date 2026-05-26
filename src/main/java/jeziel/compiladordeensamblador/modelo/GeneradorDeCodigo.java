@@ -26,6 +26,7 @@ public class GeneradorDeCodigo {
 
         for (String linea : lineasArchivo) {
             String lineaTrim = linea.trim();
+            // Saltamos líneas vacías o comentarios
             if (lineaTrim.isEmpty() || lineaTrim.startsWith(";")) {
                 continue;
             }
@@ -33,36 +34,31 @@ public class GeneradorDeCodigo {
             NodoAST nodo = buscarNodoParaLinea(linea, arbol);
             ErrorSintactico error = buscarErrorParaLinea(linea, errores);
 
-            if (nodo != null) {
-                String contadorHex = String.format("%04X", locationCounter);
-                String codificacion = "";
+            // Valores por defecto
+            String codificacion = "----";
+            String estado = (error != null) ? error.getMensaje() : "OK";
+            String contadorHex = String.format("%04X", locationCounter);
 
+            // Procesamiento si existe un nodo (Instrucción o Directiva)
+            if (nodo != null) {
                 if (nodo.getTipo() == NodoAST.Tipo.INSTRUCCION) {
                     codificacion = codificarInstruccion(nodo);
                     int bytes = codificacion.replace(" ", "").length() / 2;
                     locationCounter += bytes;
                 } else if (nodo.getTipo() == NodoAST.Tipo.DIRECTIVA) {
-                     codificacion = codificarDirectiva(nodo);
+                    codificacion = codificarDirectiva(nodo);
+                    // Si la directiva genera código, actualizamos el contador
                     int bytes = codificacion.split(" ").length;
-                    if (!codificacion.isEmpty()) locationCounter += bytes;
-
-
-                    String estado = (error == null) ? "OK" : error.getMensaje();
-
-                    codigoMaquina.add(new FilaMaquina(
-                            String.format("%04X", locationCounter - (codificacion.isEmpty() ? 0 : bytes)),
-                            linea,
-                            codificacion.isEmpty() ? "---" : codificacion,
-                            estado
-                    ));
+                    if (!codificacion.isEmpty() && !codificacion.equals("----")) {
+                        locationCounter += bytes;
+                    }
                 }
-                codigoMaquina.add(new FilaMaquina(contadorHex, linea, codificacion, "OK"));
-
-            } else if (error != null) {
-                codigoMaquina.add(new FilaMaquina("----", linea, "----", error.getMensaje()));
-            } else {
-                codigoMaquina.add(new FilaMaquina(String.format("%04X", locationCounter), linea, "", ""));
             }
+
+            // Creamos la fila única para esta línea.
+            // Si hay error, se mostrará en la columna de estado.
+            // Si hay codificación, se mostrará. Si no, se mantienen los valores por defecto.
+            codigoMaquina.add(new FilaMaquina(contadorHex, linea, codificacion, estado));
         }
         return codigoMaquina;
     }

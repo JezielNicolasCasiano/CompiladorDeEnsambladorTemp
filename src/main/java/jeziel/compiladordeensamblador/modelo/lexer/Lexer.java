@@ -137,7 +137,7 @@ public class Lexer {
                 catch (IllegalArgumentException e) { return null; }
 
             case PSEUDOINSTRUCCION:
-                if (upper.startsWith("DUP")) { //Parche temporal, es necesario evaluar lexicograficamente lo que tiene adentro del parentesis para poder resolverlo de manera general
+                if (upper.equals("DUP")) {
                     return TokenSubtype.Directiva.DUP;
                 }
                 try { return TokenSubtype.Directiva.valueOf(upper.replace(" ", "_").replace(".", "")); }
