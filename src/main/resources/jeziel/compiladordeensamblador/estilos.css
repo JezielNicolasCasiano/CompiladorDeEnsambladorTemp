@@ -7,58 +7,24 @@
     -fx-padding: 10px;
 }
 
-
-#codigoArea {
-    -fx-font-family: "Consolas";
-    -fx-font-size: 11pt;
-}
-
-#codigoArea .content {
-    -fx-padding: 10px;
-}
-
-
 .pagination .page-information {
-    -fx-min-height: 0 !important;
-    -fx-pref-height: 0 !important;
-    -fx-max-height: 0 !important;
-    -fx-padding: 0 !important;
-    -fx-opacity: 0 !important;
-    -fx-font-size: 0 !important;
-    visibility: hidden !important;
+    -fx-min-height: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+    -fx-opacity: 0;
+    visibility: hidden;
 }
+
 .pagination .number-button,
 .pagination .bullet-button {
-    -fx-min-width: 0 !important;
-    -fx-pref-width: 0 !important;
-    -fx-max-width: 0 !important;
-    -fx-min-height: 0 !important;
-    -fx-pref-height: 0 !important;
-    -fx-max-height: 0 !important;
-    -fx-padding: 0 !important;
-    -fx-opacity: 0 !important;
-    -fx-font-size: 0 !important;
-}
-
-.pagination .control-box {
-    -fx-spacing: 0 !important;
-}
-
-#numeracionPagina .control-box {
-    -fx-min-height: 0 !important;
-    -fx-pref-height: 0 !important;
-    -fx-max-height: 0 !important;
-    -fx-padding: 0 !important;
-    -fx-opacity: 0 !important;
-    visibility: hidden !important;
-
-}
-
-.text-area.area-paginacion {
-    -fx-font-family: "monospace" !important;
-    -fx-font-size: 10pt !important;
-}
-
-.text-area.area-paginacion .content {
-    -fx-padding: 10px;
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-min-height: 0;
+    -fx-pref-height: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+    -fx-opacity: 0;
+    visibility: hidden;
 }

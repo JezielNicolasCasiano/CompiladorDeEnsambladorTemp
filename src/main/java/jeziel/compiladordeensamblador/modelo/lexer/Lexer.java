@@ -63,10 +63,10 @@ public class Lexer {
                 "'.'",
                 "[a-zA-Z][a-zA-Z0-9_]{0,9}",
                 ",",
-                /*"\\[",
+                "\\[",
                 "\\]",
                 "\\(",
-                "\\)",*/
+                "\\)",
 
         };
 
@@ -90,10 +90,10 @@ public class Lexer {
                 TokenType.CARACTER,
                 TokenType.VARIABLE,
                 TokenType.SEPARADOR,
-                /*TokenType.CORCHETE_ABRE,
+                TokenType.CORCHETE_ABRE,
                 TokenType.CORCHETE_CIERRA,
                 TokenType.PARENTESIS_ABRE,
-                TokenType.PARENTESIS_CIERRA,*/
+                TokenType.PARENTESIS_CIERRA,
         };
 
         for (int i = 0; i < tokenPatterns.length; i++) {

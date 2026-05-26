@@ -48,9 +48,11 @@
                </children>
             </VBox>
          </bottom>
-             <center>
-                 <TableView fx:id="tablaAnalisis" prefHeight="524.0" prefWidth="500.0" BorderPane.alignment="CENTER" />
-             </center>
+
+                 <center>
+                     <Pagination fx:id="paginacionTabla" prefHeight="524.0" prefWidth="500.0" BorderPane.alignment="CENTER" />
+                 </center>
+
       </BorderPane>
    </children>
 </AnchorPane>

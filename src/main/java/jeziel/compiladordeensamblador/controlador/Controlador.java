@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import jeziel.compiladordeensamblador.modelo.Fila;
 import jeziel.compiladordeensamblador.modelo.LectorDeArchivos;
@@ -29,12 +30,21 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private final Map<TokenType, String> descripciones = new EnumMap<>(TokenType.class);
     private ControladorTablaCodigos conTabCode;
 
-    @FXML
-    private TableView<Fila> tablaAnalisis;
 
+    @FXML
+    private MenuItem seleccionarArchivo;
+    @FXML
+    private TextArea codigoArea;
+    @FXML
+    private VBox contenedorTabla;
+    @FXML
+    private Pagination paginacionTabla;
+
+    private TableView<Fila> tablaAnalisis;
+    private ObservableList<Fila> listaCompletaDatos;
+    private final int FILAS_POR_PAGINA = 25;
     private TableColumn<Fila, String> columnaInstruccion;
     private TableColumn<Fila, String> columnaParser;
-    private ObservableList<Fila> datosTabla;
     private List<Token> tokensActuales;
 
 
@@ -54,34 +64,35 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 return;
             }
 
-                try {
-                    codigoArea.clear();
-                    la.setFile(selectedFile);
+            try {
+                codigoArea.clear();
+                la.setFile(selectedFile);
 
-                    le = new Lexer(la.getLineas());
-                    tokensActuales = le.tokenize();
+                le = new Lexer(la.getLineas());
+                tokensActuales = le.tokenize();
 
-                    datosTabla.clear();
+                listaCompletaDatos.clear();
 
-                    columnaInstruccion.setVisible(false);
-                    columnaParser.setVisible(false);
+                columnaInstruccion.setVisible(false);
+                columnaParser.setVisible(false);
 
-                    for (int i = 0; i < tokensActuales.size(); i++) {
-                        Token t = tokensActuales.get(i);
-                        String descripcion = (t.getType() == TokenType.CONSTANTE) ?
-                                "Constante (numérica " + String.valueOf(t.getSub()).toLowerCase() + ")" :
-                                descripciones.getOrDefault(t.getType(), "Elemento inválido");
+                for (int i = 0; i < tokensActuales.size(); i++) {
+                    Token t = tokensActuales.get(i);
+                    String descripcion = (t.getType() == TokenType.CONSTANTE) ?
+                            "Constante (numérica " + String.valueOf(t.getSub()).toLowerCase() + ")" :
+                            descripciones.getOrDefault(t.getType(), "Elemento inválido");
 
-                        datosTabla.add(new Fila(i + 1, t.getValue(), descripcion, "", ""));
-                    }
+                    listaCompletaDatos.add(new Fila(i + 1, t.getValue(), descripcion, "", ""));
+                }
 
-                } catch (IOException ex) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Error de Lectura");
-                    alert.setHeaderText("No se pudo cargar el archivo");
-                    alert.setContentText("Ocurrió un problema técnico: " + ex.getMessage());
-                    alert.showAndWait();
+                actualizarPaginacion();
 
+            } catch (IOException ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error de Lectura");
+                alert.setHeaderText("No se pudo cargar el archivo");
+                alert.setContentText("Ocurrió un problema técnico: " + ex.getMessage());
+                alert.showAndWait();
             }
         }
     }
@@ -103,14 +114,14 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         la = new LectorDeArchivos(this);
         codigoArea.setEditable(false);
 
-        datosTabla = FXCollections.observableArrayList();
-        tablaAnalisis.setItems(datosTabla);
+        tablaAnalisis = new TableView<>();
+        listaCompletaDatos = FXCollections.observableArrayList();
 
         TableColumn<Fila, Integer> columnaContador = new TableColumn<>("No.");
         columnaContador.setCellValueFactory(new PropertyValueFactory<>("contador"));
         columnaContador.setPrefWidth(40);
 
-        TableColumn<Fila, String> columnaLexema = new TableColumn<>("Lexema");
+        TableColumn<Fila, String> columnaLexema = new TableColumn<>("Identificacion");
         columnaLexema.setCellValueFactory(new PropertyValueFactory<>("lexema"));
 
         TableColumn<Fila, String> columnaTipo = new TableColumn<>("Descripción");
@@ -118,12 +129,11 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
         columnaInstruccion = new TableColumn<>("Línea de Código");
         columnaInstruccion.setCellValueFactory(new PropertyValueFactory<>("instruccionOriginal"));
-        columnaInstruccion.setVisible(false); // OCULTA POR DEFECTO
+        columnaInstruccion.setVisible(false);
 
-        columnaParser = new TableColumn<>("Estado (Parser)");
+        columnaParser = new TableColumn<>("Estado");
         columnaParser.setCellValueFactory(new PropertyValueFactory<>("resultadoParser"));
-        columnaParser.setVisible(false); // OCULTA POR DEFECTO
-
+        columnaParser.setVisible(false);
         tablaAnalisis.getColumns().addAll(columnaContador, columnaLexema, columnaTipo, columnaInstruccion, columnaParser);
         tablaAnalisis.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
@@ -153,26 +163,25 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             Parser parser = new Parser(tokensActuales);
             ResultadoParser resultado = parser.parsear();
 
-            for (int i = 0; i < tokensActuales.size(); i++) {
-                Token t = tokensActuales.get(i);
-                Fila fila = datosTabla.get(i);
+        for (int i = 0; i < tokensActuales.size(); i++) {
+            Token t = tokensActuales.get(i);
+            Fila fila = listaCompletaDatos.get(i);
 
-                fila.setInstruccionOriginal("Contexto del token: " + t.getValue());
+            fila.setInstruccionOriginal(t.getValue());
 
-                String estado = "Sintaxis Correcta";
-                for (jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico error : resultado.getErrores()) {
-                    if (error.getToken() == t) {
-                        estado = "Error: " + error.getMensaje();
-                        break;
-                    }
+            String estado = "Sintaxis Correcta";
+            for (jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico error : resultado.getErrores()) {
+                if (error.getToken() == t) {
+                    estado = "Error: " + error.getMensaje();
+                    break;
                 }
-                fila.setResultadoParser(estado);
             }
+            fila.setResultadoParser(estado);
+        }
 
-            tablaAnalisis.refresh();
-
-            columnaInstruccion.setVisible(true);
-            columnaParser.setVisible(true);
+        tablaAnalisis.refresh();
+        columnaInstruccion.setVisible(true);
+        columnaParser.setVisible(true);
 
         try{
             FXMLLoader codigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
@@ -187,6 +196,29 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void actualizarPaginacion() {
+        if (listaCompletaDatos.isEmpty()) {
+            paginacionTabla.setPageCount(1);
+            tablaAnalisis.setItems(FXCollections.observableArrayList());
+            paginacionTabla.setPageFactory(pageIndex -> tablaAnalisis);
+            return;
+        }
+
+        int numeroDePaginas = (int) Math.ceil((double) listaCompletaDatos.size() / FILAS_POR_PAGINA);
+        paginacionTabla.setPageCount(numeroDePaginas);
+        paginacionTabla.setPageFactory(pageIndex -> {
+            int indiceInicio = pageIndex * FILAS_POR_PAGINA;
+            int indiceFin = Math.min(indiceInicio + FILAS_POR_PAGINA, listaCompletaDatos.size());
+
+            ObservableList<Fila> subLista = FXCollections.observableArrayList(
+                    listaCompletaDatos.subList(indiceInicio, indiceFin)
+            );
+            tablaAnalisis.setItems(subLista);
+
+            return tablaAnalisis;
+        });
     }
 
 }
