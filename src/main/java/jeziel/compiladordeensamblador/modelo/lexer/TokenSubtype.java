@@ -25,7 +25,9 @@ public class TokenSubtype {
         PROC,
         ENDP,
         //
-        OFFSET
+        OFFSET,
+        STACK_SEGMENT, DATA_SEGMENT, CODE_SEGMENT,
+        MODEL, STARTUP, EXIT
     }
     public enum Registro {
         // 16 bits

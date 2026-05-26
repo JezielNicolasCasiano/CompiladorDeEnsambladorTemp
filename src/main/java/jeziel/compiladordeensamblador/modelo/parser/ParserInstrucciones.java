@@ -14,7 +14,7 @@ public class ParserInstrucciones {
         TokenSubtype.Instruccion subtipo = (TokenSubtype.Instruccion) inst.getSub();
 
         if (subtipo == null) {
-            errores.add(new ErrorSintactico(inst, "Instrucción no reconocida: '" + inst.getValue() + "'"));
+            p.lanzarError(inst, "Instrucción no reconocida: '" + inst.getValue() + "'");
             return nodo;
         }
 
@@ -62,8 +62,9 @@ public class ParserInstrucciones {
                 nodo.agregarHijo(p.parseOperando());
                 break;
 
+
             default:
-                errores.add(new ErrorSintactico(inst, "Instrucción sin regla definida: '" + inst.getValue() + "'"));
+                p.lanzarError(inst, "Instrucción sin regla definida: '" + inst.getValue() + "'");
         }
 
         return nodo;

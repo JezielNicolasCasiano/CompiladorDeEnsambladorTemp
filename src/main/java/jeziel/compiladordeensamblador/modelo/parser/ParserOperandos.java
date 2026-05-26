@@ -29,10 +29,8 @@ public class ParserOperandos {
         }
 
         Token t = p.getActual();
-        errores.add(new ErrorSintactico(t,
-            "Se esperaba un operando pero se encontró " +
-            (t != null ? "'" + t.getValue() + "'" : "fin de archivo")));
-        if (t != null) p.consumir();
+        String valorToken = (t != null) ? "'" + t.getValue() + "'" : "fin de archivo";
+        p.lanzarError(t, "Se esperaba un operando pero se encontró " + valorToken);
         return null;
     }
 
@@ -45,7 +43,7 @@ public class ParserOperandos {
         } else if (p.estipo(TokenType.VARIABLE)) {
             nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, p.consumir()));
         } else {
-            errores.add(new ErrorSintactico(p.getActual(), "Se esperaba registro o variable dentro de []"));
+            p.lanzarError(p.getActual(), "Se esperaba registro o variable dentro de []");
         }
 
         p.consumir(TokenType.CORCHETE_CIERRA);

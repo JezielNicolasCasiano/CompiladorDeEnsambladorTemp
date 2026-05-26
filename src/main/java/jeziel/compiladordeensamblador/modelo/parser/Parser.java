@@ -36,18 +36,7 @@ public class Parser {
         return t;
     }
 
-    private Token consume(TokenType tipo) {
-        Token t = actual();
-        if (t == null || t.getType() != tipo) {
-            errores.add(new ErrorSintactico(
-                t,
-                "Se esperaba " + tipo + " pero se encontró " + (t != null ? t.getType() + " ('" + t.getValue() + "')" : "fin de archivo")
-            ));
-            return null;
-        }
-        pos++;
-        return t;
-    }
+
 
     private boolean check(TokenType tipo) {
         return actual() != null && actual().getType() == tipo;
@@ -61,11 +50,32 @@ public class Parser {
         return actual() != null && subtipo.equals(actual().getSub());
     }
 
+    private Token consume(TokenType tipo) {
+        Token t = actual();
+        if (t == null || t.getType() != tipo) {
+            String encontrado = (t != null) ? t.getType() + " ('" + t.getValue() + "')" : "fin de archivo";
+
+            lanzarError(t, "Se esperaba " + tipo + " pero se encontró " + encontrado);
+        }
+        pos++;
+        return t;
+    }
+    //modificacion importante al metodo sincronizar, no se estaba activando arruinando el contador
     private void sincronizar() {
-        while (actual() != null
-                && actual().getType() != TokenType.ETIQUETA
-                && actual().getType() != TokenType.INSTRUCCION
-                && actual().getType() != TokenType.PSEUDOINSTRUCCION) {
+
+        if (actual() != null) {
+            consume();
+        }
+
+
+        while (actual() != null) {
+            TokenType tipo = actual().getType();
+            if (tipo == TokenType.ETIQUETA ||
+                    tipo == TokenType.INSTRUCCION ||
+                    tipo == TokenType.PSEUDOINSTRUCCION ||
+                    tipo == TokenType.VARIABLE) {
+                return;
+            }
             consume();
         }
     }
@@ -88,31 +98,33 @@ public class Parser {
 
         if (check(TokenType.DESCONOCIDO)) {
             Token t = consume();
-            errores.add(new ErrorSintactico(t, "Token desconocido: '" + t.getValue() + "'"));
-            return null;
+            lanzarError(t, "Token desconocido: '" + t.getValue() + "'");
         }
 
-        if (check(TokenType.ETIQUETA)) {
-            return parseEtiqueta();
-        }
-
-        if (check(TokenType.INSTRUCCION)) {
-            return parseInstruccion();
-        }
-
-        if (check(TokenType.PSEUDOINSTRUCCION)) {
-            return parseDirectiva();
-        }
-
-        if (check(TokenType.VARIABLE)) {
-            return parseDeclaracionVariable();
-        }
+        if (check(TokenType.ETIQUETA)) return parseEtiqueta();
+        if (check(TokenType.INSTRUCCION)) return parseInstruccion();
+        if (check(TokenType.PSEUDOINSTRUCCION)) return parseDirectiva();
+        if (check(TokenType.VARIABLE)) return parseDeclaracionVariable();
 
         Token t = consume();
-        errores.add(new ErrorSintactico(t, "Token inesperado: '" + t.getValue() + "'"));
+        lanzarError(t, "Token inesperado al inicio de línea: '" + t.getValue() + "'");
         return null;
     }
 
+    private NodoAST parseDeclaracionVariable() {
+        Token tokenVariable = consume(TokenType.VARIABLE);
+        NodoAST nodoVariable = new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, tokenVariable);
+
+        if (check(TokenType.PSEUDOINSTRUCCION)) {
+            NodoAST nodoDirectiva = parseDirectiva();
+            if (nodoDirectiva != null) {
+                nodoDirectiva.getHijos().add(0, nodoVariable);
+                return nodoDirectiva;
+            }
+        }
+        lanzarError(getActual(), "Se esperaba pseduinstruccion (DB, DW, EQU) después de la variable '" + tokenVariable.getValue() + "'");
+        return null;
+    }
 
     private NodoAST parseEtiqueta() {
         Token etiqueta = consume(TokenType.ETIQUETA);
@@ -131,6 +143,10 @@ public class Parser {
         return ParserInstrucciones.parse(this, errores);
     }
 
+    public void lanzarError(Token t, String mensaje) {
+        throw new ErrorSintacticoException(new ErrorSintactico(t, mensaje));
+    }
+
     private NodoAST parseDirectiva() {
         return ParserDirectivas.parse(this, errores);
     }
@@ -139,21 +155,7 @@ public class Parser {
         return ParserOperandos.parse(this, errores);
     }
 
-    private NodoAST parseDeclaracionVariable() {//Parche, idealmente tiene que ser una clase nueva
-        Token tokenVariable = consume(TokenType.VARIABLE);
-        NodoAST nodoVariable = new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, tokenVariable);
 
-        if (check(TokenType.PSEUDOINSTRUCCION)) {
-            NodoAST nodoDirectiva = parseDirectiva();
-
-            if (nodoDirectiva != null) {
-                nodoDirectiva.getHijos().add(0, nodoVariable);
-                return nodoDirectiva;
-            }
-        }
-        errores.add(new ErrorSintactico(getActual(), "Se esperaba directiva (DB, DW, EQU) después de la variable '" + tokenVariable.getValue() + "'"));
-        return null;
-    }
 
     Token getActual()          { return actual(); }
     Token getSiguiente()       { return siguiente(); }

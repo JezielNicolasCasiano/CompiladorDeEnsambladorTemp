@@ -57,6 +57,12 @@ import java.util.List;
         private void procesarDirectiva(NodoAST nodo) {
             TokenSubtype.Directiva subtipo = (TokenSubtype.Directiva) nodo.getToken().getSub();
 
+            // 1. AÑADE ESTA VALIDACIÓN: Si el subtipo es null, abortamos para no causar un NPE
+            if (subtipo == null) {
+                return;
+            }
+
+            // 2. Ahora el switch es seguro
             switch (subtipo) {
                 case ORG:
                     // El ORG cambia el location counter directamente
@@ -69,7 +75,7 @@ import java.util.List;
 
                 case DB:
                 case DW:
-                    // El parser debe poner el nombre de la variable como primer hijo (como hiciste en tu parche)
+                    // El parser debe poner el nombre de la variable como primer hijo
                     if (!nodo.getHijos().isEmpty() && nodo.getHijos().get(0).getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE) {
                         String nombreVar = nodo.getHijos().get(0).getToken().getValue();
                         int multiplicador = (subtipo == TokenSubtype.Directiva.DB) ? 1 : 2;
