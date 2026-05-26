@@ -58,9 +58,25 @@ public class GeneradorDeCodigo {
         switch (subtipo) {
             case MOV:
                 return codificarMOV(instruccion);
+            case ADD:
+                return codificarADD(instruccion);
+            case INC: case NEG: case DIV: case IMUL:
+                return codificar1Operando(instruccion);
+            case LDS: case ROR:
+                return codificarLDS_ROR(instruccion);
+            case JMP: case JNS: case JS: case LOOPNE: case JG: case JNBE:
+                return codificarSaltos(instruccion);
             default:
                 return "??";
         }
+    }
+
+    private String obtenerDireccionLittleEndian(NodoAST nodoMemoria) {
+        String nombreVar = nodoMemoria.getHijos().isEmpty() ? nodoMemoria.getToken().getValue() : nodoMemoria.getHijos().get(0).getToken().getValue();
+        jeziel.compiladordeensamblador.modelo.semantico.Simbolo sim = tablaSimbolos.buscar(nombreVar);
+        int dir = (sim != null) ? sim.getDireccion() : 0;
+        String dirHex = String.format("%04X", dir);
+        return dirHex.substring(2, 4) + " " + dirHex.substring(0, 2);
     }
 
     private String codificarSinOperandos(TokenSubtype.Instruccion inst) {
@@ -266,6 +282,152 @@ public class GeneradorDeCodigo {
         }
 
         return "NO_IMPLEMENTADO";
+    }
+
+    private String codificarADD(NodoAST instruccion) {
+        NodoAST destino = instruccion.getHijos().get(0);
+        NodoAST fuente = instruccion.getHijos().get(1);
+
+        boolean destReg = (destino.getTipo() == NodoAST.Tipo.OPERANDO_REGISTRO);
+        boolean fuenteReg = (fuente.getTipo() == NodoAST.Tipo.OPERANDO_REGISTRO);
+        boolean fuenteConst = (fuente.getTipo() == NodoAST.Tipo.OPERANDO_CONSTANTE);
+        boolean destMem = (destino.getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE || destino.getTipo() == NodoAST.Tipo.OPERANDO_MEMORIA);
+        boolean fuenteMem = (fuente.getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE || fuente.getTipo() == NodoAST.Tipo.OPERANDO_MEMORIA);
+
+        String regDest = destReg ? destino.getToken().getValue() : "";
+        String regFuent = fuenteReg ? fuente.getToken().getValue() : "";
+
+        if (destReg && fuenteReg) {
+            int w = obtenerBitW(regDest);
+            int opcode = 0b00000000 | w;
+            String byte1 = String.format("%02X", opcode);
+            String byte2 = armarModRM(3, obtenerCodigoRegistro(regFuent), obtenerCodigoRegistro(regDest));
+            return byte1 + " " + byte2;
+        }
+
+        if (destReg && fuenteConst) {
+            int w = obtenerBitW(regDest);
+            int opcode = 0b10000000 | w;
+            String byte1 = String.format("%02X", opcode);
+            String byte2 = armarModRM(3, 0, obtenerCodigoRegistro(regDest));
+            boolean isWord = (w == 1);
+            return byte1 + " " + byte2 + " " + procesarValorSimple(fuente, isWord);
+        }
+
+        if (destReg && fuenteMem) {
+            int w = obtenerBitW(regDest);
+            int opcode = 0b00000010 | w;
+            String byte1 = String.format("%02X", opcode);
+            String byte2 = armarModRM(0, obtenerCodigoRegistro(regDest), 6);
+            return byte1 + " " + byte2 + " " + obtenerDireccionLittleEndian(fuente);
+        }
+
+        if (destMem && fuenteReg) {
+            int w = obtenerBitW(regFuent);
+            int opcode = 0b00000000 | w;
+            String byte1 = String.format("%02X", opcode);
+            String byte2 = armarModRM(0, obtenerCodigoRegistro(regFuent), 6);
+            return byte1 + " " + byte2 + " " + obtenerDireccionLittleEndian(destino);
+        }
+
+        return "??";
+    }
+    private String codificar1Operando(NodoAST instruccion) {
+        TokenSubtype.Instruccion inst = (TokenSubtype.Instruccion) instruccion.getToken().getSub();
+        NodoAST op = instruccion.getHijos().get(0);
+
+        boolean isReg = (op.getTipo() == NodoAST.Tipo.OPERANDO_REGISTRO);
+        boolean isMem = (op.getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE || op.getTipo() == NodoAST.Tipo.OPERANDO_MEMORIA);
+        String regVal = isReg ? op.getToken().getValue() : "";
+
+        if (inst == TokenSubtype.Instruccion.INC && isReg && obtenerBitW(regVal) == 1) {
+            int opcode = 0b01000000 | obtenerCodigoRegistro(regVal); // 40 + reg
+            return String.format("%02X", opcode);
+        }
+
+        int w = isReg ? obtenerBitW(regVal) : 1;
+
+        int baseOpcode = (inst == TokenSubtype.Instruccion.INC) ? 0b11111110 : 0b11110110;
+        int opcode = baseOpcode | w;
+
+        int regExt = 0;
+        if (inst == TokenSubtype.Instruccion.INC) regExt = 0;      // 000
+        else if (inst == TokenSubtype.Instruccion.NEG) regExt = 3; // 011
+        else if (inst == TokenSubtype.Instruccion.IMUL) regExt = 5;// 101
+        else if (inst == TokenSubtype.Instruccion.DIV) regExt = 6; // 110
+
+        String byte1 = String.format("%02X", opcode);
+
+        if (isReg) {
+            String byte2 = armarModRM(3, regExt, obtenerCodigoRegistro(regVal));
+            return byte1 + " " + byte2;
+        } else if (isMem) {
+            String byte2 = armarModRM(0, regExt, 6);
+            return byte1 + " " + byte2 + " " + obtenerDireccionLittleEndian(op);
+        }
+        return "??";
+    }
+
+    private String codificarLDS_ROR(NodoAST instruccion) {
+        TokenSubtype.Instruccion inst = (TokenSubtype.Instruccion) instruccion.getToken().getSub();
+        NodoAST op1 = instruccion.getHijos().get(0);
+        NodoAST op2 = instruccion.getHijos().get(1);
+
+        if (inst == TokenSubtype.Instruccion.LDS) {
+            String byte1 = "C5";
+            String byte2 = armarModRM(0, obtenerCodigoRegistro(op1.getToken().getValue()), 6);
+            return byte1 + " " + byte2 + " " + obtenerDireccionLittleEndian(op2);
+        }
+
+        if (inst == TokenSubtype.Instruccion.ROR) {
+            boolean op1Reg = (op1.getTipo() == NodoAST.Tipo.OPERANDO_REGISTRO);
+            boolean isCL = (op2.getTipo() == NodoAST.Tipo.OPERANDO_REGISTRO && op2.getToken().getValue().equalsIgnoreCase("CL"));
+
+            int w = op1Reg ? obtenerBitW(op1.getToken().getValue()) : 1;
+            int baseOpcode = isCL ? 0b11010010 : 0b11010000;
+            int opcode = baseOpcode | w;
+
+            String byte1 = String.format("%02X", opcode);
+            String byte2 = "";
+
+            if (op1Reg) {
+                byte2 = armarModRM(3, 1, obtenerCodigoRegistro(op1.getToken().getValue())); // reg=001(ROR)
+                return byte1 + " " + byte2;
+            } else {
+                byte2 = armarModRM(0, 1, 6);
+                return byte1 + " " + byte2 + " " + obtenerDireccionLittleEndian(op1);
+            }
+        }
+        return "??";
+    }
+
+    private String codificarSaltos(NodoAST instruccion) {
+        TokenSubtype.Instruccion inst = (TokenSubtype.Instruccion) instruccion.getToken().getSub();
+        String nombreEtiqueta = instruccion.getHijos().get(0).getToken().getValue();
+
+        jeziel.compiladordeensamblador.modelo.semantico.Simbolo sim = tablaSimbolos.buscar(nombreEtiqueta);
+        int dirDestino = (sim != null) ? sim.getDireccion() : 0;
+
+        int tamañoInst = (inst == TokenSubtype.Instruccion.JMP) ? 3 : 2;
+        int dirSiguienteInstruccion = locationCounter + tamañoInst;
+        int desplazamiento = dirDestino - dirSiguienteInstruccion;
+
+        if (inst == TokenSubtype.Instruccion.JMP) {
+            String hex = String.format("%04X", desplazamiento & 0xFFFF);
+            return "E9 " + hex.substring(2, 4) + " " + hex.substring(0, 2);
+        } else {
+            String opcode = "";
+            switch (inst) {
+                case JS: opcode = "78"; break;
+                case JNS: opcode = "79"; break;
+                case JNBE: opcode = "77"; break;
+                case JG: opcode = "7F"; break;
+                case LOOPNE: opcode = "E0"; break;
+                default: opcode = "00";
+            }
+            String despHex = String.format("%02X", desplazamiento & 0xFF);
+            return opcode + " " + despHex;
+        }
     }
 
 }
