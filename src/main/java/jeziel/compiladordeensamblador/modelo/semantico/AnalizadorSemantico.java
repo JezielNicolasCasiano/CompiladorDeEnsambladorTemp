@@ -7,11 +7,11 @@ import java.util.List;
 
 public class AnalizadorSemantico {
 
-    private List<Nodo> arbol;
+    /*private List<Nodo> arbol;
     private Map<String, InfoSimbolo> tablaDeSimbolos;
 
     public AnalizadorSemantico(List<NodoAST> arbol) {
         this.arbol = arbol;
-        this.tablaDeSimbolos = new HashMap<>();
+        this.tablaDeSimbolos = new HashMap<>();*/
     }
-}
+

@@ -135,6 +135,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         la = new LectorDeArchivos(this);
         codigoArea.setEditable(false);
+        contenedorTabla.setAlignment(javafx.geometry.Pos.CENTER);
 
         /*descripciones.put(TokenType.INSTRUCCION, "Instrucción");
         descripciones.put(TokenType.PSEUDOINSTRUCCION, "Pseudoinstrucción");
@@ -153,12 +154,17 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     }
 
     @FXML
-    public void Codificar(){
+    public void codificar(){
         try{
-            FXMLLoader codigos = new FXMLLoader(getClass().getResource("Tabla-codigos.fxml"));
+            FXMLLoader codigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
             Parent nodoTabla = codigos.load();
             conTabCode = codigos.getController();
-            contenedorTabla.getChildren().add(2,nodoTabla);
+            contenedorTabla.getChildren().add(0, nodoTabla);
+            contenedorTabla.setAlignment(javafx.geometry.Pos.CENTER);
+            javafx.stage.Window ventana = contenedorTabla.getScene().getWindow();
+            if (ventana instanceof javafx.stage.Stage stage) {
+                stage.sizeToScene();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
