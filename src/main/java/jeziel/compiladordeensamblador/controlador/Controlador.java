@@ -41,12 +41,12 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
 
     @FXML
-    public void SeleccionarUnArchivo(){ //Metodo que instancia un fileChooser para seleccionar el archivo. Es onAction de SeleccionarArchivo
+    public void SeleccionarUnArchivo() { //Metodo que instancia un fileChooser para seleccionar el archivo. Es onAction de SeleccionarArchivo
         FileChooser fileChooser = new FileChooser();
         File selectedFile = fileChooser.showOpenDialog(seleccionarArchivo.getParentPopup().getScene().getWindow());
 
 
-        if(selectedFile != null) {
+        if (selectedFile != null) {
             if (!selectedFile.getName().toLowerCase().endsWith(".asm")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Archivo no válido");
@@ -55,7 +55,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 alert.showAndWait();
                 return;
             }
-            try {
+
                 try {
                     codigoArea.clear();
                     la.setFile(selectedFile);
@@ -74,66 +74,21 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                                 "Constante (numérica " + String.valueOf(t.getSub()).toLowerCase() + ")" :
                                 descripciones.getOrDefault(t.getType(), "Elemento inválido");
 
-                        datosTabla.add(new FilaAnalisis(i + 1, t.getValue(), descripcion, "", ""));
+                        datosTabla.add(new Fila(i + 1, t.getValue(), descripcion, "", ""));
                     }
 
-            } catch (IOException ex) {
+                } catch (IOException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Error de Lectura");
                     alert.setHeaderText("No se pudo cargar el archivo");
                     alert.setContentText("Ocurrió un problema técnico: " + ex.getMessage());
                     alert.showAndWait();
+
             }
         }
     }
 
-    public void paginar(List<Token> tokens){
-        int numeroDePaginas = (int) Math.ceil((double) tokens.size() / 25);
-        divisionPagina.setPageCount(numeroDePaginas == 0 ? 1 : numeroDePaginas);
-        numeracionPagina.currentPageIndexProperty().unbindBidirectional(divisionPagina.currentPageIndexProperty());
-        numeracionPagina.currentPageIndexProperty().bindBidirectional(divisionPagina.currentPageIndexProperty());
-        divisionPagina.setPageFactory(pageIndex ->{
-            TextArea paginaTemporal = new TextArea();
-            paginaTemporal.setEditable(false);
-            paginaTemporal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 11pt;");
-            paginaTemporal.getStyleClass().add("area-paginacion");
 
-            int indiceInicio = pageIndex * 25;
-            int indiceFin = Math.min(indiceInicio + 25, tokens.size());
-
-            for (int i = indiceInicio; i < indiceFin; i++) {
-                String descripcion;
-
-                if (tokens.get(i).getType() == TokenType.CONSTANTE) {
-                    descripcion = "Constante (numérica " + String.valueOf(tokens.get(i).getSub()).toLowerCase() + ")";
-                } else {
-                    descripcion = descripciones.getOrDefault(tokens.get(i).getType(), "Elemento inválido");
-                }
-                /*if(tokens.get(i).getSub() != null){
-                    descripcion = tokens.get(i).getSub().name();
-                }else {
-                    descripcion = tokens.get(i).getType().name();
-                }*/
-                paginaTemporal.appendText(String.format("%-25s ; %s\n", tokens.get(i).getValue(), descripcion));
-            }
-            return paginaTemporal;
-        });
-        numeracionPagina.setPageFactory(pageIndex ->{
-            TextArea paginaTemporal = new TextArea();
-            paginaTemporal.setEditable(false);
-            paginaTemporal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 11pt;");
-            paginaTemporal.getStyleClass().add("area-paginacion");
-            int indiceInicio = pageIndex * 25;
-            int indiceFin = Math.min(indiceInicio + 25, tokens.size());
-
-            for (int i = indiceInicio; i < indiceFin; i++) {
-                paginaTemporal.appendText(String.valueOf(i));
-                paginaTemporal.appendText("\n");
-            }
-
-            return paginaTemporal;
-        });
-    }
 
 
 
@@ -220,7 +175,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
             columnaInstruccion.setVisible(true);
             columnaParser.setVisible(true);
-        }
+
         try{
             FXMLLoader codigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
             Parent nodoTabla = codigos.load();
