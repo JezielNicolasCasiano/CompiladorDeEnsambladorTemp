@@ -14,6 +14,10 @@ public class Simbolo {
             this.tamano = tamano;
         }
 
+        public String getDireccionHex() {
+        return String.format("%04X", direccion);
+         }
+
 
         public String getNombre() { return nombre; }
         public String getTipo() { return tipo; }

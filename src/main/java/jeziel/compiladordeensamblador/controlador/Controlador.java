@@ -11,9 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import jeziel.compiladordeensamblador.modelo.Fila;
-import jeziel.compiladordeensamblador.modelo.LectorDeArchivos;
-import jeziel.compiladordeensamblador.modelo.LectorDeArchivosListener;
+import jeziel.compiladordeensamblador.modelo.*;
 import jeziel.compiladordeensamblador.modelo.lexer.Lexer;
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
@@ -218,9 +216,9 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 panelPrincipal.setRight(nodoTablaMaquina);
             }
 
-            // Aquí iría la llamada al Generador de Código que pasará los datos
-            // List<FilaMaquina> codigoGenerado = generador.generar(resultado.getArbol());
-            // conTabMaquina.cargarDatosMaquina(codigoGenerado);
+            GeneradorDeCodigo generador = new GeneradorDeCodigo(semantico.getTablaSimbolos());
+            List<FilaMaquina> codigoGenerado = generador.generar(resultado.getArbol());
+            conTabMaquina.cargarDatosMaquina(codigoGenerado);
 
         } catch (IOException e) {
             System.err.println("Error cargando la tabla de código máquina: " + e.getMessage());

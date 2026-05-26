@@ -12,12 +12,20 @@ public class ParserOperandos {
             return new NodoAST(NodoAST.Tipo.OPERANDO_REGISTRO, p.consumir());
         }
 
-        if (p.estipo(TokenType.CONSTANTE)) { //Constante pero con un parche para el dup
+        if (p.estipo(TokenType.CONSTANTE)) {//parche para dup
             Token numToken = p.consumir();
+
             if (p.getActual() != null && p.estipo(TokenType.PSEUDOINSTRUCCION) && p.getActual().getSub() == TokenSubtype.Directiva.DUP) {
                 Token dupToken = p.consumir();
                 NodoAST nodoDup = new NodoAST(NodoAST.Tipo.OPERANDO_DUP, dupToken);
                 nodoDup.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, numToken));
+                String dupStr = dupToken.getValue();
+                int start = dupStr.indexOf('(') + 1;
+                int end = dupStr.lastIndexOf(')');
+                String valorInterno = (start > 0 && end > start) ? dupStr.substring(start, end).trim() : "?";
+                Token tokenInterno = new Token(TokenType.CONSTANTE, valorInterno);
+                nodoDup.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, tokenInterno));
+
                 return nodoDup;
             }
             return new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, numToken);

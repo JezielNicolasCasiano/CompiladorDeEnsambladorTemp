@@ -25,8 +25,7 @@ public class ControladorTablaCodigos implements Initializable {
     private TableColumn<Simbolo, Integer> columnaValor;
     @FXML
     private TableColumn<Simbolo, Integer> columnaTamano;
-    @FXML
-    private TableColumn<Simbolo, Integer> columnaDireccion;
+    @FXML private TableColumn<Simbolo, String> columnaDireccion;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -35,7 +34,7 @@ public class ControladorTablaCodigos implements Initializable {
         columnaSimbolo.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         columnaTipo.setCellValueFactory(new PropertyValueFactory<>("tipo"));
         columnaTamano.setCellValueFactory(new PropertyValueFactory<>("tamano"));
-        columnaDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
+        columnaDireccion.setCellValueFactory(new PropertyValueFactory<>("direccionHex"));
     }
     public void cargarSimbolos(Collection<Simbolo> simbolos) {
         ObservableList<Simbolo> listaSimbolos = FXCollections.observableArrayList(simbolos);

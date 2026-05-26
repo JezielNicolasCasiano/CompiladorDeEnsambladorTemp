@@ -11,9 +11,10 @@ import java.util.List;
         private int locationCounter;
         private TablaSimbolo tablaSimbolos;
         private List<ErrorSintactico> erroresSemanticos;
+        private final int BASE_ADDRESS = 0x0470;
 
         public AnalizadorSemantico() {
-            this.locationCounter = 0;
+            this.locationCounter = BASE_ADDRESS;
             this.tablaSimbolos = new TablaSimbolo();
             this.erroresSemanticos = new ArrayList<>();
         }
@@ -58,12 +59,26 @@ import java.util.List;
             }
 
             switch (subtipo) {
-                case ORG:
+                case DATA:
+                case CODE:
+                case STACK:
+                case DATA_SEGMENT:
+                case CODE_SEGMENT:
+                case STACK_SEGMENT:
+                    // Todos los segmentos inician en 0470h
+                    this.locationCounter = BASE_ADDRESS;
 
-                    if (!nodo.getHijos().isEmpty()) {
-                        String valorH = nodo.getHijos().get(0).getToken().getValue();
-                        locationCounter = parsearConstanteAEntero(valorH);
-                    }
+                    // Solo DATA en 0470h, los demás en 0000h
+            /*
+            if (subtipo == TokenSubtype.Directiva.DATA || subtipo == TokenSubtype.Directiva.DATA_SEGMENT) {
+                this.locationCounter = BASE_ADDRESS;
+            } else {
+                this.locationCounter = 0x0000;
+            }
+            */
+                    break;
+
+                case ORG:
                     break;
 
                 case DB:
@@ -71,7 +86,18 @@ import java.util.List;
                     if (!nodo.getHijos().isEmpty() && nodo.getHijos().get(0).getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE) {
                         String nombreVar = nodo.getHijos().get(0).getToken().getValue();
                         int multiplicador = (subtipo == TokenSubtype.Directiva.DB) ? 1 : 2;
-                        int cantValores = nodo.getHijos().size() - 1;
+
+                        int cantValores = 0;
+                        for (int i = 1; i < nodo.getHijos().size(); i++) {
+                            NodoAST operando = nodo.getHijos().get(i);
+
+                            if (operando.getTipo() == NodoAST.Tipo.OPERANDO_DUP) {
+                                String repeticionesStr = operando.getHijos().get(0).getToken().getValue();
+                                cantValores += parsearConstanteAEntero(repeticionesStr);
+                            } else {
+                                cantValores += 1;
+                            }
+                        }
 
                         String tipoStr = (multiplicador == 1) ? "8 bits" : "16 bits";
                         Simbolo simVar = new Simbolo(nombreVar, tipoStr, locationCounter, multiplicador * cantValores);
@@ -88,12 +114,99 @@ import java.util.List;
             }
         }
 
-        private int calcularTamanoInstruccion(NodoAST instruccion) {
-            int numOperandos = instruccion.getHijos().size();
-            if (numOperandos == 0) return 1;
-            if (numOperandos == 1) return 2;
-            return 3;
+        private int calcularTamanoInstruccion(NodoAST instruccion) {//calculo del tamaño de las lineas de codigo
+            TokenSubtype.Instruccion tipoInst = (TokenSubtype.Instruccion) instruccion.getToken().getSub();
+            List<NodoAST> operandos = instruccion.getHijos();
+            int numOperandos = operandos.size();
+
+
+            if (numOperandos == 0) {
+                return 1;
+            }
+
+            if (tipoInst == TokenSubtype.Instruccion.JMP) {
+                return 3;
+            }
+
+
+            if (tipoInst == TokenSubtype.Instruccion.JNS ||
+                    tipoInst == TokenSubtype.Instruccion.JS ||
+                    tipoInst == TokenSubtype.Instruccion.LOOPNE ||
+                    tipoInst == TokenSubtype.Instruccion.JG ||
+                    tipoInst == TokenSubtype.Instruccion.JNBE) {
+                return 2;
+            }
+
+            if (numOperandos == 2) {
+                NodoAST op1 = operandos.get(0);
+                NodoAST op2 = operandos.get(1);
+
+                boolean op1Reg = (op1.getTipo() == NodoAST.Tipo.OPERANDO_REGISTRO);
+                boolean op2Reg = (op2.getTipo() == NodoAST.Tipo.OPERANDO_REGISTRO);
+                boolean op2Const = (op2.getTipo() == NodoAST.Tipo.OPERANDO_CONSTANTE);
+                boolean op1Mem = (op1.getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE || op1.getTipo() == NodoAST.Tipo.OPERANDO_MEMORIA);
+                boolean op2Mem = (op2.getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE || op2.getTipo() == NodoAST.Tipo.OPERANDO_MEMORIA);
+
+                if (tipoInst == TokenSubtype.Instruccion.LDS) {
+                    return 4;
+                }
+                if (tipoInst == TokenSubtype.Instruccion.ROR) {
+                    if (op1Reg) {
+                        if (op2Reg && op2.getToken().getValue().equalsIgnoreCase("CL")) return 2;
+                        if (op2Const && op2.getToken().getValue().equals("1")) return 2;
+                        return 3;
+                    } else if (op1Mem) {
+                        if (op2Reg && op2.getToken().getValue().equalsIgnoreCase("CL")) return 4;
+                        if (op2Const && op2.getToken().getValue().equals("1")) return 4;
+                        return 5;
+                    }
+                }
+
+
+                if (op1Reg && op2Reg) {
+                    return 2;
+                }
+                if (op1Reg && op2Const) {
+                    return esRegistro8Bits(op1.getToken().getValue()) ? 2 : 3;
+                }
+                if ((op1Reg && op2Mem) || (op1Mem && op2Reg)) {
+                    return 4;
+                }
+                if (op1Mem && op2Const) {
+                    return 5;
+                }
+            }
+
+            if (numOperandos == 1) {
+                NodoAST op = operandos.get(0);
+
+                if (op.getTipo() == NodoAST.Tipo.OPERANDO_REGISTRO) {
+                    if (tipoInst == TokenSubtype.Instruccion.INC) {
+                        return esRegistro8Bits(op.getToken().getValue()) ? 2 : 1;
+                    }
+                    return 2;
+                } else if (op.getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE || op.getTipo() == NodoAST.Tipo.OPERANDO_MEMORIA) {
+                    return 4;
+                }
+            }
+
+            return 2;
         }
+
+        private boolean esRegistro8Bits(String reg) {
+            String r = reg.toUpperCase();
+            return r.equals("AH") || r.equals("AL") || r.equals("BH") || r.equals("BL") ||
+                    r.equals("CH") || r.equals("CL") || r.equals("DH") || r.equals("DL");
+        }
+
+        private boolean esSaltoCondicionalOLoop(TokenSubtype.Instruccion tipoInst) {
+            return tipoInst == TokenSubtype.Instruccion.JNS ||
+                    tipoInst == TokenSubtype.Instruccion.JS ||
+                    tipoInst == TokenSubtype.Instruccion.LOOPNE ||
+                    tipoInst == TokenSubtype.Instruccion.JG ||
+                    tipoInst == TokenSubtype.Instruccion.JNBE;
+        }
+
 
         private int parsearConstanteAEntero(String constanteStr) {
             constanteStr = constanteStr.toUpperCase();
