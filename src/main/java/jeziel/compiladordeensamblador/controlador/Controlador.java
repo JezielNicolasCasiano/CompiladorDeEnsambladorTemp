@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import jeziel.compiladordeensamblador.modelo.Fila;
@@ -30,7 +31,13 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private Lexer le;
     private final Map<TokenType, String> descripciones = new EnumMap<>(TokenType.class);
     private ControladorTablaCodigos conTabCode;
-
+    private ControladorTablaMaquina conTabMaquina;
+    private TableView<Fila> tablaAnalisis;
+    private ObservableList<Fila> listaCompletaDatos;
+    private final int FILAS_POR_PAGINA = 25;
+    private TableColumn<Fila, String> columnaInstruccion;
+    private TableColumn<Fila, String> columnaParser;
+    private List<Token> tokensActuales;
 
     @FXML
     private MenuItem seleccionarArchivo;
@@ -40,13 +47,8 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private VBox contenedorTabla;
     @FXML
     private Pagination paginacionTabla;
-
-    private TableView<Fila> tablaAnalisis;
-    private ObservableList<Fila> listaCompletaDatos;
-    private final int FILAS_POR_PAGINA = 25;
-    private TableColumn<Fila, String> columnaInstruccion;
-    private TableColumn<Fila, String> columnaParser;
-    private List<Token> tokensActuales;
+    @FXML
+    private BorderPane panelPrincipal;
 
 
     @FXML
@@ -207,7 +209,24 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        try {
+            if (conTabMaquina == null) {
+                FXMLLoader loaderMaquina = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-maquina.fxml"));
+                javafx.scene.Parent nodoTablaMaquina = loaderMaquina.load();
+                conTabMaquina = loaderMaquina.getController();
+                panelPrincipal.setRight(nodoTablaMaquina);
+            }
+
+            // Aquí iría la llamada al Generador de Código que pasará los datos
+            // List<FilaMaquina> codigoGenerado = generador.generar(resultado.getArbol());
+            // conTabMaquina.cargarDatosMaquina(codigoGenerado);
+
+        } catch (IOException e) {
+            System.err.println("Error cargando la tabla de código máquina: " + e.getMessage());
+        }
     }
+
 
     private void actualizarPaginacion() {
         if (listaCompletaDatos.isEmpty()) {

@@ -13,8 +13,7 @@
 
 <AnchorPane prefHeight="630.0" prefWidth="1203.0" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.Controlador">
    <children>
-       <BorderPane prefHeight="605.0" prefWidth="1120.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <top>
+       <BorderPane fx:id="panelPrincipal" prefHeight="605.0" prefWidth="1120.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">         <top>
             <MenuBar fx:id="menu" BorderPane.alignment="CENTER">
               <menus>
                 <Menu mnemonicParsing="false" text="File">
@@ -36,9 +35,9 @@
             </ScrollPane>
          </left>
          <bottom>
-            <VBox fx:id="contenedorTabla" prefHeight="38.0" prefWidth="1006.0" BorderPane.alignment="CENTER">
+            <VBox fx:id="contenedorTabla" BorderPane.alignment="CENTER">
                <children>
-                  <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                  <AnchorPane>
                      <children>
                         <Button fx:id="codificarBoton" layoutX="1129.0" layoutY="6.0" mnemonicParsing="false" onAction="#codificar" text="Button" />
                      </children>

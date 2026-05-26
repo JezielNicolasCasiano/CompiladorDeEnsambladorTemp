@@ -1,6 +1,7 @@
 package jeziel.compiladordeensamblador.modelo.parser;
 
 import jeziel.compiladordeensamblador.modelo.lexer.*;
+import jeziel.compiladordeensamblador.modelo.semantico.Simbolo;
 
 import java.util.List;
 
@@ -25,10 +26,36 @@ public class ParserDirectivas {
             // DB / DW — variable: valor o lista de valores
             case DB:
             case DW:
-                nodo.agregarHijo(p.parseOperando());
-                while (p.estipo(TokenType.SEPARADOR)) {
-                    p.consumir();
-                    nodo.agregarHijo(p.parseOperando());
+                if (!nodo.getHijos().isEmpty() && nodo.getHijos().get(0).getTipo() == NodoAST.Tipo.OPERANDO_VARIABLE) {
+                    String nombreVar = nodo.getHijos().get(0).getToken().getValue();
+                    int multiplicador = (subtipo == TokenSubtype.Directiva.DB) ? 1 : 2;
+
+                    // --- CÁLCULO DE TAMAÑO TOMANDO EN CUENTA EL DUP ---
+                    int cantValores = 0;
+                    for (int i = 1; i < nodo.getHijos().size(); i++) {
+                        NodoAST operando = nodo.getHijos().get(i);
+
+                        if (operando.getTipo() == NodoAST.Tipo.OPERANDO_DUP) {
+                            // El hijo 0 guarda el token del multiplicador (ej. "128")
+                            String repeticionesStr = operando.getHijos().get(0).getToken().getValue();
+                            cantValores += parsearConstanteAEntero(repeticionesStr);
+
+                            // Para el futuro (Segunda Pasada):
+                            // El valor interno (ej. '0' o 'a') está en operando.getToken().getValue() que es el String "dup(0)".
+                            // En la segunda pasada solo tendrás que hacer un substring o regex para extraer lo que está entre los paréntesis.
+                        } else {
+                            // Variable normal (ej. 'hola' o 45H)
+                            cantValores += 1;
+                        }
+                    }
+                    String tipoStr = (multiplicador == 1) ? "VAR_8BITS" : "VAR_16BITS";
+                    Simbolo simVar = new Simbolo(nombreVar, tipoStr, locationCounter, multiplicador * cantValores);
+
+                    if (!tablaSimbolos.agregar(simVar)) {
+                        erroresSemanticos.add(new ErrorSintactico(nodo.getToken(), "Variable redefinida: " + nombreVar));
+                    }
+
+                    locationCounter += (multiplicador * cantValores);
                 }
                 break;
 
@@ -58,12 +85,8 @@ public class ParserDirectivas {
                 }
                 break;
 
-            // DUP 
-            case DUP:
-                p.consumir(TokenType.PARENTESIS_ABRE);
-                nodo.agregarHijo(p.parseOperando());
-                p.consumir(TokenType.PARENTESIS_CIERRA);
-                break;
+
+
 
                 default:
                 break;

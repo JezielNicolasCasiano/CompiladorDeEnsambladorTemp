@@ -12,8 +12,15 @@ public class ParserOperandos {
             return new NodoAST(NodoAST.Tipo.OPERANDO_REGISTRO, p.consumir());
         }
 
-        if (p.estipo(TokenType.CONSTANTE)) {
-            return new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, p.consumir());
+        if (p.estipo(TokenType.CONSTANTE)) { //Constante pero con un parche para el dup
+            Token numToken = p.consumir();
+            if (p.getActual() != null && p.estipo(TokenType.PSEUDOINSTRUCCION) && p.getActual().getSub() == TokenSubtype.Directiva.DUP) {
+                Token dupToken = p.consumir();
+                NodoAST nodoDup = new NodoAST(NodoAST.Tipo.OPERANDO_DUP, dupToken);
+                nodoDup.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, numToken));
+                return nodoDup;
+            }
+            return new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, numToken);
         }
 
         if (p.estipo(TokenType.CARACTER)) {
@@ -22,6 +29,10 @@ public class ParserOperandos {
 
         if (p.estipo(TokenType.VARIABLE)) {
             return new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, p.consumir());
+        }
+
+        if (p.estipo(TokenType.CADENA)) {
+            return new NodoAST(NodoAST.Tipo.OPERANDO_CADENA, p.consumir());
         }
 
         if (p.estipo(TokenType.CORCHETE_ABRE)) {
@@ -42,7 +53,12 @@ public class ParserOperandos {
             nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_REGISTRO, p.consumir()));
         } else if (p.estipo(TokenType.VARIABLE)) {
             nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, p.consumir()));
-        } else {
+
+
+        }
+
+
+        else {
             p.lanzarError(p.getActual(), "Se esperaba registro o variable dentro de []");
         }
 

@@ -17,7 +17,8 @@ public class NodoAST {
         OPERANDO_VARIABLE,
         OPERANDO_MEMORIA,
         OPERANDO_CARACTER,
-        OPERANDO_CADENA
+        OPERANDO_CADENA,
+        OPERANDO_DUP
     }
 
     private final Tipo tipo;

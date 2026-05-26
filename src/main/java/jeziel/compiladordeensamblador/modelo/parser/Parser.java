@@ -11,6 +11,12 @@ public class Parser {
     private int pos;
     private final List<ErrorSintactico> errores;
     private final List<NodoAST> arbol;
+    private EstadoPrograma estadoActual = EstadoPrograma.INICIO;
+
+    public enum EstadoPrograma {
+        INICIO, STACK, DATA, CODE
+    }
+
 
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
@@ -60,7 +66,6 @@ public class Parser {
         pos++;
         return t;
     }
-    //modificacion importante al metodo sincronizar, no se estaba activando arruinando el contador
     private NodoAST parseLinea() {
         if (actual() == null) return null;
 
@@ -69,9 +74,46 @@ public class Parser {
         }
 
         if (check(TokenType.ETIQUETA)) return parseEtiqueta();
-        if (check(TokenType.INSTRUCCION)) return parseInstruccion();
-        if (check(TokenType.PSEUDOINSTRUCCION)) return parseDirectiva();
-        if (check(TokenType.VARIABLE)) return parseDeclaracionVariable();
+
+        if (check(TokenType.INSTRUCCION)) {
+            if (estadoActual != EstadoPrograma.CODE) {
+                lanzarError(actual(), "Instrucción fuera de lugar: Debe ir dentro del segmento .CODE");
+            }
+            return parseInstruccion();
+        }
+
+        if (check(TokenType.PSEUDOINSTRUCCION)) {
+            Token t = actual();
+            Enum<?> sub = t.getSub();
+
+            if (sub == TokenSubtype.Directiva.STACK || sub == TokenSubtype.Directiva.STACK_SEGMENT) {
+                if (estadoActual != EstadoPrograma.INICIO) {
+                    lanzarError(t, "Estructura incorrecta: El segmento stack debe ser el primero.");
+                }
+                estadoActual = EstadoPrograma.STACK;
+            }
+            else if (sub == TokenSubtype.Directiva.DATA || sub == TokenSubtype.Directiva.DATA_SEGMENT) {
+                if (estadoActual != EstadoPrograma.STACK && estadoActual != EstadoPrograma.INICIO) {
+                    lanzarError(t, "Estructura incorrecta: El segmento data debe ir después de STACK.");
+                }
+                estadoActual = EstadoPrograma.DATA;
+            }
+            else if (sub == TokenSubtype.Directiva.CODE || sub == TokenSubtype.Directiva.CODE_SEGMENT) {
+                if (estadoActual != EstadoPrograma.DATA) {
+                    lanzarError(t, "Estructura incorrecta: El segmento code debe ir después de DATA.");
+                }
+                estadoActual = EstadoPrograma.CODE;
+            }
+
+            return parseDirectiva();
+        }
+
+        if (check(TokenType.VARIABLE)) {
+            if (estadoActual != EstadoPrograma.DATA && estadoActual != EstadoPrograma.STACK) {
+                lanzarError(actual(), "Declaración fuera de lugar: Las variables deben declararse en el segmento .data");
+            }
+            return parseDeclaracionVariable();
+        }
 
         Token t = consume();
         lanzarError(t, "Token inesperado al inicio de línea: '" + t.getValue() + "'");
