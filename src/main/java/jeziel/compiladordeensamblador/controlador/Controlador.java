@@ -1,21 +1,24 @@
 package jeziel.compiladordeensamblador.controlador;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Pagination;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import jeziel.compiladordeensamblador.modelo.Fila;
 import jeziel.compiladordeensamblador.modelo.LectorDeArchivos;
 import jeziel.compiladordeensamblador.modelo.LectorDeArchivosListener;
 import jeziel.compiladordeensamblador.modelo.lexer.Lexer;
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
+import jeziel.compiladordeensamblador.modelo.parser.Parser;
+import jeziel.compiladordeensamblador.modelo.parser.ResultadoParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,16 +32,12 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private ControladorTablaCodigos conTabCode;
 
     @FXML
-    private MenuItem seleccionarArchivo;
-    @FXML
-    private TextArea codigoArea;
-    @FXML
-    private Pagination numeracionPagina;
-    @FXML
-    private Pagination divisionPagina;
-    @FXML
-    private VBox contenedorTabla;
+    private TableView<Fila> tablaAnalisis;
 
+    private TableColumn<Fila, String> columnaInstruccion;
+    private TableColumn<Fila, String> columnaParser;
+    private ObservableList<Fila> datosTabla;
+    private List<Token> tokensActuales;
 
 
     @FXML
@@ -57,11 +56,26 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 return;
             }
             try {
-                codigoArea.clear();
-                la.setFile(selectedFile);
+                try {
+                    codigoArea.clear();
+                    la.setFile(selectedFile);
 
-                le = new Lexer(la.getLineas());
-                paginar(le.tokenize());
+                    le = new Lexer(la.getLineas());
+                    tokensActuales = le.tokenize();
+
+                    datosTabla.clear();
+
+                    columnaInstruccion.setVisible(false);
+                    columnaParser.setVisible(false);
+
+                    for (int i = 0; i < tokensActuales.size(); i++) {
+                        Token t = tokensActuales.get(i);
+                        String descripcion = (t.getType() == TokenType.CONSTANTE) ?
+                                "Constante (numérica " + String.valueOf(t.getSub()).toLowerCase() + ")" :
+                                descripciones.getOrDefault(t.getType(), "Elemento inválido");
+
+                        datosTabla.add(new FilaAnalisis(i + 1, t.getValue(), descripcion, "", ""));
+                    }
 
             } catch (IOException ex) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -135,7 +149,30 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         la = new LectorDeArchivos(this);
         codigoArea.setEditable(false);
-        contenedorTabla.setAlignment(javafx.geometry.Pos.CENTER);
+
+        datosTabla = FXCollections.observableArrayList();
+        tablaAnalisis.setItems(datosTabla);
+
+        TableColumn<Fila, Integer> columnaContador = new TableColumn<>("No.");
+        columnaContador.setCellValueFactory(new PropertyValueFactory<>("contador"));
+        columnaContador.setPrefWidth(40);
+
+        TableColumn<Fila, String> columnaLexema = new TableColumn<>("Lexema");
+        columnaLexema.setCellValueFactory(new PropertyValueFactory<>("lexema"));
+
+        TableColumn<Fila, String> columnaTipo = new TableColumn<>("Descripción");
+        columnaTipo.setCellValueFactory(new PropertyValueFactory<>("tipoToken"));
+
+        columnaInstruccion = new TableColumn<>("Línea de Código");
+        columnaInstruccion.setCellValueFactory(new PropertyValueFactory<>("instruccionOriginal"));
+        columnaInstruccion.setVisible(false); // OCULTA POR DEFECTO
+
+        columnaParser = new TableColumn<>("Estado (Parser)");
+        columnaParser.setCellValueFactory(new PropertyValueFactory<>("resultadoParser"));
+        columnaParser.setVisible(false); // OCULTA POR DEFECTO
+
+        tablaAnalisis.getColumns().addAll(columnaContador, columnaLexema, columnaTipo, columnaInstruccion, columnaParser);
+        tablaAnalisis.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         descripciones.put(TokenType.INSTRUCCION, "Instrucción");
         descripciones.put(TokenType.PSEUDOINSTRUCCION, "Pseudoinstrucción");
@@ -155,6 +192,35 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
     @FXML
     public void codificar(){
+
+            if (tokensActuales == null || tokensActuales.isEmpty()) {
+                return; // No hacer nada si no hay código cargado
+            }
+
+            Parser parser = new Parser(tokensActuales);
+            ResultadoParser resultado = parser.parsear();
+
+            for (int i = 0; i < tokensActuales.size(); i++) {
+                Token t = tokensActuales.get(i);
+                Fila fila = datosTabla.get(i);
+
+                fila.setInstruccionOriginal("Contexto del token: " + t.getValue());
+
+                String estado = "Sintaxis Correcta";
+                for (jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico error : resultado.getErrores()) {
+                    if (error.getToken() == t) {
+                        estado = "Error: " + error.getMensaje();
+                        break;
+                    }
+                }
+                fila.setResultadoParser(estado);
+            }
+
+            tablaAnalisis.refresh();
+
+            columnaInstruccion.setVisible(true);
+            columnaParser.setVisible(true);
+        }
         try{
             FXMLLoader codigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
             Parent nodoTabla = codigos.load();
