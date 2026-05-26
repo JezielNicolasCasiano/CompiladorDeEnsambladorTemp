@@ -1,10 +1,10 @@
 package jeziel.compiladordeensamblador.modelo.lexer;
 
 public class TokenSubtype {
-    enum Instruccion {
+    public enum Instruccion {
         CBW,CLC,LODSB,LODSW,STOSB,STOSW,DIV,IMUL,INC,NEG,ADD,LDS,MOV,ROR,JNS,JS,LOOPNE,JG,JMP,JNBE
     }
-    enum Directiva {
+    public enum Directiva {
         ORG,
         END,
         DB, DW,
@@ -27,7 +27,7 @@ public class TokenSubtype {
         //
         OFFSET
     }
-    enum Registro {
+    public enum Registro {
         // 16 bits
         AX, BX, CX, DX,
         SI, DI, BP, SP,
@@ -40,7 +40,7 @@ public class TokenSubtype {
         CS, DS, SS, ES
     }
 
-    enum Constante {
+    public enum Constante {
         DECIMAL,
         HEXADECIMAL,
         BINARIO

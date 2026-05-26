@@ -1,6 +1,6 @@
 package jeziel.compiladordeensamblador.modelo.semantico;
 
-import jeziel.compiladordeensamblador.modelo.parser.nodo.Nodo;
+import jeziel.compiladordeensamblador.modelo.parser.*;
 
 import java.util.HashMap;
 import java.util.List;
