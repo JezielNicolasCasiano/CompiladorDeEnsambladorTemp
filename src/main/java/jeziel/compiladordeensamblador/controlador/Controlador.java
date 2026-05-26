@@ -173,12 +173,18 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             fila.setInstruccionOriginal(t.getValue());
 
             String estado = "Sintaxis Correcta";
+
+            if (t.getType() == TokenType.DESCONOCIDO) {
+                estado = "Error Léxico: Elemento no reconocido";
+            }
+
             for (jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico error : resultado.getErrores()) {
                 if (error.getToken() == t) {
-                    estado = "Error: " + error.getMensaje();
+                    estado = "Error Sintáctico: " + error.getMensaje();
                     break;
                 }
             }
+
             fila.setResultadoParser(estado);
         }
 
@@ -190,6 +196,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             FXMLLoader codigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
             Parent nodoTabla = codigos.load();
             conTabCode = codigos.getController();
+            conTabCode.cargarSimbolos(semantico.getTablaSimbolos().obtenerTodos());
             contenedorTabla.getChildren().add(0, nodoTabla);
             contenedorTabla.setAlignment(javafx.geometry.Pos.CENTER);
             javafx.stage.Window ventana = contenedorTabla.getScene().getWindow();

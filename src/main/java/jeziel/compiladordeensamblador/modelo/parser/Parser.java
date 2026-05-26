@@ -61,12 +61,27 @@ public class Parser {
         return t;
     }
     //modificacion importante al metodo sincronizar, no se estaba activando arruinando el contador
-    private void sincronizar() {
+    private NodoAST parseLinea() {
+        if (actual() == null) return null;
 
+        if (check(TokenType.DESCONOCIDO)) {
+            lanzarError(actual(), "Token desconocido: '" + actual().getValue() + "'");
+        }
+
+        if (check(TokenType.ETIQUETA)) return parseEtiqueta();
+        if (check(TokenType.INSTRUCCION)) return parseInstruccion();
+        if (check(TokenType.PSEUDOINSTRUCCION)) return parseDirectiva();
+        if (check(TokenType.VARIABLE)) return parseDeclaracionVariable();
+
+        Token t = consume();
+        lanzarError(t, "Token inesperado al inicio de línea: '" + t.getValue() + "'");
+        return null;
+    }
+
+    private void sincronizar() {
         if (actual() != null) {
             consume();
         }
-
 
         while (actual() != null) {
             TokenType tipo = actual().getType();
@@ -76,7 +91,9 @@ public class Parser {
                     tipo == TokenType.VARIABLE) {
                 return;
             }
-            consume();
+
+            Token omitido = consume();
+            registrarError(new ErrorSintactico(omitido, "Token omitido por error de sintaxis previo"));
         }
     }
 
@@ -93,23 +110,7 @@ public class Parser {
         return new ResultadoParser(arbol, errores);
     }
 
-    private NodoAST parseLinea() {
-        if (actual() == null) return null;
 
-        if (check(TokenType.DESCONOCIDO)) {
-            Token t = consume();
-            lanzarError(t, "Token desconocido: '" + t.getValue() + "'");
-        }
-
-        if (check(TokenType.ETIQUETA)) return parseEtiqueta();
-        if (check(TokenType.INSTRUCCION)) return parseInstruccion();
-        if (check(TokenType.PSEUDOINSTRUCCION)) return parseDirectiva();
-        if (check(TokenType.VARIABLE)) return parseDeclaracionVariable();
-
-        Token t = consume();
-        lanzarError(t, "Token inesperado al inicio de línea: '" + t.getValue() + "'");
-        return null;
-    }
 
     private NodoAST parseDeclaracionVariable() {
         Token tokenVariable = consume(TokenType.VARIABLE);
