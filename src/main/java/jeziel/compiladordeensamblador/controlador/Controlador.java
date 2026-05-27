@@ -1,15 +1,15 @@
 package jeziel.compiladordeensamblador.controlador;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Pagination;
+import javafx.scene.control.TextArea;
 import javafx.stage.FileChooser;
-import jeziel.compiladordeensamblador.modelo.*;
+import javafx.stage.Window;
+import jeziel.compiladordeensamblador.modelo.LectorDeArchivos;
+import jeziel.compiladordeensamblador.modelo.LectorDeArchivosListener;
 import jeziel.compiladordeensamblador.modelo.lexer.Lexer;
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
@@ -24,24 +24,25 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private Lexer le;
     private final Map<TokenType, String> descripciones = new EnumMap<>(TokenType.class);
 
-    //Tabla del lexer
-    private TableView<Fila> tablaAnalisis;
-    private ObservableList<Fila> listaCompletaDatos;
-    private final int FILAS_POR_PAGINA = 25;
-    private List<Token> tokensActuales;
+    @FXML
+    private MenuItem seleccionarArchivo;
+    @FXML
+    private TextArea codigoArea;
+    @FXML
+    private Pagination numeracionPagina;
+    @FXML
+    private Pagination divisionPagina;
 
-    @FXML private MenuItem seleccionarArchivo;
-    @FXML private TextArea codigoArea;
-    @FXML private VBox contenedorTabla;
-    @FXML private Pagination paginacionTabla;
-    @FXML private BorderPane panelPrincipal;
+
+
 
     @FXML
-    public void SeleccionarUnArchivo() {
+    public void SeleccionarUnArchivo(){ //Metodo que instancia un fileChooser para seleccionar el archivo. Es onAction de SeleccionarArchivo
         FileChooser fileChooser = new FileChooser();
         File selectedFile = fileChooser.showOpenDialog(seleccionarArchivo.getParentPopup().getScene().getWindow());
 
-        if (selectedFile != null) {
+
+        if(selectedFile != null) {
             if (!selectedFile.getName().toLowerCase().endsWith(".asm")) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Archivo no válido");
@@ -50,26 +51,12 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 alert.showAndWait();
                 return;
             }
-
             try {
                 codigoArea.clear();
                 la.setFile(selectedFile);
 
                 le = new Lexer(la.getLineas());
-                tokensActuales = le.tokenize();
-
-                listaCompletaDatos.clear();
-
-                for (int i = 0; i < tokensActuales.size(); i++) {
-                    Token t = tokensActuales.get(i);
-                    String descripcion = (t.getType() == TokenType.CONSTANTE) ?
-                            "Constante (numérica " + String.valueOf(t.getSub()).toLowerCase() + ")" :
-                            descripciones.getOrDefault(t.getType(), "Elemento inválido");
-
-                    listaCompletaDatos.add(new Fila(i + 1, t.getValue(), descripcion));
-                }
-
-                actualizarPaginacion();
+                paginar(le.tokenize());
 
             } catch (IOException ex) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -80,6 +67,60 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             }
         }
     }
+
+    public void paginar(List<Token> tokens){
+        int numeroDePaginas = (int) Math.ceil((double) tokens.size() / 25);
+        divisionPagina.setPageCount(numeroDePaginas == 0 ? 1 : numeroDePaginas);
+        numeracionPagina.currentPageIndexProperty().unbindBidirectional(divisionPagina.currentPageIndexProperty());
+        numeracionPagina.currentPageIndexProperty().bindBidirectional(divisionPagina.currentPageIndexProperty());
+        divisionPagina.setPageFactory(pageIndex ->{
+            TextArea paginaTemporal = new TextArea();
+            paginaTemporal.setEditable(false);
+            paginaTemporal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 11pt;");
+            paginaTemporal.getStyleClass().add("area-paginacion");
+
+            int indiceInicio = pageIndex * 25;
+            int indiceFin = Math.min(indiceInicio + 25, tokens.size());
+
+            for (int i = indiceInicio; i < indiceFin; i++) {
+                String descripcion;
+                /*if (tokens.get(i).getType() == TokenType.ETIQUETA){
+                    String value = tokens.get(i).getValue();
+                    tokens.get(i).setValue(value + ":");
+                }*/
+
+                if (tokens.get(i).getType() == TokenType.CONSTANTE) {
+                    descripcion = "Constante (numérica " + String.valueOf(tokens.get(i).getSub()).toLowerCase() + ")";
+                } else {
+                    descripcion = descripciones.getOrDefault(tokens.get(i).getType(), "Elemento inválido");
+                }
+                /*if(tokens.get(i).getSub() != null){
+                    descripcion = tokens.get(i).getSub().name();
+                }else {
+                    descripcion = tokens.get(i).getType().name();
+                }*/
+                paginaTemporal.appendText(String.format("%-25s ; %s\n", tokens.get(i).getValue(), descripcion));
+            }
+            return paginaTemporal;
+        });
+        numeracionPagina.setPageFactory(pageIndex ->{
+            TextArea paginaTemporal = new TextArea();
+            paginaTemporal.setEditable(false);
+            paginaTemporal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 11pt;");
+            paginaTemporal.getStyleClass().add("area-paginacion");
+            int indiceInicio = pageIndex * 25;
+            int indiceFin = Math.min(indiceInicio + 25, tokens.size());
+
+            for (int i = indiceInicio; i < indiceFin; i++) {
+                paginaTemporal.appendText(String.valueOf(i));
+                paginaTemporal.appendText("\n");
+            }
+
+            return paginaTemporal;
+        });
+    }
+
+
 
     @Override
     public void rellenarCodigo() {
@@ -94,69 +135,19 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         la = new LectorDeArchivos(this);
         codigoArea.setEditable(false);
 
-        tablaAnalisis = new TableView<>();
-        listaCompletaDatos = FXCollections.observableArrayList();
-
-        TableColumn<Fila, Integer> columnaContador = new TableColumn<>("No.");
-        columnaContador.setCellValueFactory(new PropertyValueFactory<>("contador"));
-        columnaContador.setPrefWidth(40);
-
-        TableColumn<Fila, String> columnaLexema = new TableColumn<>("Identificación");
-        columnaLexema.setCellValueFactory(new PropertyValueFactory<>("lexema"));
-
-        TableColumn<Fila, String> columnaTipo = new TableColumn<>("Descripción");
-        columnaTipo.setCellValueFactory(new PropertyValueFactory<>("tipoToken"));
-
-        tablaAnalisis.getColumns().addAll(columnaContador, columnaLexema, columnaTipo);
-        tablaAnalisis.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
-
         descripciones.put(TokenType.INSTRUCCION, "Instrucción");
         descripciones.put(TokenType.PSEUDOINSTRUCCION, "Pseudoinstrucción");
         descripciones.put(TokenType.REGISTRO, "Registro");
         descripciones.put(TokenType.VARIABLE, "Símbolo");
         descripciones.put(TokenType.IDENTIFICADOR, "Símbolo");
-        descripciones.put(TokenType.ETIQUETA, "Etiqueta");
+        descripciones.put(TokenType.ETIQUETA, "Símbolo");
         descripciones.put(TokenType.SEPARADOR, "Símbolo");
         descripciones.put(TokenType.CORCHETE_ABRE, "Símbolo");
         descripciones.put(TokenType.CORCHETE_CIERRA, "Símbolo");
         descripciones.put(TokenType.PARENTESIS_ABRE, "Símbolo");
         descripciones.put(TokenType.PARENTESIS_CIERRA, "Símbolo");
         descripciones.put(TokenType.CARACTER, "Constante (caracter)");
-        descripciones.put(TokenType.CADENA, "Constante (cadena)");
         descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
-    }
 
-    @FXML
-    public void codificar() {
-        if (tokensActuales == null || tokensActuales.isEmpty()) {
-            return;
-        }
-
-        // TODO: El Lexer ya generó "tokensActuales".
-        // Aquí instanciarás el nuevo Parser más adelante.
-        System.out.println("Lexer ejecutado exitosamente. Se encontraron " + tokensActuales.size() + " tokens.");
-    }
-
-    private void actualizarPaginacion() {
-        if (listaCompletaDatos.isEmpty()) {
-            paginacionTabla.setPageCount(1);
-            tablaAnalisis.setItems(FXCollections.observableArrayList());
-            paginacionTabla.setPageFactory(pageIndex -> tablaAnalisis);
-            return;
-        }
-
-        int numeroDePaginas = (int) Math.ceil((double) listaCompletaDatos.size() / FILAS_POR_PAGINA);
-        paginacionTabla.setPageCount(numeroDePaginas);
-        paginacionTabla.setPageFactory(pageIndex -> {
-            int indiceInicio = pageIndex * FILAS_POR_PAGINA;
-            int indiceFin = Math.min(indiceInicio + FILAS_POR_PAGINA, listaCompletaDatos.size());
-
-            ObservableList<Fila> subLista = FXCollections.observableArrayList(
-                    listaCompletaDatos.subList(indiceInicio, indiceFin)
-            );
-            tablaAnalisis.setItems(subLista);
-
-            return tablaAnalisis;
-        });
     }
 }
