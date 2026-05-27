@@ -1,5 +1,4 @@
-package jeziel.compiladordeensamblador.modelo.parser;
-
+package compilador8086;
 
 public class ErrorSintacticoException extends RuntimeException {
 

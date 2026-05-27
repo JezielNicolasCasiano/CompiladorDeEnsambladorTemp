@@ -1,6 +1,4 @@
-package jeziel.compiladordeensamblador.modelo.parser;
-
-import jeziel.compiladordeensamblador.modelo.lexer.*;
+package compilador8086;
 
 import java.util.List;
 
@@ -14,7 +12,7 @@ public class ParserInstrucciones {
         TokenSubtype.Instruccion subtipo = (TokenSubtype.Instruccion) inst.getSub();
 
         if (subtipo == null) {
-            p.lanzarError(inst, "Instrucción no reconocida: '" + inst.getValue() + "'");
+            errores.add(new ErrorSintactico(inst, "Instrucción no reconocida: '" + inst.getValue() + "'"));
             return nodo;
         }
 
@@ -62,9 +60,13 @@ public class ParserInstrucciones {
                 nodo.agregarHijo(p.parseOperando());
                 break;
 
+            // INT: constante
+            case INT:
+                nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, p.consumir(TokenType.CONSTANTE)));
+                break;
 
             default:
-                p.lanzarError(inst, "Instrucción sin regla definida: '" + inst.getValue() + "'");
+                errores.add(new ErrorSintactico(inst, "Instrucción sin regla definida: '" + inst.getValue() + "'"));
         }
 
         return nodo;

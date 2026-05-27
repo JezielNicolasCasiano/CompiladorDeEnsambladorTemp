@@ -1,6 +1,4 @@
-package jeziel.compiladordeensamblador.modelo.parser;
-
-import jeziel.compiladordeensamblador.modelo.lexer.*;
+package compilador8086;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +15,7 @@ public class NodoAST {
         OPERANDO_VARIABLE,
         OPERANDO_MEMORIA,
         OPERANDO_CARACTER,
-        OPERANDO_CADENA,
-        OPERANDO_DUP
+        OPERANDO_CADENA
     }
 
     private final Tipo tipo;

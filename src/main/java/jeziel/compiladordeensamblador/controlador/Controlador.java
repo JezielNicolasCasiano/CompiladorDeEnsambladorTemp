@@ -15,9 +15,6 @@ import jeziel.compiladordeensamblador.modelo.*;
 import jeziel.compiladordeensamblador.modelo.lexer.Lexer;
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
-import jeziel.compiladordeensamblador.modelo.parser.Parser;
-import jeziel.compiladordeensamblador.modelo.parser.ResultadoParser;
-import jeziel.compiladordeensamblador.modelo.semantico.AnalizadorSemantico;
 
 import java.io.File;
 import java.io.IOException;

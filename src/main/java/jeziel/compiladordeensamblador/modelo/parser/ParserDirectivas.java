@@ -1,6 +1,4 @@
-package jeziel.compiladordeensamblador.modelo.parser;
-
-import jeziel.compiladordeensamblador.modelo.lexer.*;
+package compilador8086;
 
 import java.util.List;
 
@@ -17,28 +15,32 @@ public class ParserDirectivas {
         try {
             subtipo = TokenSubtype.Directiva.valueOf(val);
         } catch (IllegalArgumentException e) {
-            p.lanzarError(dir, "Pseudoinstruccion no reconocida: '" + dir.getValue() + "'");
+            errores.add(new ErrorSintactico(dir, "Directiva no reconocida: '" + dir.getValue() + "'"));
             return nodo;
         }
 
         switch (subtipo) {
+            // DB / DW — variable: valor o lista de valores
             case DB:
             case DW:
                 nodo.agregarHijo(p.parseOperando());
                 while (p.estipo(TokenType.SEPARADOR)) {
-                    p.consumir(TokenType.SEPARADOR);
+                    p.consumir();
                     nodo.agregarHijo(p.parseOperando());
                 }
                 break;
 
+            // EQU
             case EQU:
                 nodo.agregarHijo(p.parseOperando());
                 break;
 
+            // ORG
             case ORG:
                 nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, p.consumir(TokenType.CONSTANTE)));
                 break;
 
+            // SEGMENT 
             case SEGMENT:
             case ENDS:
             case PROC:
@@ -54,7 +56,14 @@ public class ParserDirectivas {
                 }
                 break;
 
-            default:
+            // DUP 
+            case DUP:
+                p.consumir(TokenType.PARENTESIS_ABRE);
+                nodo.agregarHijo(p.parseOperando());
+                p.consumir(TokenType.PARENTESIS_CIERRA);
+                break;
+
+                default:
                 break;
         }
 

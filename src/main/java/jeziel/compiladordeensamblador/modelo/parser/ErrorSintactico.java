@@ -1,6 +1,4 @@
-package jeziel.compiladordeensamblador.modelo.parser;
-
-import jeziel.compiladordeensamblador.modelo.lexer.Token;
+package compilador8086;
 
 public class ErrorSintactico {
 
