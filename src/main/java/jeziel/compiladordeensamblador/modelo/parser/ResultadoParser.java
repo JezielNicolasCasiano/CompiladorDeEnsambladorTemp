@@ -1,4 +1,4 @@
-package compilador8086;
+package jeziel.compiladordeensamblador.modelo.parser;
 
 import java.util.List;
 

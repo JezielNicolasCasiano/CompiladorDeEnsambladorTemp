@@ -25,13 +25,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private LectorDeArchivos la;
     private Lexer le;
     private final Map<TokenType, String> descripciones = new EnumMap<>(TokenType.class);
-    private ControladorTablaCodigos conTabCode;
-    private ControladorTablaMaquina conTabMaquina;
-    private TableView<Fila> tablaAnalisis;
-    private ObservableList<Fila> listaCompletaDatos;
     private final int FILAS_POR_PAGINA = 25;
-    private TableColumn<Fila, String> columnaInstruccion;
-    private TableColumn<Fila, String> columnaParser;
     private List<Token> tokensActuales;
 
     @FXML
@@ -68,7 +62,6 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 le = new Lexer(la.getLineas());
                 tokensActuales = le.tokenize();
 
-                listaCompletaDatos.clear();
 
                 for (int i = 0; i < tokensActuales.size(); i++) {
                     Token t = tokensActuales.get(i);
@@ -76,7 +69,6 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                             "Constante (numérica " + String.valueOf(t.getSub()).toLowerCase() + ")" :
                             descripciones.getOrDefault(t.getType(), "Elemento inválido");
 
-                    listaCompletaDatos.add(new Fila(i + 1, t.getValue(), descripcion));
                 }
 
                 actualizarPaginacion();
@@ -108,21 +100,6 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         la = new LectorDeArchivos(this);
         codigoArea.setEditable(false);
 
-        tablaAnalisis = new TableView<>();
-        listaCompletaDatos = FXCollections.observableArrayList();
-
-        TableColumn<Fila, Integer> columnaContador = new TableColumn<>("No.");
-        columnaContador.setCellValueFactory(new PropertyValueFactory<>("contador"));
-        columnaContador.setPrefWidth(40);
-
-        TableColumn<Fila, String> columnaLexema = new TableColumn<>("Identificación");
-        columnaLexema.setCellValueFactory(new PropertyValueFactory<>("lexema"));
-
-        TableColumn<Fila, String> columnaTipo = new TableColumn<>("Descripción");
-        columnaTipo.setCellValueFactory(new PropertyValueFactory<>("tipoToken"));
-
-        tablaAnalisis.getColumns().addAll(columnaContador, columnaLexema, columnaTipo);
-        tablaAnalisis.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
 
         descripciones.put(TokenType.INSTRUCCION, "Instrucción");
         descripciones.put(TokenType.PSEUDOINSTRUCCION, "Pseudoinstrucción");
@@ -145,28 +122,11 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             return;
         }
 
-        Parser parser = new Parser(tokensActuales);
-        ResultadoParser resultado = parser.parsear();
-        AnalizadorSemantico semantico = new AnalizadorSemantico();
-        semantico.analizar(resultado.getArbol());
 
-        List<jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico> todosLosErrores = new ArrayList<>();
-
-        for (Token t : tokensActuales) {
-            if (t.getType() == TokenType.DESCONOCIDO) {
-                todosLosErrores.add(new jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico(t, "Error Léxico: Elemento no reconocido"));
-            }
-        }
-        todosLosErrores.addAll(resultado.getErrores());
-        todosLosErrores.addAll(semantico.getErrores());
-
-        tablaAnalisis.refresh();
 
         try {
             FXMLLoader codigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
             Parent nodoTabla = codigos.load();
-            conTabCode = codigos.getController();
-            conTabCode.cargarSimbolos(semantico.getTablaSimbolos().obtenerTodos());
 
             if (contenedorTabla.getChildren().size() > 1) {
                 contenedorTabla.getChildren().remove(0);
@@ -177,47 +137,11 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             throw new RuntimeException(e);
         }
 
-        try {
-            if (conTabMaquina == null) {
-                FXMLLoader loaderMaquina = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-maquina.fxml"));
-                Parent nodoTablaMaquina = loaderMaquina.load();
-                conTabMaquina = loaderMaquina.getController();
-                panelPrincipal.setRight(nodoTablaMaquina);
-            }
-
-            GeneradorDeCodigo generador = new GeneradorDeCodigo(semantico.getTablaSimbolos());
-
-            List<FilaMaquina> codigoGenerado = generador.generar(la.getLineas(), resultado.getArbol(), todosLosErrores);
-
-            conTabMaquina.cargarDatosMaquina(codigoGenerado);
-
-        } catch (IOException e) {
-            System.err.println("Error cargando la tabla: " + e.getMessage());
-        }
     }
 
 
     private void actualizarPaginacion() {
-        if (listaCompletaDatos.isEmpty()) {
-            paginacionTabla.setPageCount(1);
-            tablaAnalisis.setItems(FXCollections.observableArrayList());
-            paginacionTabla.setPageFactory(pageIndex -> tablaAnalisis);
-            return;
-        }
 
-        int numeroDePaginas = (int) Math.ceil((double) listaCompletaDatos.size() / FILAS_POR_PAGINA);
-        paginacionTabla.setPageCount(numeroDePaginas);
-        paginacionTabla.setPageFactory(pageIndex -> {
-            int indiceInicio = pageIndex * FILAS_POR_PAGINA;
-            int indiceFin = Math.min(indiceInicio + FILAS_POR_PAGINA, listaCompletaDatos.size());
-
-            ObservableList<Fila> subLista = FXCollections.observableArrayList(
-                    listaCompletaDatos.subList(indiceInicio, indiceFin)
-            );
-            tablaAnalisis.setItems(subLista);
-
-            return tablaAnalisis;
-        });
     }
 
 }

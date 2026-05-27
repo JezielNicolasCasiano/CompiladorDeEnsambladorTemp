@@ -1,6 +1,7 @@
-package compilador8086;
+package jeziel.compiladordeensamblador.modelo.parser;
 
 import java.util.List;
+import jeziel.compiladordeensamblador.modelo.lexer.*;
 
 public class ParserOperandos {
 

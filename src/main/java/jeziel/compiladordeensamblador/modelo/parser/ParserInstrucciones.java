@@ -1,6 +1,7 @@
-package compilador8086;
+package jeziel.compiladordeensamblador.modelo.parser;
 
 import java.util.List;
+import jeziel.compiladordeensamblador.modelo.lexer.*;
 
 public class ParserInstrucciones {
 
@@ -37,7 +38,7 @@ public class ParserInstrucciones {
             // sin operandos
             case CBW:
             case CLC:
-	    case LODSB:
+	        case LODSB:
             case LODSW:
             case STOSB:
             case STOSW:
@@ -61,9 +62,9 @@ public class ParserInstrucciones {
                 break;
 
             // INT: constante
-            case INT:
+            /*case INT:
                 nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, p.consumir(TokenType.CONSTANTE)));
-                break;
+                break;*/
 
             default:
                 errores.add(new ErrorSintactico(inst, "Instrucción sin regla definida: '" + inst.getValue() + "'"));
