@@ -1,13 +1,13 @@
 package jeziel.compiladordeensamblador.controlador;
 
-import javafx.scene.control.Alert;
+import javafx.collections.FXCollections;
+import javafx.scene.control.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Pagination;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import jeziel.compiladordeensamblador.modelo.FilaLexer;
 import jeziel.compiladordeensamblador.modelo.LectorDeArchivos;
 import jeziel.compiladordeensamblador.modelo.LectorDeArchivosListener;
 import jeziel.compiladordeensamblador.modelo.lexer.Lexer;
@@ -23,6 +23,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private LectorDeArchivos la;
     private Lexer le;
     private final Map<TokenType, String> descripciones = new EnumMap<>(TokenType.class);
+    private List<FilaLexer> listaFilas;
 
     @FXML
     private MenuItem seleccionarArchivo;
@@ -30,10 +31,9 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private TextArea codigoArea;
     @FXML
     private Pagination numeracionPagina;
-    @FXML
-    private Pagination divisionPagina;
 
 
+    TableView<FilaLexer> tablaLexer;
 
 
     @FXML
@@ -69,55 +69,20 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     }
 
     public void paginar(List<Token> tokens){
-        int numeroDePaginas = (int) Math.ceil((double) tokens.size() / 25);
-        divisionPagina.setPageCount(numeroDePaginas == 0 ? 1 : numeroDePaginas);
-        numeracionPagina.currentPageIndexProperty().unbindBidirectional(divisionPagina.currentPageIndexProperty());
-        numeracionPagina.currentPageIndexProperty().bindBidirectional(divisionPagina.currentPageIndexProperty());
-        divisionPagina.setPageFactory(pageIndex ->{
-            TextArea paginaTemporal = new TextArea();
-            paginaTemporal.setEditable(false);
-            paginaTemporal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 11pt;");
-            paginaTemporal.getStyleClass().add("area-paginacion");
-
-            int indiceInicio = pageIndex * 25;
-            int indiceFin = Math.min(indiceInicio + 25, tokens.size());
-
-            for (int i = indiceInicio; i < indiceFin; i++) {
-                String descripcion;
-                /*if (tokens.get(i).getType() == TokenType.ETIQUETA){
-                    String value = tokens.get(i).getValue();
-                    tokens.get(i).setValue(value + ":");
-                }*/
-
-                if (tokens.get(i).getType() == TokenType.CONSTANTE) {
-                    descripcion = "Constante (numérica " + String.valueOf(tokens.get(i).getSub()).toLowerCase() + ")";
-                } else {
-                    descripcion = descripciones.getOrDefault(tokens.get(i).getType(), "Elemento inválido");
-                }
-                /*if(tokens.get(i).getSub() != null){
-                    descripcion = tokens.get(i).getSub().name();
-                }else {
-                    descripcion = tokens.get(i).getType().name();
-                }*/
-                paginaTemporal.appendText(String.format("%-25s ; %s\n", tokens.get(i).getValue(), descripcion));
-            }
-            return paginaTemporal;
-        });
+        listaFilas = new ArrayList<>();
+        for(int i = 0; i < tokens.size(); i++){
+            listaFilas.add(FilaLexer.crearDesdeToken(i,tokens.get(i),descripciones));
+        }
+        int numeroDePaginas = (int) Math.ceil((double) tokens.size() / 20);
+        numeracionPagina.setPageCount(numeroDePaginas == 0 ? 1 : numeroDePaginas);
         numeracionPagina.setPageFactory(pageIndex ->{
-            TextArea paginaTemporal = new TextArea();
-            paginaTemporal.setEditable(false);
-            paginaTemporal.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 11pt;");
-            paginaTemporal.getStyleClass().add("area-paginacion");
-            int indiceInicio = pageIndex * 25;
-            int indiceFin = Math.min(indiceInicio + 25, tokens.size());
-
-            for (int i = indiceInicio; i < indiceFin; i++) {
-                paginaTemporal.appendText(String.valueOf(i));
-                paginaTemporal.appendText("\n");
-            }
-
-            return paginaTemporal;
+            int indiceInicio = pageIndex * 20;
+            int indiceFin = Math.min(indiceInicio + 20, listaFilas.size());
+            List<FilaLexer> subLista = listaFilas.subList(indiceInicio, indiceFin);
+            tablaLexer.setItems(FXCollections.observableArrayList(subLista));
+            return tablaLexer;
         });
+
     }
 
 
@@ -148,6 +113,32 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         descripciones.put(TokenType.PARENTESIS_CIERRA, "Símbolo");
         descripciones.put(TokenType.CARACTER, "Constante (caracter)");
         descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
+        inicializarTablaLexer();
+    }
+
+    @FXML public void codificar(){
 
     }
+
+    private void inicializarTablaLexer() {
+        tablaLexer = new TableView<>();
+
+        tablaLexer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        TableColumn<FilaLexer, Integer> colContador = new TableColumn<>("Numero");
+        colContador.setCellValueFactory(new PropertyValueFactory<>("numero"));
+        colContador.setPrefWidth(50);
+
+
+        TableColumn<FilaLexer, String> colToken = new TableColumn<>("Separación");
+        colToken.setCellValueFactory(new PropertyValueFactory<>("separacion"));
+        colToken.setPrefWidth(150);
+
+        TableColumn<FilaLexer, String> colDesc = new TableColumn<>("Identificación");
+        colDesc.setCellValueFactory(new PropertyValueFactory<>("token"));
+        colDesc.setPrefWidth(250);
+
+        tablaLexer.getColumns().addAll(colContador, colToken, colDesc);
+
+    }
+
 }

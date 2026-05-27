@@ -12,5 +12,4 @@ module jeziel.compiladordeensamblador {
     exports jeziel.compiladordeensamblador.modelo;
     opens jeziel.compiladordeensamblador.modelo to javafx.fxml, javafx.base;
 
-    opens jeziel.compiladordeensamblador.modelo.semantico to javafx.base;
 }
