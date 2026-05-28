@@ -158,10 +158,11 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 resultado = resultadoParser.getErrores().get(contadorErroresSintacticos).getMensaje();
                 contadorErroresSintacticos++;
             }
-
-            if (resultadoSemantico.getErrores().get(contadorErroresSemanticos).getPosicionArbolAST() == i){
-                resultado = resultadoSemantico.getErrores().get(i).getMensaje();
-                contadorErroresSemanticos++;
+            if (!resultadoSemantico.getErrores().isEmpty()){
+                if (resultadoSemantico.getErrores().get(contadorErroresSemanticos).getPosicionArbolAST() == i){
+                    resultado = resultadoSemantico.getErrores().get(contadorErroresSemanticos).getMensaje();
+                    contadorErroresSemanticos++;
+                }
             }
             linea = renglones.get(i);
             todasLasFilasMaquina.add(new FilaMaquina(i,linea,codigoMaquina,resultado));

@@ -2,34 +2,45 @@ package jeziel.compiladordeensamblador.controlador;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import jeziel.compiladordeensamblador.modelo.FilaLexer;
 import jeziel.compiladordeensamblador.modelo.FilaMaquina;
 import java.util.List;
 
 public class ControladorTablaMaquina {
-
+    private TableView<FilaMaquina> tablaAnalizador;
     @FXML
-    private TableView<FilaMaquina> tablaMaquina; // Cambia FilaMaquina por tu clase modelo
-    @FXML
-    private TableColumn<FilaMaquina, Integer> columnaContador;
-    @FXML
-    private TableColumn<FilaMaquina, String> columnaLinea;
-    @FXML
-    private TableColumn<FilaMaquina, String> columnaCodificacion;
-    @FXML
-    private TableColumn<FilaMaquina, String> columnaError;
+    private Pagination paginacionTablaMaquina;
 
     @FXML
     public void initialize() {
-        columnaContador.setCellValueFactory(new PropertyValueFactory<>("contador"));
-        columnaLinea.setCellValueFactory(new PropertyValueFactory<>("linea"));
-        columnaCodificacion.setCellValueFactory(new PropertyValueFactory<>("codigoMaquina"));
-        columnaError.setCellValueFactory(new PropertyValueFactory<>("resultado"));
+        tablaAnalizador = new TableView<>();
+
+        tablaAnalizador.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        TableColumn<FilaMaquina, Integer> colContador = new TableColumn<>("Contador");
+        colContador.setCellValueFactory(new PropertyValueFactory<>("contador"));
+        colContador.setPrefWidth(50);
+
+
+        TableColumn<FilaMaquina, String> colLinea = new TableColumn<>("Linea");
+        colLinea.setCellValueFactory(new PropertyValueFactory<>("linea"));
+        colLinea.setPrefWidth(150);
+
+        TableColumn<FilaMaquina, String> colCodigoMaquina = new TableColumn<>("Codigo Maquina");
+        colCodigoMaquina.setCellValueFactory(new PropertyValueFactory<>("codigoMaquina"));
+        colCodigoMaquina.setPrefWidth(250);
+
+        TableColumn<FilaMaquina, String> colResultado = new TableColumn<>("Resultado");
+        colResultado.setCellValueFactory(new PropertyValueFactory<>("resultado"));
+        colResultado.setPrefWidth(250);
+
+        tablaAnalizador.getColumns().addAll(colContador, colLinea, colCodigoMaquina, colResultado);
     }
 
     public void actualizarDatosPagina(List<FilaMaquina> listaSubSeccion) {
-        tablaMaquina.setItems(FXCollections.observableArrayList(listaSubSeccion));
+        tablaAnalizador.setItems(FXCollections.observableArrayList(listaSubSeccion));
     }
 }
