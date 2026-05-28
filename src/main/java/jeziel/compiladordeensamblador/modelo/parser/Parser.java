@@ -14,7 +14,7 @@ public class Parser {
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
         this.pos = 0;
-        this.errores = new ArrayList<>();
+            this.errores = new ArrayList<>();
         this.arbol = new ArrayList<>();
     }
 
@@ -76,6 +76,8 @@ public class Parser {
                 if (nodo != null) arbol.add(nodo);
             } catch (ErrorSintacticoException e) {
                 errores.add(e.getError());
+                //Modificacion, en vez de no guardar nada y saltarlo guarda el error sintactico para saber la posicion
+                arbol.add(new NodoAST(NodoAST.Tipo.ERROR_SINTACTICO,e.getError().getToken()));
                 sincronizar();
             }
         }
@@ -88,7 +90,8 @@ public class Parser {
         if (check(TokenType.DESCONOCIDO)) {
             Token t = consume();
             errores.add(new ErrorSintactico(t, "Token desconocido: '" + t.getValue() + "'"));
-            return null;
+            //En vez de mandar null manda el nuevo tipo de error
+            return new NodoAST(NodoAST.Tipo.ERROR_LEXICO,t);
         }
 
         if (check(TokenType.ETIQUETA)) {
