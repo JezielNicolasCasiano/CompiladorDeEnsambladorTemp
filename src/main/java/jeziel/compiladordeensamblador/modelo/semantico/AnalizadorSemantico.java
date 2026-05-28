@@ -43,8 +43,9 @@ public class AnalizadorSemantico {
     }
     public void buscarSimbolo(NodoAST nodo){
         if(nodo == null) return;
-        Token tokenVarible = nodo.getHijos().get(nodo.getHijos().size()-1).getToken();
-        if(nodo.getTipo() == NodoAST.Tipo.DIRECTIVA && tokenVarible.getType() == TokenType.VARIABLE){
+
+        if(nodo.getTipo() == NodoAST.Tipo.DIRECTIVA && nodo.getHijos().get(nodo.getHijos().size()-1).getToken().getType() == TokenType.VARIABLE){
+            Token tokenVarible = nodo.getHijos().get(nodo.getHijos().size()-1).getToken();
             int tamanoSimbolo = 0;
             if (nodo.getHijos().get(0).getToken().getSub() == TokenSubtype.Directiva.DB){
                 tamanoSimbolo = 8;
