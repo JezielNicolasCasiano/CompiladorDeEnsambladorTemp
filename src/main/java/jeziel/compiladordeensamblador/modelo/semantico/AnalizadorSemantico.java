@@ -40,10 +40,10 @@ public class AnalizadorSemantico {
         if(nodo == null) return;
         switch (nodo.getTipo()) {
             case INSTRUCCION:
-                ValidadorInstrucciones.validar(nodo, contextoSemantico);
+                ValidadorInstrucciones.validar(nodo, contextoSemantico,arbolSintactico);
                 break;
             case DIRECTIVA:
-                ValidadorDirectivas.validar(nodo, contextoSemantico);
+                ValidadorDirectivas.validar(nodo, contextoSemantico, arbolSintactico);
                 break;
             default:
                 break;
@@ -59,6 +59,9 @@ public class AnalizadorSemantico {
                 tamanoSimbolo = 1;
             } else if (nodo.getHijos().get(0).getToken().getSub() == TokenSubtype.Directiva.DW) {
                 tamanoSimbolo = 2;
+            } else if (contextoSemantico.getTablaSimbolos().containsKey(nodo.getHijos().get(nodo.getHijos().size()-1).getToken().getValue())) {
+                contextoSemantico.registrarError(new ErrorSemantico(nodo.getToken(), "El identificador ya existe: '" + nodo.getHijos().get(nodo.getHijos().size()-1).getToken().getValue() + "'", arbolSintactico.indexOf(nodo)));
+                return;
             }
             int tamanoTotal = (nodo.getHijos().size()-1) * tamanoSimbolo;
             contextoSemantico.getTablaSimbolos().put(tokenVarible.getValue(),new Simbolo(tokenVarible.getValue(), Simbolo.TipoSext.VARIABLE,tamanoTotal,0));

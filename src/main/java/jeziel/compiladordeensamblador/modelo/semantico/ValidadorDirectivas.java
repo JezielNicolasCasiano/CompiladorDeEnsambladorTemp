@@ -7,13 +7,8 @@ import jeziel.compiladordeensamblador.modelo.parser.NodoAST;
 import java.util.List;
 
 public class ValidadorDirectivas {
-    private static List<NodoAST> arbolParser;
 
-    public ValidadorDirectivas(List<NodoAST> arbolParser){
-        this.arbolParser = arbolParser;
-    }
-
-    public static void validar(NodoAST nodoDirectiva, ContextoSemantico contexto) {
+    public static void validar(NodoAST nodoDirectiva, ContextoSemantico contexto, List<NodoAST> arbolParser) {
         if (nodoDirectiva.getToken() == null || nodoDirectiva.getToken().getSub() == null) return;
 
         TokenSubtype.Directiva directiva = (TokenSubtype.Directiva) nodoDirectiva.getToken().getSub();
@@ -21,10 +16,10 @@ public class ValidadorDirectivas {
         switch (directiva) {
             case DB:
             case DW:
-                validarLimitesDatos(nodoDirectiva, contexto, directiva);
+                validarLimitesDatos(nodoDirectiva, contexto, directiva, arbolParser);
                 break;
             case EQU:
-                validarEqu(nodoDirectiva, contexto);
+                validarEqu(nodoDirectiva, contexto,arbolParser);
                 break;
             case ORG:
             case SEGMENT:
@@ -44,7 +39,7 @@ public class ValidadorDirectivas {
         }
     }
 
-    private static void validarLimitesDatos(NodoAST nodo, ContextoSemantico contexto, TokenSubtype.Directiva tipo) {
+    private static void validarLimitesDatos(NodoAST nodo, ContextoSemantico contexto, TokenSubtype.Directiva tipo, List<NodoAST> arbolParser) {
         // Recorremos todos los hijos. Recordar que el último puede ser la variable en sí.
         for (int i = 0; i < nodo.getHijos().size(); i++) {
             NodoAST hijo = nodo.getHijos().get(i);
@@ -88,7 +83,7 @@ public class ValidadorDirectivas {
         }
     }
 
-    private static void validarEqu(NodoAST nodo, ContextoSemantico contexto) {
+    private static void validarEqu(NodoAST nodo, ContextoSemantico contexto, List<NodoAST> arbolParser) {
         if (nodo.getHijos().isEmpty()) {
             contexto.registrarError(new ErrorSemantico(nodo.getToken(), "EQU requiere un operando de valor.", arbolParser.indexOf(nodo)));
             return;

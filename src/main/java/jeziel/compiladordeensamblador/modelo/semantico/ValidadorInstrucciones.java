@@ -6,26 +6,21 @@ import jeziel.compiladordeensamblador.modelo.parser.NodoAST;
 import java.util.List;
 
 public class ValidadorInstrucciones {
-    private static List<NodoAST> arbolParser;
 
-    public ValidadorInstrucciones(List<NodoAST> arbolParser){
-        this.arbolParser = arbolParser;
-    }
-
-    public static void validar(NodoAST nodoInstruccion, ContextoSemantico contexto) {
+    public static void validar(NodoAST nodoInstruccion, ContextoSemantico contexto, List<NodoAST> arbolParser) {
         TokenSubtype.Instruccion instruccion = (TokenSubtype.Instruccion) nodoInstruccion.getToken().getSub();
 
         switch (instruccion) {
             case MOV:
             case ADD:
             case LDS:
-                validarDosOperandos(nodoInstruccion, contexto, instruccion);
+                validarDosOperandos(nodoInstruccion, contexto, instruccion,  arbolParser);
                 break;
             case INC:
             case NEG:
             case DIV:
             case IMUL:
-                validarUnOperando(nodoInstruccion, contexto, instruccion);
+                validarUnOperando(nodoInstruccion, contexto, instruccion, arbolParser);
                 break;
             case JMP:
             case JNS:
@@ -33,10 +28,10 @@ public class ValidadorInstrucciones {
             case JG:
             case JNBE:
             case LOOPNE:
-                validarSaltos(nodoInstruccion, contexto);
+                validarSaltos(nodoInstruccion, contexto,arbolParser);
                 break;
             case ROR:
-                validarRor(nodoInstruccion, contexto);
+                validarRor(nodoInstruccion, contexto, arbolParser);
                 break;
             case CBW:
             case CLC:
@@ -48,7 +43,7 @@ public class ValidadorInstrucciones {
         }
     }
 
-    private static void validarDosOperandos(NodoAST nodo, ContextoSemantico contexto, TokenSubtype.Instruccion inst) {
+    private static void validarDosOperandos(NodoAST nodo, ContextoSemantico contexto, TokenSubtype.Instruccion inst, List<NodoAST> arbolParser) {
         if (nodo.getHijos().size() < 2) return;
 
         NodoAST destino = nodo.getHijos().get(0);
@@ -84,7 +79,7 @@ public class ValidadorInstrucciones {
         }
     }
 
-    private static void validarUnOperando(NodoAST nodo, ContextoSemantico contexto, TokenSubtype.Instruccion inst) {
+    private static void validarUnOperando(NodoAST nodo, ContextoSemantico contexto, TokenSubtype.Instruccion inst,  List<NodoAST> arbolParser) {
         if (nodo.getHijos().isEmpty()) return;
 
         NodoAST destino = nodo.getHijos().get(0);
@@ -94,7 +89,7 @@ public class ValidadorInstrucciones {
         }
     }
 
-    private static void validarSaltos(NodoAST nodo, ContextoSemantico contexto) {
+    private static void validarSaltos(NodoAST nodo, ContextoSemantico contexto,  List<NodoAST> arbolParser) {
         if (nodo.getHijos().isEmpty()) return;
 
         NodoAST destino = nodo.getHijos().get(0);
@@ -108,7 +103,7 @@ public class ValidadorInstrucciones {
         }
     }
 
-    private static void validarRor(NodoAST nodo, ContextoSemantico contexto) {
+    private static void validarRor(NodoAST nodo, ContextoSemantico contexto,  List<NodoAST> arbolParser) {
         if (nodo.getHijos().size() < 2) return;
 
         NodoAST destino = nodo.getHijos().get(0);
