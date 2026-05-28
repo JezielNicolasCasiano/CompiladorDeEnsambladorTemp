@@ -16,7 +16,7 @@ public class ParserDirectivas {
         try {
             subtipo = TokenSubtype.Directiva.valueOf(val);
         } catch (IllegalArgumentException e) {
-            errores.add(new ErrorSintactico(dir, "Directiva no reconocida: '" + dir.getValue() + "'"));
+            errores.add(new ErrorSintactico(dir, "Pseudoinstruccion no reconocida: '" + dir.getValue() + "'"));
             return nodo;
         }
 

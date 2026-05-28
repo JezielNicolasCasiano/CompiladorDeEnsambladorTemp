@@ -102,8 +102,8 @@ public class Parser {
             return parseInstruccion();
         }
 
-        if (check(TokenType.PSEUDOINSTRUCCION)) {
-            return parseDirectiva();
+        if (check(TokenType.PSEUDOINSTRUCCION) || check(TokenType.VARIABLE)) {
+            return parseDirectivaConVariable();
         }
 
         Token t = consume();
@@ -131,6 +131,20 @@ public class Parser {
 
     private NodoAST parseDirectiva() {
         return ParserDirectivas.parse(this, errores);
+    }
+
+    private NodoAST parseDirectivaConVariable() {
+        Token tokenVariable = null;
+
+        if (check(TokenType.VARIABLE)) {
+            tokenVariable = consume(TokenType.VARIABLE);
+        }
+        NodoAST nodoDirectiva = parseDirectiva();
+        if (tokenVariable != null && nodoDirectiva != null) {
+            nodoDirectiva.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, tokenVariable));
+        }
+
+        return nodoDirectiva;
     }
 
     NodoAST parseOperando() {

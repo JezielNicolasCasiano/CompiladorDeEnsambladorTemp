@@ -1,5 +1,7 @@
 package jeziel.compiladordeensamblador.modelo.semantico;
 
+import jeziel.compiladordeensamblador.modelo.lexer.Token;
+import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
 import jeziel.compiladordeensamblador.modelo.parser.NodoAST;
 import jeziel.compiladordeensamblador.modelo.parser.ResultadoParser;
 
@@ -53,7 +55,7 @@ public class AnalizadorSemantico {
 
     }
     public void buscarSimbolo(NodoAST nodo){
-        if(nodo.getTipo() = NodoAST.Tipo.){
+        if(nodo.getTipo() == NodoAST.Tipo.DIRECTIVA && nodo.getHijos().get(1).getToken() == ){
 
 
         }
