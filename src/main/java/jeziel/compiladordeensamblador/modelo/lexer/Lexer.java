@@ -46,9 +46,9 @@ public class Lexer {
         String[] tokenPatterns = {
                 ";[^\r\n]*",
                 "[a-zA-Z][a-zA-Z0-9_]{0,9}:",
-                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT|OFFSET)\\b",
+                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT|)\\b",
                 "(?i)\\b(DUP\\([^)]*\\))",
-                "(?i)(BYTE PTR|WORD PTR|ORG|END|DB|DW|EQU|ENDS|MACRO|ENDM|PROC|ENDP)\\b",
+                "(?i)(BYTE PTR|WORD PTR|ORG|END|DB|DW|EQU|ENDS|MACRO|ENDM|PROC|ENDP|OFFSET)\\b",
                 "(?i)(.STACK|.CODE|.DATA)\\s+SEGMENT",
                 "(?i)(.STACK|.DATA|.CODE|.MODEL|.STARTUP|.EXIT)\\b",
                 "\\[[^\\]]*\\]",

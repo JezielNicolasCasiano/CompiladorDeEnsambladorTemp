@@ -26,6 +26,18 @@ public class ParserOperandos {
         if (p.estipo(TokenType.CORCHETE_ABRE)) {
             return parseMemoria(p, errores);
         }
+        if (p.estipo(TokenType.PSEUDOINSTRUCCION) && p.esSubtipo(TokenSubtype.Directiva.OFFSET)) {
+            Token tokenOffset = p.consumir(); // Consumimos la palabra OFFSET
+            NodoAST nodoOffset = new NodoAST(NodoAST.Tipo.OPERANDO_OFFSET, tokenOffset);
+
+            // Inmediatamente después debe venir una variable
+            if (p.estipo(TokenType.VARIABLE)) {
+                nodoOffset.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, p.consumir()));
+            } else {
+                errores.add(new ErrorSintactico(p.getActual(), "Se esperaba una variable después de OFFSET"));
+            }
+            return nodoOffset;
+        }
 
         Token t = p.getActual();
         errores.add(new ErrorSintactico(t,

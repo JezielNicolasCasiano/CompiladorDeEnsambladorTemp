@@ -2,7 +2,7 @@ package jeziel.compiladordeensamblador.modelo.lexer;
 
 public class TokenSubtype {
     public enum Instruccion {
-        CBW,CLC,LODSB,LODSW,STOSB,STOSW,DIV,IMUL,INC,NEG,ADD,LDS,MOV,ROR,JNS,JS,LOOPNE,JG,JMP,JNBE
+        CBW,CLC,LODSB,LODSW,STOSB,STOSW,DIV,IMUL,INC,NEG,ADD,LDS,MOV,ROR,JNS,JS,LOOPNE,JG,JMP,JNBE, INT
     }
     public enum Directiva {
         ORG,

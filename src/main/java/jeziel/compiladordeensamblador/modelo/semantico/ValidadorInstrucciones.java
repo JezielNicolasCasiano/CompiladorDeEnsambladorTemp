@@ -10,6 +10,10 @@ public class ValidadorInstrucciones {
     public static void validar(NodoAST nodoInstruccion, ContextoSemantico contexto, List<NodoAST> arbolParser) {
         TokenSubtype.Instruccion instruccion = (TokenSubtype.Instruccion) nodoInstruccion.getToken().getSub();
 
+        if (instruccion == null) {
+            return;
+        }
+
         switch (instruccion) {
             case MOV:
             case ADD:
@@ -20,6 +24,7 @@ public class ValidadorInstrucciones {
             case NEG:
             case DIV:
             case IMUL:
+            case INT:
                 validarUnOperando(nodoInstruccion, contexto, instruccion, arbolParser);
                 break;
             case JMP:
@@ -145,6 +150,8 @@ public class ValidadorInstrucciones {
         }
         else if (operando.getTipo() == NodoAST.Tipo.OPERANDO_CONSTANTE) {
             return 0; // 0 indica que la constante se adapta al tamaño del destino
+        }else if (operando.getTipo() == NodoAST.Tipo.OPERANDO_OFFSET) {
+            return 2; // OFFSET devuelve una dirección de 16 bits (2 bytes)
         }
 
         return -1; // Memoria o tamaño indeterminado

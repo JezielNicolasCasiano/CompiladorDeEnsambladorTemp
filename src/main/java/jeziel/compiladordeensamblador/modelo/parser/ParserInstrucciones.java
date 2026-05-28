@@ -62,9 +62,9 @@ public class ParserInstrucciones {
                 break;
 
             // INT: constante
-            /*case INT:
+            case INT:
                 nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, p.consumir(TokenType.CONSTANTE)));
-                break;*/
+                break;
 
             default:
                 errores.add(new ErrorSintactico(inst, "Instrucción sin regla definida: '" + inst.getValue() + "'"));

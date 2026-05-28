@@ -136,13 +136,6 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         //obteniendo resultados
         List<FilaMaquina> todasLasFilasMaquina = new ArrayList<>();
         List<String> renglones = new ArrayList<>();
-        for (CharSequence e : codigoArea.getParagraphs()){
-            String renglon = e.toString().trim();
-            if (renglon.isBlank()){
-                continue;
-            }
-            renglones.add(renglon);
-        }
 
         pe = new Parser(tokens);
         ResultadoParser resultadoParser = pe.parsear();
@@ -153,21 +146,26 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         String codigoMaquina ="----";
         int contadorErroresSintacticos = 0;
         int contadorErroresSemanticos = 0;
-        for (int i = 0; i< renglones.size(); i++){
-            if (resultadoParser.getArbol().get(i).getTipo() == NodoAST.Tipo.ERROR_LEXICO || resultadoParser.getArbol().get(i).getTipo() == NodoAST.Tipo.ERROR_SINTACTICO){
-                resultado = resultadoParser.getErrores().get(contadorErroresSintacticos).getMensaje();
-                contadorErroresSintacticos++;
+        for (int i = 0; i<resultadoParser.getArbol().size() ; i++){
+            NodoAST nodoActual = resultadoParser.getArbol().get(i);
+            linea =  nodoActual.reconstruirTexto();
+            if (nodoActual.getTipo() == NodoAST.Tipo.ERROR_LEXICO || nodoActual.getTipo() == NodoAST.Tipo.ERROR_SINTACTICO) {
+                if (contadorErroresSintacticos < resultadoParser.getErrores().size()) {
+                    resultado = resultadoParser.getErrores().get(contadorErroresSintacticos).getMensaje();
+                    contadorErroresSintacticos++;
+                }
             }
-            if (!resultadoSemantico.getErrores().isEmpty()){
-                if (resultadoSemantico.getErrores().get(contadorErroresSemanticos).getPosicionArbolAST() == i){
+
+            if (contadorErroresSemanticos < resultadoSemantico.getErrores().size()) {
+                if (resultadoSemantico.getErrores().get(contadorErroresSemanticos).getPosicionArbolAST() == i) {
                     resultado = resultadoSemantico.getErrores().get(contadorErroresSemanticos).getMensaje();
                     contadorErroresSemanticos++;
                 }
             }
-            linea = renglones.get(i);
-            todasLasFilasMaquina.add(new FilaMaquina(i,linea,codigoMaquina,resultado));
 
+            todasLasFilasMaquina.add(new FilaMaquina(i, linea, codigoMaquina, resultado));
         }
+
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-maquina.fxml"));
