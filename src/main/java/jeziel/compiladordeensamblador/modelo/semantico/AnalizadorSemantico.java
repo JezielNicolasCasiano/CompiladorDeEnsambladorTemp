@@ -48,13 +48,18 @@ public class AnalizadorSemantico {
             Token tokenVarible = nodo.getHijos().get(nodo.getHijos().size()-1).getToken();
             int tamanoSimbolo = 0;
             if (nodo.getHijos().get(0).getToken().getSub() == TokenSubtype.Directiva.DB){
-                tamanoSimbolo = 8;
+                tamanoSimbolo = 1;
             } else if (nodo.getHijos().get(0).getToken().getSub() == TokenSubtype.Directiva.DW) {
-                tamanoSimbolo = 16;
+                tamanoSimbolo = 2;
             }
-            contextoSemantico.getTablaSimbolos().put(tokenVarible.getValue(),new Simbolo(tokenVarible.getValue(), Simbolo.TipoSext.VARIABLE,tamanoSimbolo,0));
+            int tamanoTotal = (nodo.getHijos().size()-1) * tamanoSimbolo;
+            contextoSemantico.getTablaSimbolos().put(tokenVarible.getValue(),new Simbolo(tokenVarible.getValue(), Simbolo.TipoSext.VARIABLE,tamanoTotal,0));
         } else if (nodo.getTipo()== NodoAST.Tipo.ETIQUETA) {
-            contextoSemantico.getTablaSimbolos().put(nodo.getToken().getValue().replace(":",""),new Simbolo(nodo.getToken().getValue(), Simbolo.TipoSext.ETIQUETA,0,0));
+            if (contextoSemantico.getTablaSimbolos().containsKey(nodo.getToken().getValue().replace(":", ""))) {
+                contextoSemantico.registrarError(new ErrorSemantico(nodo.getToken(), "El identificador ya existe: '" + nodo.getToken().getValue().replace(":", "") + "'", arbolSintactico.indexOf(nodo)));
+            } else {
+                contextoSemantico.getTablaSimbolos().put(nodo.getToken().getValue().replace(":", ""), new Simbolo(nodo.getToken().getValue(), Simbolo.TipoSext.ETIQUETA, 0, 0));
+            }
         }
     }
 }
