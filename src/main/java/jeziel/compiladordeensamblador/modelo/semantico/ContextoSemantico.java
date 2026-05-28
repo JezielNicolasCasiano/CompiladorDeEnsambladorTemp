@@ -10,6 +10,7 @@ public class ContextoSemantico {
     private final List<ErrorSemantico> errores = new ArrayList<>();
     private int contadorUbicacion = 0;
 
+
     public Map<String, Simbolo> getTablaSimbolos() { return tablaSimbolos; }
     public List<ErrorSemantico> getErrores() { return errores; }
 

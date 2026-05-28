@@ -38,8 +38,16 @@ public class AnalizadorSemantico {
 
     public void analizarNodo(NodoAST nodo){
         if(nodo == null) return;
-        //switch para redireccionar a metodos especificos que a su vez redireccionen a clases especicializadas
-
+        switch (nodo.getTipo()) {
+            case INSTRUCCION:
+                ValidadorInstrucciones.validar(nodo, contextoSemantico);
+                break;
+            case DIRECTIVA:
+                ValidadorDirectivas.validar(nodo, contextoSemantico);
+                break;
+            default:
+                break;
+        }
     }
     public void buscarSimbolo(NodoAST nodo){
         if(nodo == null) return;
