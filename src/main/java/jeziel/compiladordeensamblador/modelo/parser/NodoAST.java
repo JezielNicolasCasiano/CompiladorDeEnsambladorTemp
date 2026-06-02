@@ -118,6 +118,13 @@ public class NodoAST {
             case OPERANDO_CADENA:
             case ERROR_LEXICO:
             case ERROR_SINTACTICO:
+                if (!this.hijos.isEmpty()) {
+                    StringBuilder sbHijos = new StringBuilder();
+                    for (NodoAST hijo : this.hijos) {
+                        sbHijos.append(hijo.reconstruirTexto()).append(" ");
+                    }
+                    return sbHijos.toString().trim();
+                }
                 return this.token != null ? this.token.getValue() : "";
 
             default:

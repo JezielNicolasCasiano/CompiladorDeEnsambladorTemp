@@ -141,12 +141,13 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         ResultadoParser resultadoParser = pe.parsear();
         an = new AnalizadorSemantico(resultadoParser);
         ResultadoSemantico resultadoSemantico = an.analizarSemantica();
-        String resultado = "";
+
         String linea = "";
         String codigoMaquina ="----";
         int contadorErroresSintacticos = 0;
         int contadorErroresSemanticos = 0;
         for (int i = 0; i<resultadoParser.getArbol().size() ; i++){
+            String resultado = "Correcto";
             NodoAST nodoActual = resultadoParser.getArbol().get(i);
             linea =  nodoActual.reconstruirTexto();
             if (nodoActual.getTipo() == NodoAST.Tipo.ERROR_LEXICO || nodoActual.getTipo() == NodoAST.Tipo.ERROR_SINTACTICO) {
@@ -173,6 +174,9 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             ControladorTablaMaquina controladorMaquina = loader.getController();
             Pagination paginationDerecho = new Pagination();
             int elementosPorPagina = 20;
+            paginationDerecho.setPrefWidth(550);
+            paginationDerecho.setMinWidth(550);
+            paginationDerecho.setMaxWidth(550);
             int numeroDePaginas = (int) Math.ceil((double) todasLasFilasMaquina.size() / elementosPorPagina);
             paginationDerecho.setPageCount(numeroDePaginas == 0 ? 1 : numeroDePaginas);
             paginationDerecho.setPageFactory(pageIndex -> {

@@ -25,12 +25,13 @@ public class ParserDirectivas {
             case DB:
             case DW:
                 nodo.agregarHijo(p.parseOperando());
-                while (p.estipo(TokenType.SEPARADOR)) {
-                    p.consumir();
+                while (p.estipo(TokenType.SEPARADOR) || p.estipo(TokenType.VARIABLE) || p.estipo(TokenType.CONSTANTE) || p.estipo(TokenType.CADENA)) {
+                    if (p.estipo(TokenType.SEPARADOR)) {
+                        p.consumir();
+                    }
                     nodo.agregarHijo(p.parseOperando());
                 }
                 break;
-
             // EQU
             case EQU:
                 nodo.agregarHijo(p.parseOperando());

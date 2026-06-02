@@ -71,6 +71,7 @@ public class Parser {
 
     public ResultadoParser parsear() {
         while (actual() != null) {
+            int lineaActual = actual().getLinea();
             try {
                 NodoAST nodo = parseLinea();
                 if (nodo != null) arbol.add(nodo);
@@ -80,6 +81,7 @@ public class Parser {
                 arbol.add(new NodoAST(NodoAST.Tipo.ERROR_SINTACTICO,e.getError().getToken()));
                 sincronizar();
             }
+            sincronizarRenglon(lineaActual);
         }
         return new ResultadoParser(arbol, errores);
     }
@@ -145,6 +147,12 @@ public class Parser {
         }
 
         return nodoDirectiva;
+    }
+
+    private void sincronizarRenglon(int lineaActual) {
+        while (actual() != null && actual().getLinea() == lineaActual) {
+            consume();
+        }
     }
 
     NodoAST parseOperando() {

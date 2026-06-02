@@ -46,7 +46,7 @@ public class Lexer {
         String[] tokenPatterns = {
                 ";[^\r\n]*",
                 "[a-zA-Z][a-zA-Z0-9_]{0,9}:",
-                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT|)\\b",
+                "(?i)\\b(CBW|CLC|LODSB|LODSW|STOSB|STOSW|DIV|IMUL|INC|NEG|ADD|LDS|MOV|ROR|JNS|JS|LOOPNE|JG|JMP|JNBE|INT)\\b",
                 "(?i)\\b(DUP\\([^)]*\\))",
                 "(?i)(BYTE PTR|WORD PTR|ORG|END|DB|DW|EQU|ENDS|MACRO|ENDM|PROC|ENDP|OFFSET)\\b",
                 "(?i)(.STACK|.CODE|.DATA)\\s+SEGMENT",
@@ -117,7 +117,7 @@ public class Lexer {
 
                 currentPosition = endPos;
                 Enum<?> subtype = resolveSubtype(tokenTypes[i], value);
-                return new Token(tokenTypes[i], value, subtype);
+                return new Token(tokenTypes[i], value, subtype, currentLine + 1);
             }
         }
 
@@ -126,7 +126,7 @@ public class Lexer {
         String palabraDesconocida = partes[0];
         currentPosition += palabraDesconocida.length();
 
-        return new Token(TokenType.DESCONOCIDO, palabraDesconocida);
+        return new Token(TokenType.DESCONOCIDO, palabraDesconocida, currentLine + 1);
     }
 
     private Enum<?> resolveSubtype(TokenType type, String value) {

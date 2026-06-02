@@ -6,12 +6,15 @@ import javafx.scene.control.Pagination;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.AnchorPane;
 import jeziel.compiladordeensamblador.modelo.FilaLexer;
 import jeziel.compiladordeensamblador.modelo.FilaMaquina;
 import java.util.List;
 
 public class ControladorTablaMaquina {
     private TableView<FilaMaquina> tablaAnalizador;
+    @FXML
+    private AnchorPane rootPane;
     @FXML
     private Pagination paginacionTablaMaquina;
 
@@ -38,9 +41,18 @@ public class ControladorTablaMaquina {
         colResultado.setPrefWidth(250);
 
         tablaAnalizador.getColumns().addAll(colContador, colLinea, colCodigoMaquina, colResultado);
+
+        rootPane.getChildren().add(tablaAnalizador);
+
+        AnchorPane.setTopAnchor(tablaAnalizador, 0.0);
+        AnchorPane.setBottomAnchor(tablaAnalizador, 0.0);
+        AnchorPane.setLeftAnchor(tablaAnalizador, 0.0);
+        AnchorPane.setRightAnchor(tablaAnalizador, 0.0);
     }
 
     public void actualizarDatosPagina(List<FilaMaquina> listaSubSeccion) {
         tablaAnalizador.setItems(FXCollections.observableArrayList(listaSubSeccion));
     }
+
+
 }

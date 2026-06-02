@@ -23,6 +23,10 @@ public class ParserOperandos {
             return new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, p.consumir());
         }
 
+        if (p.estipo(TokenType.CADENA)) {
+            return new NodoAST(NodoAST.Tipo.OPERANDO_CADENA, p.consumir());
+        }
+
         if (p.estipo(TokenType.CORCHETE_ABRE)) {
             return parseMemoria(p, errores);
         }
