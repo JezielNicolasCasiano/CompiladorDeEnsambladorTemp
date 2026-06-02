@@ -87,7 +87,9 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     public void paginar(List<Token> tokens){
         listaFilas = new ArrayList<>();
         for(int i = 0; i < tokens.size(); i++){
-            listaFilas.add(FilaLexer.crearDesdeToken(i,tokens.get(i),descripciones));
+            if (tokens.get(i).getType() == TokenType.SEPARADOR){
+                listaFilas.add(FilaLexer.crearDesdeToken(i,tokens.get(i),descripciones));
+            }
         }
         int numeroDePaginas = (int) Math.ceil((double) tokens.size() / 20);
         numeracionPagina.setPageCount(numeroDePaginas == 0 ? 1 : numeroDePaginas);

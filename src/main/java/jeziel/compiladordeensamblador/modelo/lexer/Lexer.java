@@ -28,7 +28,7 @@ public class Lexer {
 
                 Token token = nextToken();
                 assert token != null;
-                if (token.getType() != TokenType.COMENTARIO && token.getType() != TokenType.SEPARADOR) {
+                if (token.getType() != TokenType.COMENTARIO) {
                     tokens.add(token);
                 }
             }
