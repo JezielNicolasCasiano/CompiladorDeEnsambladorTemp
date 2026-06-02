@@ -9,6 +9,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import jeziel.compiladordeensamblador.modelo.*;
@@ -43,6 +44,8 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private TextArea codigoArea;
     @FXML
     private Pagination numeracionPagina;
+    @FXML
+    private VBox contenedorTabla;
 
 
     TableView<FilaLexer> tablaLexer;
@@ -177,35 +180,97 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             }
 
             todasLasFilasMaquina.add(new FilaMaquina(i, linea, codigoMaquina, resultado));
+
+            if (nodoActual.getTipo() == NodoAST.Tipo.DIRECTIVA && !nodoActual.getHijos().isEmpty()) {
+                NodoAST ultimoHijo = nodoActual.getHijos().get(nodoActual.getHijos().size() - 1);
+
+                if (ultimoHijo.getToken() != null && ultimoHijo.getToken().getType() == TokenType.VARIABLE) {
+                    String varNombre = ultimoHijo.getToken().getValue();
+
+                    String tamanoStr = "Indeterminado";
+                    if (nodoActual.getToken().getSub() == jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype.Directiva.DB) {
+                        tamanoStr = "8 bits";
+                    } else if (nodoActual.getToken().getSub() == jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype.Directiva.DW) {
+                        tamanoStr = "16 bits";
+                    }
+
+                    String valorStr = "-";
+                    String tipoDetallado = "Variable";
+                    NodoAST primerHijo = nodoActual.getHijos().get(0);
+
+                    if (primerHijo.getTipo() == NodoAST.Tipo.OPERANDO_CONSTANTE && primerHijo.getToken() != null) {
+                        valorStr = primerHijo.getToken().getValue();
+                        if (primerHijo.getToken().getSub() == jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype.Constante.HEXADECIMAL) {
+                            tipoDetallado = "Constante Hexadecimal";
+                        } else if (primerHijo.getToken().getSub() == jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype.Constante.BINARIO) {
+                            tipoDetallado = "Constante Binaria";
+                        } else {
+                            tipoDetallado = "Constante Decimal";
+                        }
+                    } else if (primerHijo.getTipo() == NodoAST.Tipo.OPERANDO_CARACTER && primerHijo.getToken() != null) {
+                        valorStr = primerHijo.getToken().getValue();
+                        tipoDetallado = "Constante Caracter";
+                    } else if (primerHijo.getTipo() == NodoAST.Tipo.OPERANDO_CADENA && primerHijo.getToken() != null) {
+                        valorStr = primerHijo.getToken().getValue();
+                        tipoDetallado = "Constante Cadena";
+                    }
+
+                    listaCodigos.add(new FilaCodigo(varNombre, tipoDetallado, valorStr, tamanoStr));
+                }
+            } else if (nodoActual.getTipo() == NodoAST.Tipo.ETIQUETA) {
+                String etiqNombre = nodoActual.getToken().getValue().replace(":", "");
+                listaCodigos.add(new FilaCodigo(etiqNombre, "Etiqueta", "-", "0 bits"));
+            }
         }
 
 
-
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-maquina.fxml"));
-            AnchorPane vistaTablaMaquina = loader.load();
-            ControladorTablaMaquina controladorMaquina = loader.getController();
+            FXMLLoader loaderMaquina = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-maquina.fxml"));
+            AnchorPane vistaTablaMaquina = loaderMaquina.load();
+            ControladorTablaMaquina controladorMaquina = loaderMaquina.getController();
             Pagination paginationDerecho = new Pagination();
-            int elementosPorPagina = 20;
+            int elementosPorPaginaMaquina = 20;
             paginationDerecho.setPrefWidth(550);
             paginationDerecho.setMinWidth(550);
             paginationDerecho.setMaxWidth(550);
-            int numeroDePaginas = (int) Math.ceil((double) todasLasFilasMaquina.size() / elementosPorPagina);
-            paginationDerecho.setPageCount(numeroDePaginas == 0 ? 1 : numeroDePaginas);
+            int numeroDePaginasMaquina = (int) Math.ceil((double) todasLasFilasMaquina.size() / elementosPorPaginaMaquina);
+            paginationDerecho.setPageCount(numeroDePaginasMaquina == 0 ? 1 : numeroDePaginasMaquina);
             paginationDerecho.setPageFactory(pageIndex -> {
-                int indiceInicio = pageIndex * elementosPorPagina;
-                int indiceFin = Math.min(indiceInicio + elementosPorPagina, todasLasFilasMaquina.size());
+                int indiceInicio = pageIndex * elementosPorPaginaMaquina;
+                int indiceFin = Math.min(indiceInicio + elementosPorPaginaMaquina, todasLasFilasMaquina.size());
                 List<FilaMaquina> subLista = todasLasFilasMaquina.subList(indiceInicio, indiceFin);
                 controladorMaquina.actualizarDatosPagina(subLista);
                 return vistaTablaMaquina;
             });
 
             panelPrincipal.setRight(paginationDerecho);
+            FXMLLoader loaderCodigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
+            AnchorPane vistaTablaCodigos = loaderCodigos.load();
+            ControladorTablaCodigos controladorCodigos = loaderCodigos.getController();
+
+            Pagination paginationInferior = new Pagination();
+            int elementosPorPaginaCodigos = 10;
+            int numeroDePaginasCodigos = (int) Math.ceil((double) listaCodigos.size() / elementosPorPaginaCodigos);
+
+            paginationInferior.setPageCount(numeroDePaginasCodigos == 0 ? 1 : numeroDePaginasCodigos);
+            paginationInferior.setPageFactory(pageIndex -> {
+                int indiceInicio = pageIndex * elementosPorPaginaCodigos;
+                int indiceFin = Math.min(indiceInicio + elementosPorPaginaCodigos, listaCodigos.size());
+                List<FilaCodigo> subListaCodigos = listaCodigos.subList(indiceInicio, indiceFin);
+                controladorCodigos.actualizarDatos(subListaCodigos);
+                return vistaTablaCodigos;
+            });
+            VBox.setVgrow(paginationInferior, javafx.scene.layout.Priority.ALWAYS);
+
+            if (contenedorTabla.getChildren().size() > 1) {
+                contenedorTabla.getChildren().remove(0);
+            }
+            contenedorTabla.getChildren().add(0, paginationInferior);
 
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Error de Interfaz");
-            alert.setHeaderText("No se pudo cargar la vista de código máquina");
+            alert.setHeaderText("No se pudieron cargar las vistas de análisis");
             alert.setContentText(e.getMessage());
             alert.showAndWait();
         }
