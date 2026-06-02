@@ -54,18 +54,24 @@ public class AnalizadorSemantico {
 
         if(nodo.getTipo() == NodoAST.Tipo.DIRECTIVA && !nodo.getHijos().isEmpty() && nodo.getHijos().get(nodo.getHijos().size()-1).getToken().getType() == TokenType.VARIABLE){
             Token tokenVarible = nodo.getHijos().get(nodo.getHijos().size()-1).getToken();
-            int tamanoSimbolo = 0;
-            if (nodo.getHijos().get(0).getToken().getSub() == TokenSubtype.Directiva.DB){
-                tamanoSimbolo = 1;
-            } else if (nodo.getHijos().get(0).getToken().getSub() == TokenSubtype.Directiva.DW) {
-                tamanoSimbolo = 2;
-            } else if (contextoSemantico.getTablaSimbolos().containsKey(nodo.getHijos().get(nodo.getHijos().size()-1).getToken().getValue())) {
-                contextoSemantico.registrarError(new ErrorSemantico(nodo.getToken(), "El identificador ya existe: '" + nodo.getHijos().get(nodo.getHijos().size()-1).getToken().getValue() + "'", arbolSintactico.indexOf(nodo)));
+
+            if (contextoSemantico.getTablaSimbolos().containsKey(tokenVarible.getValue())) {
+                contextoSemantico.registrarError(new ErrorSemantico(nodo.getToken(), "El identificador ya existe: '" + tokenVarible.getValue() + "'", arbolSintactico.indexOf(nodo)));
                 return;
             }
+
+            int tamanoSimbolo = 0;
+
+            if (nodo.getToken().getSub() == TokenSubtype.Directiva.DB){
+                tamanoSimbolo = 1;
+            } else if (nodo.getToken().getSub() == TokenSubtype.Directiva.DW) {
+                tamanoSimbolo = 2;
+            }
+
             int tamanoTotal = (nodo.getHijos().size()-1) * tamanoSimbolo;
             contextoSemantico.getTablaSimbolos().put(tokenVarible.getValue(),new Simbolo(tokenVarible.getValue(), Simbolo.TipoSext.VARIABLE,tamanoTotal,0));
-        } else if (nodo.getTipo()== NodoAST.Tipo.ETIQUETA) {
+
+        } else if (nodo.getTipo() == NodoAST.Tipo.ETIQUETA) {
             if (contextoSemantico.getTablaSimbolos().containsKey(nodo.getToken().getValue().replace(":", ""))) {
                 contextoSemantico.registrarError(new ErrorSemantico(nodo.getToken(), "El identificador ya existe: '" + nodo.getToken().getValue().replace(":", "") + "'", arbolSintactico.indexOf(nodo)));
             } else {

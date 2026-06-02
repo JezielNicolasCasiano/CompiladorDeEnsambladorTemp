@@ -97,8 +97,9 @@ public class Parser {
             } catch (ErrorSintacticoException e) {
                 errores.add(e.getError());
                 arbol.add(new NodoAST(NodoAST.Tipo.ERROR_SINTACTICO, e.getError().getToken()));
-                sincronizarRenglon(lineaActual);
+
             }
+            sincronizarRenglon(lineaActual);
         }
         return new ResultadoParser(arbol, errores);
     }
@@ -122,12 +123,13 @@ public class Parser {
         }
 
         if (check(TokenType.PSEUDOINSTRUCCION) || check(TokenType.VARIABLE)) {
-            return parseDirectivaConVariable();
+            NodoAST nodo = parseDirectivaConVariable();
+            if (nodo != null) return nodo;
         }
 
         Token t = consume();
         errores.add(new ErrorSintactico(t, "Token inesperado: '" + t.getValue() + "'"));
-        return null;
+        return new NodoAST(NodoAST.Tipo.ERROR_SINTACTICO, t);
     }
 
 
@@ -158,7 +160,14 @@ public class Parser {
         if (check(TokenType.VARIABLE)) {
             tokenVariable = consume(TokenType.VARIABLE);
         }
+
         NodoAST nodoDirectiva = parseDirectiva();
+
+        if (nodoDirectiva == null && tokenVariable != null) {
+            errores.add(new ErrorSintactico(actual(), "Se esperaba una pseudoinstruccion despues de '" + tokenVariable.getValue() + "'"));
+            return new NodoAST(NodoAST.Tipo.ERROR_SINTACTICO, tokenVariable);
+        }
+
         if (tokenVariable != null && nodoDirectiva != null) {
             nodoDirectiva.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, tokenVariable));
         }

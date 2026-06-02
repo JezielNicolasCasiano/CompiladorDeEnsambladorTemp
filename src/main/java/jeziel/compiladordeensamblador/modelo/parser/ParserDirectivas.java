@@ -10,18 +10,16 @@ public class ParserDirectivas {
         if (dir == null) return null;
 
         NodoAST nodo = new NodoAST(NodoAST.Tipo.DIRECTIVA, dir);
-        String val = dir.getValue().toUpperCase().replace(" ", "_");
-        TokenSubtype.Directiva subtipo;
 
-        try {
-            subtipo = TokenSubtype.Directiva.valueOf(val);
-        } catch (IllegalArgumentException e) {
+        TokenSubtype.Directiva subtipo = (TokenSubtype.Directiva) dir.getSub();
+
+        if (subtipo == null) {
             errores.add(new ErrorSintactico(dir, "Pseudoinstruccion no reconocida: '" + dir.getValue() + "'"));
             return nodo;
         }
 
         switch (subtipo) {
-            // DB / DW — variable: valor o lista de valores
+            // DB / DW
             case DB:
             case DW:
                 nodo.agregarHijo(p.parseOperando());
@@ -32,6 +30,7 @@ public class ParserDirectivas {
                     nodo.agregarHijo(p.parseOperando());
                 }
                 break;
+
             // EQU
             case EQU:
                 nodo.agregarHijo(p.parseOperando());
@@ -42,7 +41,7 @@ public class ParserDirectivas {
                 nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, p.consumir(TokenType.CONSTANTE)));
                 break;
 
-            // SEGMENT 
+            // SEGMENTOS Y ESTRUCTURALES
             case SEGMENT:
             case ENDS:
             case PROC:
@@ -53,22 +52,26 @@ public class ParserDirectivas {
             case STACK:
             case DATA:
             case CODE:
+            case STACK_SEGMENT:
+            case DATA_SEGMENT:
+            case CODE_SEGMENT:
                 if (p.estipo(TokenType.VARIABLE)) {
                     nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, p.consumir()));
                 }
                 break;
 
-            // DUP 
+            // DUP
             case DUP:
                 p.consumir(TokenType.PARENTESIS_ABRE);
                 nodo.agregarHijo(p.parseOperando());
                 p.consumir(TokenType.PARENTESIS_CIERRA);
                 break;
 
-                default:
+            default:
                 break;
         }
 
         return nodo;
     }
-}
+    }
+

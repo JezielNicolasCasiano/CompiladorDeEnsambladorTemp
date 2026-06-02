@@ -161,17 +161,20 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
             linea = textoOriginal.stripLeading();
 
-            if (nodoActual.getTipo() == NodoAST.Tipo.ERROR_LEXICO || nodoActual.getTipo() == NodoAST.Tipo.ERROR_SINTACTICO) {
-                if (contadorErroresSintacticos < resultadoParser.getErrores().size()) {
-                    resultado = resultadoParser.getErrores().get(contadorErroresSintacticos).getMensaje();
-                    contadorErroresSintacticos++;
+            for (jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico errSint : resultadoParser.getErrores()) {
+                int errLinea = (errSint.getToken() != null) ? errSint.getToken().getLinea() : la.getLineas().size();
+                if (errLinea == numLineaOriginal) {
+                    resultado = errSint.getMensaje();
+                    break;
                 }
             }
 
-            if (contadorErroresSemanticos < resultadoSemantico.getErrores().size()) {
-                if (resultadoSemantico.getErrores().get(contadorErroresSemanticos).getPosicionArbolAST() == i) {
-                    resultado = resultadoSemantico.getErrores().get(contadorErroresSemanticos).getMensaje();
-                    contadorErroresSemanticos++;
+            if (resultado.equals("Correcto")) {
+                for (jeziel.compiladordeensamblador.modelo.semantico.ErrorSemantico errSem : resultadoSemantico.getErrores()) {
+                    if (errSem.getPosicionArbolAST() == i) {
+                        resultado = errSem.getMensaje();
+                        break;
+                    }
                 }
             }
 
