@@ -21,6 +21,7 @@ import jeziel.compiladordeensamblador.modelo.parser.Parser;
 import jeziel.compiladordeensamblador.modelo.parser.ResultadoParser;
 import jeziel.compiladordeensamblador.modelo.semantico.AnalizadorSemantico;
 import jeziel.compiladordeensamblador.modelo.semantico.ResultadoSemantico;
+import jeziel.compiladordeensamblador.modelo.semantico.Simbolo;
 
 import java.io.File;
 import java.io.IOException;
@@ -181,45 +182,16 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
             todasLasFilasMaquina.add(new FilaMaquina(i, linea, codigoMaquina, resultado));
 
-            if (nodoActual.getTipo() == NodoAST.Tipo.DIRECTIVA && !nodoActual.getHijos().isEmpty()) {
-                NodoAST ultimoHijo = nodoActual.getHijos().get(nodoActual.getHijos().size() - 1);
+            for (Simbolo sim : resultadoSemantico.getTablaSimbolos().values()) {
+                String tipoDetallado = (sim.getTipo() == Simbolo.TipoSext.ETIQUETA) ? "Etiqueta" : "Variable";
+                String tamanoStr = sim.getTamano() + " bytes";
 
-                if (ultimoHijo.getToken() != null && ultimoHijo.getToken().getType() == TokenType.VARIABLE) {
-                    String varNombre = ultimoHijo.getToken().getValue();
-
-                    String tamanoStr = "Indeterminado";
-                    if (nodoActual.getToken().getSub() == jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype.Directiva.DB) {
-                        tamanoStr = "8 bits";
-                    } else if (nodoActual.getToken().getSub() == jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype.Directiva.DW) {
-                        tamanoStr = "16 bits";
-                    }
-
-                    String valorStr = "-";
-                    String tipoDetallado = "Variable";
-                    NodoAST primerHijo = nodoActual.getHijos().get(0);
-
-                    if (primerHijo.getTipo() == NodoAST.Tipo.OPERANDO_CONSTANTE && primerHijo.getToken() != null) {
-                        valorStr = primerHijo.getToken().getValue();
-                        if (primerHijo.getToken().getSub() == jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype.Constante.HEXADECIMAL) {
-                            tipoDetallado = "Constante Hexadecimal";
-                        } else if (primerHijo.getToken().getSub() == jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype.Constante.BINARIO) {
-                            tipoDetallado = "Constante Binaria";
-                        } else {
-                            tipoDetallado = "Constante Decimal";
-                        }
-                    } else if (primerHijo.getTipo() == NodoAST.Tipo.OPERANDO_CARACTER && primerHijo.getToken() != null) {
-                        valorStr = primerHijo.getToken().getValue();
-                        tipoDetallado = "Constante Caracter";
-                    } else if (primerHijo.getTipo() == NodoAST.Tipo.OPERANDO_CADENA && primerHijo.getToken() != null) {
-                        valorStr = primerHijo.getToken().getValue();
-                        tipoDetallado = "Constante Cadena";
-                    }
-
-                    listaCodigos.add(new FilaCodigo(varNombre, tipoDetallado, valorStr, tamanoStr));
-                }
-            } else if (nodoActual.getTipo() == NodoAST.Tipo.ETIQUETA) {
-                String etiqNombre = nodoActual.getToken().getValue().replace(":", "");
-                listaCodigos.add(new FilaCodigo(etiqNombre, "Etiqueta", "-", "0 bits"));
+                listaCodigos.add(new FilaCodigo(
+                        sim.getNombre(),
+                        tipoDetallado,
+                        sim.getValor(),
+                        tamanoStr
+                ));
             }
         }
 
@@ -249,6 +221,8 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             ControladorTablaCodigos controladorCodigos = loaderCodigos.getController();
 
             Pagination paginationInferior = new Pagination();
+            paginationInferior.setMinHeight(250); // Mínimo de altura en píxeles
+            paginationInferior.setPrefHeight(300);
             int elementosPorPaginaCodigos = 10;
             int numeroDePaginasCodigos = (int) Math.ceil((double) listaCodigos.size() / elementosPorPaginaCodigos);
 

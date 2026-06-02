@@ -49,33 +49,50 @@ public class AnalizadorSemantico {
                 break;
         }
     }
-    public void buscarSimbolo(NodoAST nodo){
-        if(nodo == null) return;
+    public void buscarSimbolo(NodoAST nodo) {
+        if (nodo == null) return;
 
-        if(nodo.getTipo() == NodoAST.Tipo.DIRECTIVA && !nodo.getHijos().isEmpty() && nodo.getHijos().get(nodo.getHijos().size()-1).getToken().getType() == TokenType.VARIABLE){
-            Token tokenVarible = nodo.getHijos().get(nodo.getHijos().size()-1).getToken();
+        if (nodo.getTipo() == NodoAST.Tipo.DIRECTIVA && !nodo.getHijos().isEmpty() &&
+                nodo.getHijos().get(nodo.getHijos().size() - 1).getToken().getType() == TokenType.VARIABLE) {
+
+            Token tokenVarible = nodo.getHijos().get(nodo.getHijos().size() - 1).getToken();
 
             if (contextoSemantico.getTablaSimbolos().containsKey(tokenVarible.getValue())) {
-                contextoSemantico.registrarError(new ErrorSemantico(nodo.getToken(), "El identificador ya existe: '" + tokenVarible.getValue() + "'", arbolSintactico.indexOf(nodo)));
+                contextoSemantico.registrarError(new ErrorSemantico(nodo.getToken(),
+                        "El identificador ya existe: '" + tokenVarible.getValue() + "'", arbolSintactico.indexOf(nodo)));
                 return;
             }
 
-            int tamanoSimbolo = 0;
+            int tamanoSimbolo = (nodo.getToken().getSub() == TokenSubtype.Directiva.DB) ? 1 : 2;
+            int tamanoTotal = 0;
+            String valorSimbolo = "-";
 
-            if (nodo.getToken().getSub() == TokenSubtype.Directiva.DB){
-                tamanoSimbolo = 1;
-            } else if (nodo.getToken().getSub() == TokenSubtype.Directiva.DW) {
-                tamanoSimbolo = 2;
+            NodoAST primerHijo = nodo.getHijos().get(0);
+            if (primerHijo.getTipo() != NodoAST.Tipo.OPERANDO_VARIABLE && primerHijo.getToken() != null) {
+                valorSimbolo = primerHijo.getToken().getValue();
             }
 
-            int tamanoTotal = (nodo.getHijos().size()-1) * tamanoSimbolo;
-            contextoSemantico.getTablaSimbolos().put(tokenVarible.getValue(),new Simbolo(tokenVarible.getValue(), Simbolo.TipoSext.VARIABLE,tamanoTotal,0));
+            for (int i = 0; i < nodo.getHijos().size() - 1; i++) {
+                NodoAST hijo = nodo.getHijos().get(i);
+                if (hijo.getTipo() == NodoAST.Tipo.OPERANDO_CADENA || hijo.getTipo() == NodoAST.Tipo.OPERANDO_CARACTER) {
+                    String texto = hijo.getToken().getValue().replaceAll("^[\"']|[\"']$", "");
+                    tamanoTotal += texto.length();
+                } else {
+                    tamanoTotal += tamanoSimbolo;
+                }
+            }
+
+            contextoSemantico.getTablaSimbolos().put(tokenVarible.getValue(),
+                    new Simbolo(tokenVarible.getValue(), Simbolo.TipoSext.VARIABLE, tamanoTotal, 0, valorSimbolo));
 
         } else if (nodo.getTipo() == NodoAST.Tipo.ETIQUETA) {
-            if (contextoSemantico.getTablaSimbolos().containsKey(nodo.getToken().getValue().replace(":", ""))) {
-                contextoSemantico.registrarError(new ErrorSemantico(nodo.getToken(), "El identificador ya existe: '" + nodo.getToken().getValue().replace(":", "") + "'", arbolSintactico.indexOf(nodo)));
+            String nombreEtiq = nodo.getToken().getValue().replace(":", "");
+            if (contextoSemantico.getTablaSimbolos().containsKey(nombreEtiq)) {
+                contextoSemantico.registrarError(new ErrorSemantico(nodo.getToken(),
+                        "El identificador ya existe: '" + nombreEtiq + "'", arbolSintactico.indexOf(nodo)));
             } else {
-                contextoSemantico.getTablaSimbolos().put(nodo.getToken().getValue().replace(":", ""), new Simbolo(nodo.getToken().getValue(), Simbolo.TipoSext.ETIQUETA, 0, 0));
+                contextoSemantico.getTablaSimbolos().put(nombreEtiq,
+                        new Simbolo(nombreEtiq, Simbolo.TipoSext.ETIQUETA, 0, 0, "-"));
             }
         }
     }
