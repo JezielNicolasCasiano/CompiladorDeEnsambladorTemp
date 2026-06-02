@@ -52,6 +52,14 @@ public class AnalizadorSemantico {
     public void buscarSimbolo(NodoAST nodo) {
         if (nodo == null) return;
 
+        if (nodo.getToken() != null) {
+            for (jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico err : resultadoParser.getErrores()) {
+                if (err.getToken() != null && err.getToken().getLinea() == nodo.getToken().getLinea()) {
+                    return;
+                }
+            }
+        }
+
         if (nodo.getTipo() == NodoAST.Tipo.DIRECTIVA && !nodo.getHijos().isEmpty() &&
                 nodo.getHijos().get(nodo.getHijos().size() - 1).getToken().getType() == TokenType.VARIABLE) {
 
