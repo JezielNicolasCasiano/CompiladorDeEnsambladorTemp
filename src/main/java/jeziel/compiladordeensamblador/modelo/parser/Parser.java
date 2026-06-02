@@ -74,14 +74,31 @@ public class Parser {
             int lineaActual = actual().getLinea();
             try {
                 NodoAST nodo = parseLinea();
+                boolean hayBasura = false;
+                Token primerTokenBasura = null;
+                while (actual() != null && actual().getLinea() == lineaActual) {
+                    if (!hayBasura) {
+                        hayBasura = true;
+                        primerTokenBasura = actual();
+                    }
+
+                    Token tokenSobrante = consume();
+
+                    if (nodo != null) {
+                        nodo.agregarHijo(new NodoAST(NodoAST.Tipo.ERROR_SINTACTICO, tokenSobrante));
+                    }
+                }
+                if (hayBasura) {
+                    errores.add(new ErrorSintactico(primerTokenBasura,
+                            "Elementos inesperados al final de la línea"));
+                }
+
                 if (nodo != null) arbol.add(nodo);
             } catch (ErrorSintacticoException e) {
                 errores.add(e.getError());
-                //Modificacion, en vez de no guardar nada y saltarlo guarda el error sintactico para saber la posicion
-                arbol.add(new NodoAST(NodoAST.Tipo.ERROR_SINTACTICO,e.getError().getToken()));
-                sincronizar();
+                arbol.add(new NodoAST(NodoAST.Tipo.ERROR_SINTACTICO, e.getError().getToken()));
+                sincronizarRenglon(lineaActual);
             }
-            sincronizarRenglon(lineaActual);
         }
         return new ResultadoParser(arbol, errores);
     }
