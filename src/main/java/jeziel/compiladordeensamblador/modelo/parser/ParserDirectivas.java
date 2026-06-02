@@ -23,7 +23,9 @@ public class ParserDirectivas {
             case DB:
             case DW:
                 nodo.agregarHijo(p.parseOperando());
-                while (p.estipo(TokenType.SEPARADOR) || p.estipo(TokenType.VARIABLE) || p.estipo(TokenType.CONSTANTE) || p.estipo(TokenType.CADENA)) {
+                while (p.actual() != null && p.actual().getLinea() == dir.getLinea() &&
+                        (p.estipo(TokenType.SEPARADOR) || p.estipo(TokenType.VARIABLE) || p.estipo(TokenType.CONSTANTE) || p.estipo(TokenType.CADENA))) {
+
                     if (p.estipo(TokenType.SEPARADOR)) {
                         p.consumir();
                     }
@@ -41,7 +43,6 @@ public class ParserDirectivas {
                 nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_CONSTANTE, p.consumir(TokenType.CONSTANTE)));
                 break;
 
-            // SEGMENTOS Y ESTRUCTURALES
             case SEGMENT:
             case ENDS:
             case PROC:
@@ -55,7 +56,7 @@ public class ParserDirectivas {
             case STACK_SEGMENT:
             case DATA_SEGMENT:
             case CODE_SEGMENT:
-                if (p.estipo(TokenType.VARIABLE)) {
+                if (p.actual() != null && p.actual().getLinea() == dir.getLinea() && p.estipo(TokenType.VARIABLE)) {
                     nodo.agregarHijo(new NodoAST(NodoAST.Tipo.OPERANDO_VARIABLE, p.consumir()));
                 }
                 break;

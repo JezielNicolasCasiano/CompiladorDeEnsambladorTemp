@@ -19,7 +19,7 @@ public class Parser {
     }
 
 
-    private Token actual() {
+    Token actual() {
         if (pos < tokens.size()) return tokens.get(pos);
         return null;
     }
