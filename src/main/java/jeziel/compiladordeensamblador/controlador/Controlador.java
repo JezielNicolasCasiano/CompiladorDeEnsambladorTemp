@@ -87,7 +87,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     public void paginar(List<Token> tokens){
         listaFilas = new ArrayList<>();
         for(int i = 0; i < tokens.size(); i++){
-            if (tokens.get(i).getType() == TokenType.SEPARADOR){
+            if (!(tokens.get(i).getType() == TokenType.SEPARADOR)){
                 listaFilas.add(FilaLexer.crearDesdeToken(i,tokens.get(i),descripciones));
             }
         }
@@ -151,7 +151,16 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         for (int i = 0; i<resultadoParser.getArbol().size() ; i++){
             String resultado = "Correcto";
             NodoAST nodoActual = resultadoParser.getArbol().get(i);
-            linea =  nodoActual.reconstruirTexto();
+            int numLineaOriginal = (nodoActual.getToken() != null) ? nodoActual.getToken().getLinea() : la.getLineas().size();
+
+            String textoOriginal = la.getLineas().get(numLineaOriginal - 1);
+
+            if (textoOriginal.contains(";")) {
+                textoOriginal = textoOriginal.substring(0, textoOriginal.indexOf(";"));
+            }
+
+            linea = textoOriginal.stripLeading();
+
             if (nodoActual.getTipo() == NodoAST.Tipo.ERROR_LEXICO || nodoActual.getTipo() == NodoAST.Tipo.ERROR_SINTACTICO) {
                 if (contadorErroresSintacticos < resultadoParser.getErrores().size()) {
                     resultado = resultadoParser.getErrores().get(contadorErroresSintacticos).getMensaje();
@@ -168,6 +177,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
             todasLasFilasMaquina.add(new FilaMaquina(i, linea, codigoMaquina, resultado));
         }
+
 
 
         try {
