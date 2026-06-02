@@ -182,17 +182,19 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
             todasLasFilasMaquina.add(new FilaMaquina(i, linea, codigoMaquina, resultado));
 
-            for (Simbolo sim : resultadoSemantico.getTablaSimbolos().values()) {
-                String tipoDetallado = (sim.getTipo() == Simbolo.TipoSext.ETIQUETA) ? "Etiqueta" : "Variable";
-                String tamanoStr = sim.getTamano() + " bytes";
-
-                listaCodigos.add(new FilaCodigo(
-                        sim.getNombre(),
-                        tipoDetallado,
-                        sim.getValor(),
-                        tamanoStr
-                ));
             }
+
+        for (Simbolo sim : resultadoSemantico.getTablaSimbolos().values()) {
+            String tipoDetallado = (sim.getTipo() == Simbolo.TipoSext.ETIQUETA) ? "Etiqueta" : "Variable";
+            String tamanoStr = sim.getTamano() + " bytes";
+
+            listaCodigos.add(new FilaCodigo(
+                    sim.getNombre(),
+                    tipoDetallado,
+                    sim.getValor(),
+                    tamanoStr
+            ));
+
         }
 
 
