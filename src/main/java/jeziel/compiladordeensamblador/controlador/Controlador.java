@@ -11,10 +11,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import jeziel.compiladordeensamblador.modelo.FilaLexer;
-import jeziel.compiladordeensamblador.modelo.FilaMaquina;
-import jeziel.compiladordeensamblador.modelo.LectorDeArchivos;
-import jeziel.compiladordeensamblador.modelo.LectorDeArchivosListener;
+import jeziel.compiladordeensamblador.modelo.*;
 import jeziel.compiladordeensamblador.modelo.lexer.Lexer;
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
@@ -137,6 +134,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     @FXML public void codificar(){
         //obteniendo resultados
         List<FilaMaquina> todasLasFilasMaquina = new ArrayList<>();
+        List<FilaCodigo> listaCodigos = new ArrayList<>();
         List<String> renglones = new ArrayList<>();
 
         pe = new Parser(tokens);
