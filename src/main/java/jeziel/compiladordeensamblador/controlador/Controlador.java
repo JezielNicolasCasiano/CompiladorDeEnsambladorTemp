@@ -44,12 +44,33 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
     TableView<FilaLexer> tablaLexer;
 
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        inicializarTableViewLexer();
+        la = new LectorDeArchivos(this);
+        codigoArea.setEditable(false);
+
+        descripciones.put(TokenType.INSTRUCCION, "Instrucción");
+        descripciones.put(TokenType.PSEUDOINSTRUCCION, "Pseudoinstrucción");
+        descripciones.put(TokenType.REGISTRO, "Registro");
+        descripciones.put(TokenType.VARIABLE, "Símbolo");
+        descripciones.put(TokenType.IDENTIFICADOR, "Símbolo");
+        descripciones.put(TokenType.ETIQUETA, "Símbolo");
+        descripciones.put(TokenType.SEPARADOR, "Símbolo");
+        descripciones.put(TokenType.CORCHETE_ABRE, "Símbolo");
+        descripciones.put(TokenType.CORCHETE_CIERRA, "Símbolo");
+        descripciones.put(TokenType.PARENTESIS_ABRE, "Símbolo");
+        descripciones.put(TokenType.PARENTESIS_CIERRA, "Símbolo");
+        descripciones.put(TokenType.CARACTER, "Constante (caracter)");
+        descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
+
+
+    }
 
     @FXML
     public void SeleccionarUnArchivo(){ //Metodo que instancia un fileChooser para seleccionar el archivo. Es onAction de SeleccionarArchivo
         FileChooser fileChooser = new FileChooser();
         File selectedFile = fileChooser.showOpenDialog(seleccionarArchivo.getParentPopup().getScene().getWindow());
-
 
         if(selectedFile != null) {
             if (!selectedFile.getName().toLowerCase().endsWith(".asm")) {
@@ -85,7 +106,8 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
                 listaFilas.add(FilaLexer.crearDesdeToken(i,tokens.get(i),descripciones));
             }
         }
-        int numeroDePaginas = (int) Math.ceil((double) tokens.size() / 20);
+
+        int numeroDePaginas = (int) Math.ceil((double) listaFilas.size()/ 20);
         numeracionPagina.setPageCount(numeroDePaginas == 0 ? 1 : numeroDePaginas);
         numeracionPagina.setPageFactory(pageIndex ->{
             int indiceInicio = pageIndex * 20;
@@ -95,6 +117,18 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
             return tablaLexer;
         });
 
+    }
+
+    public void inicializarTableViewLexer(){
+        tablaLexer = new TableView<>();
+        TableColumn<FilaLexer, Integer> colNumero = new TableColumn<>("Número");
+        colNumero.setCellValueFactory(new PropertyValueFactory<>("numero"));
+        TableColumn<FilaLexer, String> colSeparacion = new TableColumn<>("Separacion");
+        colSeparacion.setCellValueFactory(new PropertyValueFactory<>("separacion"));
+        TableColumn<FilaLexer, String> colToken = new TableColumn<>("Identificacion");
+        colToken.setCellValueFactory(new PropertyValueFactory<>("token"));
+        tablaLexer.getColumns().addAll(colNumero, colSeparacion, colToken);
+        tablaLexer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
 
@@ -107,30 +141,13 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         }
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        la = new LectorDeArchivos(this);
-        codigoArea.setEditable(false);
 
-        descripciones.put(TokenType.INSTRUCCION, "Instrucción");
-        descripciones.put(TokenType.PSEUDOINSTRUCCION, "Pseudoinstrucción");
-        descripciones.put(TokenType.REGISTRO, "Registro");
-        descripciones.put(TokenType.VARIABLE, "Símbolo");
-        descripciones.put(TokenType.IDENTIFICADOR, "Símbolo");
-        descripciones.put(TokenType.ETIQUETA, "Símbolo");
-        descripciones.put(TokenType.SEPARADOR, "Símbolo");
-        descripciones.put(TokenType.CORCHETE_ABRE, "Símbolo");
-        descripciones.put(TokenType.CORCHETE_CIERRA, "Símbolo");
-        descripciones.put(TokenType.PARENTESIS_ABRE, "Símbolo");
-        descripciones.put(TokenType.PARENTESIS_CIERRA, "Símbolo");
-        descripciones.put(TokenType.CARACTER, "Constante (caracter)");
-        descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
-
-    }
 
     @FXML public void codificar(){
 
 
     }
+
+
 }
 
