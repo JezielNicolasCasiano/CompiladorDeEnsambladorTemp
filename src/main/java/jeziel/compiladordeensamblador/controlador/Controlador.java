@@ -16,12 +16,7 @@ import jeziel.compiladordeensamblador.modelo.*;
 import jeziel.compiladordeensamblador.modelo.lexer.Lexer;
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
-import jeziel.compiladordeensamblador.modelo.parser.NodoAST;
-import jeziel.compiladordeensamblador.modelo.parser.Parser;
-import jeziel.compiladordeensamblador.modelo.parser.ResultadoParser;
-import jeziel.compiladordeensamblador.modelo.semantico.AnalizadorSemantico;
-import jeziel.compiladordeensamblador.modelo.semantico.ResultadoSemantico;
-import jeziel.compiladordeensamblador.modelo.semantico.Simbolo;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -33,9 +28,7 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
     private Lexer le;
     private final Map<TokenType, String> descripciones = new EnumMap<>(TokenType.class);
     private List<FilaLexer> listaFilas;
-    private Parser pe;
     private List<Token> tokens;
-    private AnalizadorSemantico an;
 
     @FXML
     private BorderPane panelPrincipal;
@@ -132,143 +125,11 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         descripciones.put(TokenType.PARENTESIS_CIERRA, "Símbolo");
         descripciones.put(TokenType.CARACTER, "Constante (caracter)");
         descripciones.put(TokenType.DESCONOCIDO, "Elemento no identificado");
-        inicializarTablaLexer();
+
     }
 
     @FXML public void codificar(){
-        //obteniendo resultados
-        List<FilaMaquina> todasLasFilasMaquina = new ArrayList<>();
-        List<FilaCodigo> listaCodigos = new ArrayList<>();
-        List<String> renglones = new ArrayList<>();
 
-        pe = new Parser(tokens);
-        ResultadoParser resultadoParser = pe.parsear();
-        an = new AnalizadorSemantico(resultadoParser);
-        ResultadoSemantico resultadoSemantico = an.analizarSemantica();
-
-        String linea = "";
-        String codigoMaquina ="----";
-        int contadorErroresSintacticos = 0;
-        int contadorErroresSemanticos = 0;
-        for (int i = 0; i<resultadoParser.getArbol().size() ; i++){
-            String resultado = "Correcto";
-            NodoAST nodoActual = resultadoParser.getArbol().get(i);
-            int numLineaOriginal = (nodoActual.getToken() != null) ? nodoActual.getToken().getLinea() : la.getLineas().size();
-
-            String textoOriginal = la.getLineas().get(numLineaOriginal - 1);
-
-            if (textoOriginal.contains(";")) {
-                textoOriginal = textoOriginal.substring(0, textoOriginal.indexOf(";"));
-            }
-
-            linea = textoOriginal.stripLeading();
-
-            for (jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico errSint : resultadoParser.getErrores()) {
-                int errLinea = (errSint.getToken() != null) ? errSint.getToken().getLinea() : la.getLineas().size();
-                if (errLinea == numLineaOriginal) {
-                    resultado = errSint.getMensaje();
-                    break;
-                }
-            }
-
-            if (resultado.equals("Correcto")) {
-                for (jeziel.compiladordeensamblador.modelo.semantico.ErrorSemantico errSem : resultadoSemantico.getErrores()) {
-                    if (errSem.getPosicionArbolAST() == i) {
-                        resultado = errSem.getMensaje();
-                        break;
-                    }
-                }
-            }
-
-            todasLasFilasMaquina.add(new FilaMaquina(i, linea, codigoMaquina, resultado));
-
-            }
-
-        for (Simbolo sim : resultadoSemantico.getTablaSimbolos().values()) {
-            String tipoDetallado = (sim.getTipo() == Simbolo.TipoSext.ETIQUETA) ? "Etiqueta" : "Variable";
-            String tamanoStr = sim.getTamano() + " bytes";
-
-            listaCodigos.add(new FilaCodigo(
-                    sim.getNombre(),
-                    tipoDetallado,
-                    sim.getValor(),
-                    tamanoStr
-            ));
-
-        }
-
-
-        try {
-            FXMLLoader loaderMaquina = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-maquina.fxml"));
-            AnchorPane vistaTablaMaquina = loaderMaquina.load();
-            ControladorTablaMaquina controladorMaquina = loaderMaquina.getController();
-            Pagination paginationDerecho = new Pagination();
-            int elementosPorPaginaMaquina = 20;
-            paginationDerecho.setPrefWidth(550);
-            paginationDerecho.setMinWidth(550);
-            paginationDerecho.setMaxWidth(550);
-            int numeroDePaginasMaquina = (int) Math.ceil((double) todasLasFilasMaquina.size() / elementosPorPaginaMaquina);
-            paginationDerecho.setPageCount(numeroDePaginasMaquina == 0 ? 1 : numeroDePaginasMaquina);
-            paginationDerecho.setPageFactory(pageIndex -> {
-                int indiceInicio = pageIndex * elementosPorPaginaMaquina;
-                int indiceFin = Math.min(indiceInicio + elementosPorPaginaMaquina, todasLasFilasMaquina.size());
-                List<FilaMaquina> subLista = todasLasFilasMaquina.subList(indiceInicio, indiceFin);
-                controladorMaquina.actualizarDatosPagina(subLista);
-                return vistaTablaMaquina;
-            });
-
-            panelPrincipal.setRight(paginationDerecho);
-            FXMLLoader loaderCodigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
-            AnchorPane vistaTablaCodigos = loaderCodigos.load();
-            ControladorTablaCodigos controladorCodigos = loaderCodigos.getController();
-
-            Pagination paginationInferior = new Pagination();
-            paginationInferior.setMinHeight(250); // Mínimo de altura en píxeles
-            paginationInferior.setPrefHeight(300);
-            int elementosPorPaginaCodigos = 10;
-            int numeroDePaginasCodigos = (int) Math.ceil((double) listaCodigos.size() / elementosPorPaginaCodigos);
-
-            paginationInferior.setPageCount(numeroDePaginasCodigos == 0 ? 1 : numeroDePaginasCodigos);
-            paginationInferior.setPageFactory(pageIndex -> {
-                int indiceInicio = pageIndex * elementosPorPaginaCodigos;
-                int indiceFin = Math.min(indiceInicio + elementosPorPaginaCodigos, listaCodigos.size());
-                List<FilaCodigo> subListaCodigos = listaCodigos.subList(indiceInicio, indiceFin);
-                controladorCodigos.actualizarDatos(subListaCodigos);
-                return vistaTablaCodigos;
-            });
-            VBox.setVgrow(paginationInferior, javafx.scene.layout.Priority.ALWAYS);
-
-            if (contenedorTabla.getChildren().size() > 1) {
-                contenedorTabla.getChildren().remove(0);
-            }
-            contenedorTabla.getChildren().add(0, paginationInferior);
-
-        } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error de Interfaz");
-            alert.setHeaderText("No se pudieron cargar las vistas de análisis");
-            alert.setContentText(e.getMessage());
-            alert.showAndWait();
-        }
-    }
-    private void inicializarTablaLexer() {
-        tablaLexer = new TableView<>();
-
-        tablaLexer.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        TableColumn<FilaLexer, Integer> colContador = new TableColumn<>("Numero");
-        colContador.setCellValueFactory(new PropertyValueFactory<>("numero"));
-        colContador.setPrefWidth(50);
-
-
-        TableColumn<FilaLexer, String> colToken = new TableColumn<>("Separación");
-        colToken.setCellValueFactory(new PropertyValueFactory<>("separacion"));
-        colToken.setPrefWidth(150);
-
-        TableColumn<FilaLexer, String> colDesc = new TableColumn<>("Identificación");
-        colDesc.setCellValueFactory(new PropertyValueFactory<>("token"));
-        colDesc.setPrefWidth(250);
-
-        tablaLexer.getColumns().addAll(colContador, colToken, colDesc);
 
     }
 }
