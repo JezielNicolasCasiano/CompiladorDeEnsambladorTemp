@@ -4,9 +4,9 @@ import jeziel.compiladordeensamblador.modelo.lexer.Token;
 
 import java.util.List;
 
-public class AnalizarVariable extends AnalizadorGeneral{
+public class AnalizarEtiqueta extends AnalizadorGeneral{
 
-    public AnalizarVariable(Token primerToken, List<Token> lineaAAnalizar) {
+    public AnalizarEtiqueta(Token primerToken, List<Token> lineaAAnalizar) {
         super(primerToken, lineaAAnalizar);
     }
 }

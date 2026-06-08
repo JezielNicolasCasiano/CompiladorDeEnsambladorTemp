@@ -5,7 +5,7 @@ import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import java.util.List;
 
 public class Parser {
-    List<List<Token>> ArbolLineal;
+    List<LineaAnalizada> ArbolLineal;
     List<Token> tokens;
     int actual;
     AnalizadorLineaSintactica analizadorLineaSintactica;
