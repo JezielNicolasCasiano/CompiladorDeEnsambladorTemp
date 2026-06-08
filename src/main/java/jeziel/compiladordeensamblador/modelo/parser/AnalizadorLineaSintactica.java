@@ -2,6 +2,7 @@ package jeziel.compiladordeensamblador.modelo.parser;
 
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AnalizadorLineaSintactica {
@@ -32,7 +33,7 @@ public class AnalizadorLineaSintactica {
             // Se utiliza un switch para mandarlos a clases dedicadas a la autenticacion de la sintaxis dependiendo de cual es el primer token de la linea
 
             switch(primerToken.getType()){
-                case PSEUDOINSTRUCCION -> analizarPseudoinstruccion = new AnalizarPseudoinstruccion(primerToken);
+                case PSEUDOINSTRUCCION -> analizarPseudoinstruccion = new AnalizarPseudoinstruccion(primerToken, obtenerLineaComoSublista());
                 //Ciclo para seguir mandando los siguientes tokens
 
             }
@@ -40,22 +41,16 @@ public class AnalizadorLineaSintactica {
         return linea;
     }
 
-    public Token getTokenActualContador(){
-        return tokens.get(tokenActualContador);
-    }
 
-    public void avanzarTokens(){
-        if (tokens.get(tokenActualContador +1).getLinea() == lineaActualContador){
+    public List<Token> obtenerLineaComoSublista(){
+        List<Token> linea = new ArrayList<>();
+        while(tokens.get(tokenActualContador +1).getLinea() == lineaActualContador){
             tokenActualContador += 1;
-        } else{
-            primerToken = tokens.get(tokenActualContador+1);
+            linea.add(tokens.get(tokenActualContador));
         }
-    }
-
-    public List<Token> devolverLinea(){
+        primerToken = tokens.get(tokenActualContador+1);
         return linea;
     }
-
 
 
 
