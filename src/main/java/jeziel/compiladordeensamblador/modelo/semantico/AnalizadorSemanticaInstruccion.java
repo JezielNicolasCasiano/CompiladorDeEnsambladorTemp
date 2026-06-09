@@ -124,7 +124,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
         Token op1 = tokens.get(1);
         Token op2 = tokens.get(3);
 
-        // 1. Validar que los símbolos estén definidos
+        // Validar que los símbolos estén definidos
         if (esVariableOSimbolo(op1) && !existeSimbolo(op1.getValue())) {
             ErrorSemantico error = new ErrorSemantico(op1);
             error.setMensajeError("Símbolo no definido: " + op1.getValue());
@@ -138,7 +138,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
             return;
         }
 
-        // 2. Restricción de memoria a memoria
+        // Restricción de memoria a memoria
         if (esOperandoMemoria(op1) && esOperandoMemoria(op2)) {
             ErrorSemantico error = new ErrorSemantico(op1);
             error.setMensajeError("No se permiten operaciones de memoria a memoria.");
@@ -146,7 +146,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
             return;
         }
 
-        // 3. Restricciones específicas para LDS
+        //  Restricciones específicas para LDS
         if (inst == TokenSubtype.Instruccion.LDS) {
             if (!esRegistroDe16Bits(op1)) {
                 ErrorSemantico error = new ErrorSemantico(op1);
@@ -164,7 +164,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
             return;
         }
 
-        // 4. Restricciones específicas para ROR
+        // Restricciones específicas para ROR
         if (inst == TokenSubtype.Instruccion.ROR) {
             boolean esValido = (op2.getType() == TokenType.CONSTANTE && obtenerValorNumerico(op2) == 1) ||
                                (op2.getType() == TokenType.REGISTRO && op2.getValue().equalsIgnoreCase("CL"));
@@ -178,7 +178,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
             return;
         }
 
-        // 5. Restricciones para Registros de Segmento (MOV / ADD)
+        // Restricciones para Registros de Segmento (MOV / ADD)
         if (esRegistroSegmento(op1)) {
             if (op1.getValue().equalsIgnoreCase("CS")) {
                 ErrorSemantico error = new ErrorSemantico(op1);
@@ -208,7 +208,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
             }
         }
 
-        // 6. Validación de tamaños de operandos
+        // Validación de tamaños de operandos
         int size1 = obtenerTamanoOperando(op1);
         int size2 = obtenerTamanoOperando(op2);
 
@@ -232,14 +232,14 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
             }
         }
 
-        // 7. Calcular el bit de dirección 'd'
+        // Calcular el bit de dirección d
         if (inst == TokenSubtype.Instruccion.MOV || inst == TokenSubtype.Instruccion.ADD) {
             if (op2.getType() == TokenType.CONSTANTE) {
                 dDeTipoDeDireccionamiento = "-"; // Instrucción de inmediato
             } else if (op1.getType() == TokenType.REGISTRO) {
-                dDeTipoDeDireccionamiento = "1"; // REG (op1) es destino
+                dDeTipoDeDireccionamiento = "1"; // op1 es destino
             } else if (op2.getType() == TokenType.REGISTRO) {
-                dDeTipoDeDireccionamiento = "0"; // REG (op2) es origen, memoria es destino
+                dDeTipoDeDireccionamiento = "0"; // op2 es origen, memoria es destino
             } else {
                 dDeTipoDeDireccionamiento = "-";
             }

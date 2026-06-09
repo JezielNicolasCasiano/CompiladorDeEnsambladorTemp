@@ -17,7 +17,7 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
     public void analizar() {
         String nombre = getPrimerToken().getValue();
 
-        // 1. Validar que el símbolo no esté duplicado
+        //Validar que el símbolo no esté duplicado
         for (LineaAnalizadaSemanticamente sym : getTablaDeSimbolos()) {
             if (sym.getLineaAnalizada() != getLineaAnalizada()) {
                 Token symToken = sym.getLineaAnalizada().getTokens().getFirst();
@@ -35,9 +35,9 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
             }
         }
 
-        // 2. Validar tipos y tamaños de los valores asignados
+        // Validar tipos y tamaños de los valores asignados
         if (getLineaAAnalizar().size() < 3) {
-            return; // Ya se atrapó en sintáctico
+            return; //Ya se atrapó en sintáctico
         }
 
         Token tokenTamano = getLineaAAnalizar().get(1);
@@ -48,7 +48,7 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
         for (int i = 2; i < getLineaAAnalizar().size(); i += 2) {
             Token tokenValor = getLineaAAnalizar().get(i);
             if (!validarValorParaTipo(tokenValor, esByte, esWord)) {
-                return; // ErrorSemantico ya fue asignado
+                return; //ErrorSemantico ya fue asignado
             }
         }
     }
@@ -60,7 +60,7 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
 
         if (tokenValor.getType() == TokenType.CADENA) {
             String str = tokenValor.getValue();
-            // Quitar comillas si están presentes
+            //Quitar comillas si están presentes
             if ((str.startsWith("\"") && str.endsWith("\"")) || (str.startsWith("'") && str.endsWith("'"))) {
                 str = str.substring(1, str.length() - 1);
             }

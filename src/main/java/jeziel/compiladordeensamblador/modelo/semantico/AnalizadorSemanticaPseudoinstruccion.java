@@ -46,7 +46,7 @@ public class AnalizadorSemanticaPseudoinstruccion extends AnalizadorSemanticoGen
         long val = obtenerValorNumerico(op);
         if (val < 0 || val > 65535) {
             ErrorSemantico error = new ErrorSemantico(op);
-            error.setMensajeError("La dirección de ORG " + op.getValue() + " excede el rango de 16 bits (0-65535).");
+            error.setMensajeError("La dirección de ORG " + op.getValue() + " excede el rango de 16 bits ");
             setErrorSemantico(error);
         }
     }

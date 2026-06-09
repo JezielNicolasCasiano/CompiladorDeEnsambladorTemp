@@ -29,7 +29,7 @@ public class AnalizadorNodoSintactico {
         LineaAnalizada lineaActual = arbolSintactico.get(lineaSintacticaActual);
         linea = new LineaAnalizadaSemanticamente(lineaActual);
 
-        // 1. Si la línea ya tiene un error sintáctico, se agrega tal cual
+        // Si la línea ya tiene un error sintáctico, se agrega tal cual
         if (lineaActual.tieneError()) {
             lineaSintacticaActual++;
             return linea;
@@ -42,8 +42,8 @@ public class AnalizadorNodoSintactico {
 
         Token primerToken = lineaActual.getTokens().getFirst();
 
-        // 2. Si es una variable o etiqueta, ya fueron procesadas en buscarSimbolos.
-        // Las buscamos y retornamos el DTO pre-analizado.
+        // Si es una variable o etiqueta, ya fueron procesadas en buscarSimbolos.
+        // Las buscamos y retornamos
         if (primerToken.getType() == TokenType.VARIABLE || primerToken.getType() == TokenType.ETIQUETA) {
             for (LineaAnalizadaSemanticamente sym : tablaDeSimbolos) {
                 if (sym.getLineaAnalizada() == lineaActual) {
@@ -56,7 +56,7 @@ public class AnalizadorNodoSintactico {
             return linea;
         }
 
-        // 3. Procesar instrucciones y pseudoinstrucciones
+        // Procesar instrucciones y pseudoinstrucciones
         if (primerToken.getType() == TokenType.INSTRUCCION) {
             AnalizadorSemanticaInstruccion analizadorInst = new AnalizadorSemanticaInstruccion(primerToken, lineaActual, tablaDeSimbolos);
             analizadorInst.analizar();
