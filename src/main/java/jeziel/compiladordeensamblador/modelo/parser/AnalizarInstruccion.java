@@ -91,7 +91,7 @@ public class AnalizarInstruccion extends AnalizadorGeneral{
         Token operando = tokens.get(1);
         if (!esOperandoValido(operando)) {
             setErrorSintactico(new ErrorSintactico(operando));
-            getErrorSintactico().setMensajeError("Operando inválido para la instrucción.");
+            getErrorSintactico().setMensajeError("Operando inválido");
         }
     }
 
@@ -114,7 +114,7 @@ public class AnalizarInstruccion extends AnalizadorGeneral{
 
         if (coma.getType() != TokenType.SEPARADOR) {
             setErrorSintactico(new ErrorSintactico(coma));
-            getErrorSintactico().setMensajeError("Se esperaba una coma ',' separando los operandos.");
+            getErrorSintactico().setMensajeError("Se esperaba separador.");
             return;
         }
 

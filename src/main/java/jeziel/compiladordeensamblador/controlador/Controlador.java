@@ -16,6 +16,12 @@ import jeziel.compiladordeensamblador.modelo.*;
 import jeziel.compiladordeensamblador.modelo.lexer.Lexer;
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
+import jeziel.compiladordeensamblador.modelo.parser.Parser;
+import jeziel.compiladordeensamblador.modelo.parser.LineaAnalizada;
+import jeziel.compiladordeensamblador.modelo.semantico.AnalizadorSemantico;
+import jeziel.compiladordeensamblador.modelo.semantico.LineaAnalizadaSemanticamente;
+import jeziel.compiladordeensamblador.modelo.semantico.DepuradorSemantico;
+import javafx.scene.Node;
 
 
 import java.io.File;
@@ -144,8 +150,26 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
 
     @FXML public void codificar(){
+        if (tokens == null || tokens.isEmpty()) return;
 
+        Parser parser = new Parser(tokens);
+        List<LineaAnalizada> arbolSintactico = parser.parsear();
 
+        AnalizadorSemantico analizadorSemantico = new AnalizadorSemantico(arbolSintactico);
+        List<LineaAnalizadaSemanticamente> analisisSemantico = analizadorSemantico.analizar();
+
+        // Metodo de depuración en consola
+        DepuradorSemantico.depurar(analisisSemantico);
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-maquina.fxml"));
+            loader.setControllerFactory(c -> new ControladorTablaMaquina(analisisSemantico));
+            Node tablaMaquinaNode = loader.load();
+
+            panelPrincipal.setRight(tablaMaquinaNode);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

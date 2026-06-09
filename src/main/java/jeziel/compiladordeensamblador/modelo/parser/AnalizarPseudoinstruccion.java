@@ -44,6 +44,7 @@ public class AnalizarPseudoinstruccion extends AnalizadorGeneral {
             case STACK_SEGMENT:
             case DATA_SEGMENT:
             case CODE_SEGMENT:
+            case ENDS:
                 validarSinParametros(tokens);
                 break;
 
@@ -52,7 +53,6 @@ public class AnalizarPseudoinstruccion extends AnalizadorGeneral {
             case MACRO:
             case ENDM:
             case SEGMENT:
-            case ENDS:
                 validarUnParametroIdentificador(tokens);
                 break;
 

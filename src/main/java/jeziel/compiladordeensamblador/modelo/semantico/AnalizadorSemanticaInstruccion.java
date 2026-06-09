@@ -75,7 +75,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
 
         if (operando.getType() == TokenType.CONSTANTE) {
             ErrorSemantico error = new ErrorSemantico(operando);
-            error.setMensajeError("El operando de la instrucción " + inst + " no puede ser una constante.");
+            error.setMensajeError("El operando de la instrucción no puede ser una constante.");
             setErrorSemantico(error);
             return;
         }
@@ -83,7 +83,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
         if (esVariableOSimbolo(operando)) {
             if (!existeSimbolo(operando.getValue())) {
                 ErrorSemantico error = new ErrorSemantico(operando);
-                error.setMensajeError("Símbolo no definido: " + operando.getValue());
+                error.setMensajeError("Símbolo no definido " + operando.getValue());
                 setErrorSemantico(error);
             }
         }
@@ -95,7 +95,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
 
         if (operando.getType() != TokenType.CONSTANTE) {
             ErrorSemantico error = new ErrorSemantico(operando);
-            error.setMensajeError("El operando de INT debe ser una constante.");
+            error.setMensajeError("El operando debe ser una constante.");
             setErrorSemantico(error);
             return;
         }
@@ -103,7 +103,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
         long val = obtenerValorNumerico(operando);
         if (val < 0 || val > 255) {
             ErrorSemantico error = new ErrorSemantico(operando);
-            error.setMensajeError("La interrupción " + operando.getValue() + " excede el rango válido (0-255).");
+            error.setMensajeError("La interrupción  excede el rango válido.");
             setErrorSemantico(error);
         }
     }
@@ -114,7 +114,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
 
         if (!existeSimbolo(operando.getValue())) {
             ErrorSemantico error = new ErrorSemantico(operando);
-            error.setMensajeError("Símbolo de salto no definido: " + operando.getValue());
+            error.setMensajeError("Símbolo de salto no definido " + operando.getValue());
             setErrorSemantico(error);
         }
     }
@@ -127,13 +127,13 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
         // Validar que los símbolos estén definidos
         if (esVariableOSimbolo(op1) && !existeSimbolo(op1.getValue())) {
             ErrorSemantico error = new ErrorSemantico(op1);
-            error.setMensajeError("Símbolo no definido: " + op1.getValue());
+            error.setMensajeError("Símbolo no definido " + op1.getValue());
             setErrorSemantico(error);
             return;
         }
         if (esVariableOSimbolo(op2) && !existeSimbolo(op2.getValue())) {
             ErrorSemantico error = new ErrorSemantico(op2);
-            error.setMensajeError("Símbolo no definido: " + op2.getValue());
+            error.setMensajeError("Símbolo no definido " + op2.getValue());
             setErrorSemantico(error);
             return;
         }
@@ -150,17 +150,17 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
         if (inst == TokenSubtype.Instruccion.LDS) {
             if (!esRegistroDe16Bits(op1)) {
                 ErrorSemantico error = new ErrorSemantico(op1);
-                error.setMensajeError("El primer operando de LDS debe ser un registro de 16 bits.");
+                error.setMensajeError("Operando invalido");
                 setErrorSemantico(error);
                 return;
             }
             if (!esOperandoMemoria(op2)) {
                 ErrorSemantico error = new ErrorSemantico(op2);
-                error.setMensajeError("El segundo operando de LDS debe ser una dirección de memoria.");
+                error.setMensajeError("Operando invalido");
                 setErrorSemantico(error);
                 return;
             }
-            dDeTipoDeDireccionamiento = "1"; // REG (op1) es destino
+            dDeTipoDeDireccionamiento = "1";
             return;
         }
 
@@ -170,7 +170,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
                                (op2.getType() == TokenType.REGISTRO && op2.getValue().equalsIgnoreCase("CL"));
             if (!esValido) {
                 ErrorSemantico error = new ErrorSemantico(op2);
-                error.setMensajeError("El segundo operando de ROR debe ser el número 1 o el registro CL.");
+                error.setMensajeError("Operando invalido");
                 setErrorSemantico(error);
                 return;
             }
@@ -182,7 +182,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
         if (esRegistroSegmento(op1)) {
             if (op1.getValue().equalsIgnoreCase("CS")) {
                 ErrorSemantico error = new ErrorSemantico(op1);
-                error.setMensajeError("El registro CS no puede ser el destino de una operación de modificación.");
+                error.setMensajeError("Operando invalido");
                 setErrorSemantico(error);
                 return;
             }
@@ -215,7 +215,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
         // Si ambos tienen un tamaño definido y no coinciden:
         if (size1 != -1 && size2 != -1 && size1 != size2) {
             ErrorSemantico error = new ErrorSemantico(op1);
-            error.setMensajeError("Conflicto de tamaños de operando: " + size1 + " bits vs " + size2 + " bits.");
+            error.setMensajeError("Conflicto de tamaños de operando");
             setErrorSemantico(error);
             return;
         }
@@ -226,7 +226,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
             int lim = (size1 == 8) ? 255 : 65535;
             if (val < 0 || val > lim) {
                 ErrorSemantico error = new ErrorSemantico(op2);
-                error.setMensajeError("La constante " + op2.getValue() + " excede el tamaño del operando destino (" + size1 + " bits).");
+                error.setMensajeError("La constante excede el tamaño del operando destino");
                 setErrorSemantico(error);
                 return;
             }

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Pagination?>
 <?import javafx.scene.layout.AnchorPane?>
 
 
-<AnchorPane fx:id="rootPane" prefHeight="524.0" prefWidth="550.0" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.ControladorTablaMaquina" />
+<AnchorPane fx:id="rootPane" prefHeight="555.0" prefWidth="795.0" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.ControladorTablaMaquina">
+   <children>
+      <Pagination fx:id="paginationMaquina" layoutY="8.0" prefHeight="547.0" prefWidth="795.0" stylesheets="@estilos.css" />
+   </children>
+</AnchorPane>

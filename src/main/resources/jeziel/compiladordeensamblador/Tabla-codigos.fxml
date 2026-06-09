@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Pagination?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="374.0" prefWidth="619.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.ControladorTablaCodigos">   <children>
-      <TableView fx:id="tablaCodigos" layoutX="14.0" layoutY="14.0" prefHeight="200.0" prefWidth="581.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <columns>
-          <TableColumn fx:id="columnaSimbolo" prefWidth="75.0" text="Simbolo" />
-          <TableColumn fx:id="columnaTipo" prefWidth="75.0" text="Tipo" />
-            <TableColumn fx:id="columnaValor" prefWidth="98.0" text="Valor" />
-            <TableColumn fx:id="columnaTamano" prefWidth="104.0" text="Tamaño" />
-            <TableColumn fx:id="columnaDireccion" prefWidth="85.0" text="Dirección" />
-        </columns>
-      </TableView>
+<AnchorPane prefHeight="374.0" prefWidth="619.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.ControladorTablaCodigos">
+   <children>
+      <Pagination prefHeight="374.0" prefWidth="619.0" stylesheets="@estilos.css" />
    </children>
 </AnchorPane>
