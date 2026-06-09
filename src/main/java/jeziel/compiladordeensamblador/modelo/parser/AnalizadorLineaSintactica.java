@@ -56,7 +56,7 @@ public class AnalizadorLineaSintactica {
                 if(analizarVariable.getErrorSintactico() != null) linea.setErrorSintactico(analizarVariable.getErrorSintactico());
             }
             default -> {
-                linea.setErrorSintactico(new ErrorSintactico(tokens.get(tokenActualContador)));
+                linea.setErrorSintactico(new ErrorSintactico(primerToken));
                 linea.getErrorSintactico().setMensajeError("Primer token de la linea invalido");
             }
         }
