@@ -2,6 +2,7 @@ package jeziel.compiladordeensamblador.modelo.parser;
 
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Parser {
@@ -14,6 +15,7 @@ public class Parser {
         this.tokens = tokens;
         this.actual = 0;
         this.analizadorLineaSintactica = new AnalizadorLineaSintactica(this.tokens);
+        this.ArbolLineal = new ArrayList<>();
 
     }
 
