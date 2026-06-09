@@ -1,6 +1,5 @@
 package jeziel.compiladordeensamblador.modelo.semantico;
 
-import jeziel.compiladordeensamblador.modelo.parser.ErrorSemantico;
 import jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico;
 import jeziel.compiladordeensamblador.modelo.parser.LineaAnalizada;
 

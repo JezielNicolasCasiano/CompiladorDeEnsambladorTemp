@@ -17,7 +17,7 @@ public class ErrorSintactico {
         this.tokenValue = tokenErroneo.getValue();
         this.tokenLinea = tokenErroneo.getLinea();
         this.tokenType = tokenErroneo.getType().toString();
-        this.tokenSubtype = tokenErroneo.getSub().toString();
+        this.tokenSubtype = tokenErroneo.getSub() != null ? tokenErroneo.getSub().toString() : "null";
 
     }
 

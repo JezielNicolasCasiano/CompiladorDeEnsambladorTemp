@@ -137,7 +137,7 @@ public class Lexer {
                 catch (IllegalArgumentException e) { return null; }
 
             case PSEUDOINSTRUCCION:
-                if (upper.equals("DUP")) {
+                if (upper.startsWith("DUP")) {
                     return TokenSubtype.Directiva.DUP;
                 }
                 try { return TokenSubtype.Directiva.valueOf(upper.replace(" ", "_").replace(".", "")); }
