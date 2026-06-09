@@ -1,5 +1,6 @@
 package jeziel.compiladordeensamblador.modelo.semantico;
 
+import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenSubtype;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
 import jeziel.compiladordeensamblador.modelo.parser.AnalizadorGeneral;
@@ -26,26 +27,56 @@ public class AnalizadorNodoSintactico {
             lineaSintacticaActual++;
             return linea;
         }
-        switch ()
 
-
+        return null;
 
     }
 
-    public LineaAnalizadaSemanticamente buscarSimbolos(){ //Si la linea entonctro un simbolo lo regresa, si no manda null que se desecha en el anlizador semantico
-        linea = new LineaAnalizadaSemanticamente(arbolSintactico.get(lineaSintacticaActual));
-        if(arbolSintactico.get(lineaSintacticaActual).tieneError() || !(arbolSintactico.get(lineaSintacticaActual).getTokens().getFirst().getType().equals(TokenType.VARIABLE)) || !(arbolSintactico.get(lineaSintacticaActual).getTokens().getFirst().getType().equals(TokenType.ETIQUETA) || !(arbolSintactico.get(lineaSintacticaActual).getTokens().getFirst().getSub().equals(TokenSubtype.Directiva.))){
+    public LineaAnalizadaSemanticamente buscarSimbolos() {
+        if (lineaSintacticaActual >= arbolSintactico.size()) {
+            return null;
+        }
+
+        LineaAnalizada lineaActual = arbolSintactico.get(lineaSintacticaActual);
+
+        if (lineaActual.tieneError() || lineaActual.getTokens().isEmpty()) {
             lineaSintacticaActual++;
             return null;
         }
-        switch (arbolSintactico.get(lineaSintacticaActual).getTokens().getFirst().getType()){
-            case VARIABLE ->
-            case ETIQUETA ->
-            case PSEUDOINSTRUCCION ->
-            case
-            default ->
-                    throw new IllegalStateException("Unexpected value: " + arbolSintactico.get(lineaSintacticaActual).getTokens().getFirst());
+
+        Token primerToken = lineaActual.getTokens().getFirst();
+
+        switch (primerToken.getType()) {
+            case VARIABLE:
+                linea = new LineaAnalizadaSemanticamente(lineaActual);
+
+                // Aquí delegarás el análisis a tu clase semántica específica
+                // AnalizarSemanticaVariable analizadorVar = new AnalizarSemanticaVariable(primerToken, lineaActual);
+                // analizadorVar.analizar();
+
+                lineaSintacticaActual++;
+                return linea;
+
+            case ETIQUETA:
+                linea = new LineaAnalizadaSemanticamente(lineaActual);
+
+                // Aquí delegarás a la clase específica de etiquetas
+                // AnalizarSemanticaEtiqueta analizadorEtq = new AnalizarSemanticaEtiqueta(primerToken, lineaActual);
+                // analizadorEtq.analizar();
+
+                lineaSintacticaActual++;
+                return linea;
+
+            default:
+
+                lineaSintacticaActual++;
+                return null;
         }
+    }
+
+    public int getLineaSintacticaActual() {
+        return lineaSintacticaActual;
+    }
 
 
 
@@ -53,4 +84,4 @@ public class AnalizadorNodoSintactico {
 
 
 
-}
+

@@ -1,5 +1,7 @@
 package jeziel.compiladordeensamblador.modelo.semantico;
 
+import jeziel.compiladordeensamblador.modelo.parser.ErrorSemantico;
+import jeziel.compiladordeensamblador.modelo.parser.ErrorSintactico;
 import jeziel.compiladordeensamblador.modelo.parser.LineaAnalizada;
 
 public class LineaAnalizadaSemanticamente {
@@ -7,6 +9,7 @@ public class LineaAnalizadaSemanticamente {
     private String tamanoInstruccion;
     private String direccion;
     private String dDeTipoDeDireccionamiento;
+    private ErrorSemantico errorSemantico;
 
     public LineaAnalizadaSemanticamente(LineaAnalizada lineaAnalizada) {
         this.lineaAnalizada = lineaAnalizada;
@@ -44,5 +47,13 @@ public class LineaAnalizadaSemanticamente {
 
     public void setdDeTipoDeDireccionamiento(String dDeTipoDeDireccionamiento) {
         this.dDeTipoDeDireccionamiento = dDeTipoDeDireccionamiento;
+    }
+
+    public ErrorSemantico getErrorSemantico() {
+        return errorSemantico;
+    }
+
+    public void setErrorSemantico(ErrorSemantico errorSemantico) {
+        this.errorSemantico = errorSemantico;
     }
 }
