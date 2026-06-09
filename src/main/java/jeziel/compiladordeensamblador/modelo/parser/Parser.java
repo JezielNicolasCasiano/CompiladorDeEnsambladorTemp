@@ -29,9 +29,9 @@ public class Parser {
             i = analizadorLineaSintactica.getTokenActualContador();
             LineaAnalizada linea = analizadorLineaSintactica.analizarLinea();
             ArbolLineal.add(linea);
-            analizadorLineaSintactica.setLineaActualContador(analizadorLineaSintactica.getLineaActualContador()+1);
+            analizadorLineaSintactica.setTokenActualContador(analizadorLineaSintactica.getTokenActualContador()+1);
         }
-        return null;
+        return ArbolLineal;
     }
 
 }

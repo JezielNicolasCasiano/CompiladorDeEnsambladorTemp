@@ -16,7 +16,6 @@ public class AnalizadorLineaSintactica {
     public AnalizadorLineaSintactica(List<Token> tokens){
         this.tokens = tokens;
         tokenActualContador = 0;
-        lineaActualContador = 0;
         primerToken = tokens.getFirst();
     }
 
@@ -54,20 +53,23 @@ public class AnalizadorLineaSintactica {
                 analizarVariable.analizar();
                 if(analizarVariable.getErrorSintactico() != null) linea.setErrorSintactico(analizarVariable.getErrorSintactico());
             }
+            default -> {
+                linea.setErrorSintactico(new ErrorSintactico(tokens.get(tokenActualContador)));
+                linea.getErrorSintactico().setMensajeError("Primer token de la linea invalido");
+            }
         }
-
         return linea;
     }
 
-
     public List<Token> obtenerLineaComoSublista(){
-        List<Token> linea = new ArrayList<>();
-        while(tokens.get(tokenActualContador +1).getLinea() == lineaActualContador && tokens.size() > tokenActualContador){ //Condicion para excepcion indexOutOfBounes
-            tokenActualContador += 1;
-            linea.add(tokens.get(tokenActualContador));
+        List<Token> tokensLinea = new ArrayList<>();
+
+        while(tokenActualContador < tokens.size() && tokens.get(tokenActualContador).getLinea() == lineaActualContador){
+            tokensLinea.add(tokens.get(tokenActualContador));
+            tokenActualContador++;
         }
-        primerToken = tokens.get(tokenActualContador+1);
-        return linea;
+
+        return tokensLinea;
     }
 
 
