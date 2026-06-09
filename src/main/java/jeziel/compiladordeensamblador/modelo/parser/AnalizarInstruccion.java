@@ -9,5 +9,10 @@ public class AnalizarInstruccion extends AnalizadorGeneral{
     public AnalizarInstruccion(Token primerToken, List<Token> lineaAAnalizar) {
         super(primerToken, lineaAAnalizar);
     }
+
+    @Override
+    public void analizar() {
+
+    }
 }
 

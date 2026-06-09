@@ -25,20 +25,25 @@ public class AnalizadorLineaSintactica {
         el evento que devuelve la linea es que los siguientes tokens en su atributo linea sean diferente a la linea que tiene este anlizador como atributo
          */
 
-        linea = new LineaAnalizada(tokenActualContador, obtenerLineaComoSublista());
+        linea = new LineaAnalizada(lineaActualContador, obtenerLineaComoSublista());
         //Declaracion de las clasese de analisis especifico
         AnalizarEtiqueta analizarEtiqueta;
         AnalizarInstruccion analizarInstruccion;
         AnalizarPseudoinstruccion analizarPseudoinstruccion;
         AnalizarVariable analizarVariable;
-        LineaAnalizada lineaAnalizada;
         //y clase qeu se va a regregar a parser LineaAnalizada
         // Se utiliza un switch para mandarlos a clases dedicadas a la autenticacion de la sintaxis dependiendo de cual es el primer token de la linea
         switch(primerToken.getType()){
                 case PSEUDOINSTRUCCION -> analizarPseudoinstruccion = new AnalizarPseudoinstruccion(primerToken, obtenerLineaComoSublista());//Se manda la sublista completa de la linea a analizar
                 case INSTRUCCION -> analizarInstruccion = new AnalizarInstruccion(primerToken, obtenerLineaComoSublista());
-                case ETIQUETA -> analizarEtiqueta = new AnalizarEtiqueta(primerToken, obtenerLineaComoSublista());
-                case VARIABLE -> analizarVariable = new AnalizarVariable(primerToken, obtenerLineaComoSublista());
+            case ETIQUETA -> {
+                analizarEtiqueta = new AnalizarEtiqueta(primerToken, obtenerLineaComoSublista());
+                analizarEtiqueta.analizar();
+                if (analizarEtiqueta.getErrorSintactico() != null) linea.setErrorSintactico(analizarEtiqueta.getErrorSintactico());
+                break;
+
+            }
+            case VARIABLE -> analizarVariable = new AnalizarVariable(primerToken, obtenerLineaComoSublista());
             }
 
         return linea;

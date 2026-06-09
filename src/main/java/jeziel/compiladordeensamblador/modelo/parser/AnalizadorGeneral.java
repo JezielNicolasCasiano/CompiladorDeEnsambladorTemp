@@ -4,15 +4,18 @@ import jeziel.compiladordeensamblador.modelo.lexer.Token;
 
 import java.util.List;
 
-public class AnalizadorGeneral {
+public abstract class AnalizadorGeneral {
     private ErrorSintactico errorSintactico;
     private List<Token> lineaAAnalizar;
     private LineaAnalizada lineaAnalizada;
+    private Token primerToken;
 
     public AnalizadorGeneral(Token primerToken, List<Token> lineaAAnalizar){
         this.lineaAAnalizar = lineaAAnalizar;
+        this.primerToken = primerToken;
     }
 
+    public abstract void analizar();
 
 
 
@@ -40,5 +43,13 @@ public class AnalizadorGeneral {
 
     public void setLineaAnalizada(LineaAnalizada lineaAnalizada) {
         this.lineaAnalizada = lineaAnalizada;
+    }
+
+    public Token getPrimerToken() {
+        return primerToken;
+    }
+
+    public void setPrimerToken(Token primerToken) {
+        this.primerToken = primerToken;
     }
 }

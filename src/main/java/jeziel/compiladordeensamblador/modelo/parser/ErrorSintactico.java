@@ -25,4 +25,57 @@ public class ErrorSintactico {
 
     }
 
+
+
+
+    //getters y setters
+
+
+    public Token getTokenErroneo() {
+        return tokenErroneo;
+    }
+
+    public void setTokenErroneo(Token tokenErroneo) {
+        this.tokenErroneo = tokenErroneo;
+    }
+
+    public String getTokenValue() {
+        return tokenValue;
+    }
+
+    public void setTokenValue(String tokenValue) {
+        this.tokenValue = tokenValue;
+    }
+
+    public int getTokenLinea() {
+        return tokenLinea;
+    }
+
+    public void setTokenLinea(int tokenLinea) {
+        this.tokenLinea = tokenLinea;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
+    }
+
+    public String getTokenSubtype() {
+        return tokenSubtype;
+    }
+
+    public void setTokenSubtype(String tokenSubtype) {
+        this.tokenSubtype = tokenSubtype;
+    }
+
+    public String getMensajeError() {
+        return mensajeError;
+    }
+
+    public void setMensajeError(String mensajeError) {
+        this.mensajeError = mensajeError;
+    }
 }
