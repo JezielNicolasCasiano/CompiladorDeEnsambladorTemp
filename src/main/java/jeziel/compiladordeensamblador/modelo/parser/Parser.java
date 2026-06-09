@@ -17,16 +17,18 @@ public class Parser {
 
     }
 
-    public Token avanzarToken(){
-        return tokens.get(actual+1);
-    }
-
-    public List<List<Token>> parsear(){
+    public List<LineaAnalizada> parsear(){
         /* Metodo princial, orquesta toda la operacion pero no hace directamente el analisis, para eso esta el anlizadorLineaSintactico que lo hace
         linea por linea. En esta parte tiene que haber un ciclo que vaya cambiando la liena del analizador linea por linea, ademas de ir armando el arbol
         final.
          */
-
+        int i = analizadorLineaSintactica.getTokenActualContador();
+        while(i < tokens.size()){
+            i = analizadorLineaSintactica.getTokenActualContador();
+            LineaAnalizada linea = analizadorLineaSintactica.analizarLinea();
+            ArbolLineal.add(linea);
+            analizadorLineaSintactica.setLineaActualContador(analizadorLineaSintactica.getLineaActualContador()+1);
+        }
         return null;
     }
 

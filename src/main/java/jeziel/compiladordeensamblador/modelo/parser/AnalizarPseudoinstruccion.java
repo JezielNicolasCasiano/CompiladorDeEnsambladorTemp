@@ -41,6 +41,9 @@ public class AnalizarPseudoinstruccion extends AnalizadorGeneral {
             case STACK:
             case STARTUP:
             case EXIT:
+            case STACK_SEGMENT:
+            case DATA_SEGMENT:
+            case CODE_SEGMENT:
                 validarSinParametros(tokens);
                 break;
 

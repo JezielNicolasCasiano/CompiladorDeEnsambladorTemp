@@ -24,10 +24,10 @@ public class AnalizarVariable extends AnalizadorGeneral{
         Token tokenTamano = getLineaAAnalizar().get(1);
         Token tokenValor = getLineaAAnalizar().get(2);
 
-        // Validar que el segundo token sea una directiva de tamaño válida
+        // Validar que el segundo token sea una pseudoinstruccion de tamaño válida
         if (tokenTamano.getType() != TokenType.PSEUDOINSTRUCCION) {
             setErrorSintactico(new ErrorSintactico(tokenTamano));
-            getErrorSintactico().setMensajeError("Se esperaba una pseudoinstruccion de tamaño (DB, DW, EQU)");
+            getErrorSintactico().setMensajeError("Tamaño invalido");
             return;
         }
 
@@ -37,7 +37,7 @@ public class AnalizarVariable extends AnalizadorGeneral{
                 subtipo != TokenSubtype.Directiva.EQU) {
 
             setErrorSintactico(new ErrorSintactico(tokenTamano));
-            getErrorSintactico().setMensajeError("Pseudoinstruccion de tamaño invalida");
+            getErrorSintactico().setMensajeError("Tamaño invalida");
             return;
         }
 
@@ -71,7 +71,7 @@ public class AnalizarVariable extends AnalizadorGeneral{
             if (i % 2 != 0) {
                 if (actual.getType() != TokenType.SEPARADOR) {
                     setErrorSintactico(new ErrorSintactico(actual));
-                    getErrorSintactico().setMensajeError("Se esperaba separador");
+                    getErrorSintactico().setMensajeError("Se esperaba serparador (coma)");
                     return;
                 }
             }

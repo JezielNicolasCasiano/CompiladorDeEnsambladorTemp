@@ -34,17 +34,27 @@ public class AnalizadorLineaSintactica {
         //y clase qeu se va a regregar a parser LineaAnalizada
         // Se utiliza un switch para mandarlos a clases dedicadas a la autenticacion de la sintaxis dependiendo de cual es el primer token de la linea
         switch(primerToken.getType()){
-                case PSEUDOINSTRUCCION -> analizarPseudoinstruccion = new AnalizarPseudoinstruccion(primerToken, obtenerLineaComoSublista());//Se manda la sublista completa de la linea a analizar
-                case INSTRUCCION -> analizarInstruccion = new AnalizarInstruccion(primerToken, obtenerLineaComoSublista());
+            case PSEUDOINSTRUCCION -> {
+                analizarPseudoinstruccion = new AnalizarPseudoinstruccion(primerToken, obtenerLineaComoSublista()); //Se manda la sublista completa de la linea a analizar
+                analizarPseudoinstruccion.analizar();
+                if(analizarPseudoinstruccion.getErrorSintactico() != null) linea.setErrorSintactico(analizarPseudoinstruccion.getErrorSintactico());
+            }
+            case INSTRUCCION -> {
+                analizarInstruccion = new AnalizarInstruccion(primerToken, obtenerLineaComoSublista());
+                analizarInstruccion.analizar();
+                if(analizarInstruccion.getErrorSintactico() != null) linea.setErrorSintactico(analizarInstruccion.getErrorSintactico());
+            }
             case ETIQUETA -> {
                 analizarEtiqueta = new AnalizarEtiqueta(primerToken, obtenerLineaComoSublista());
                 analizarEtiqueta.analizar();
                 if (analizarEtiqueta.getErrorSintactico() != null) linea.setErrorSintactico(analizarEtiqueta.getErrorSintactico());
-                break;
-
             }
-            case VARIABLE -> analizarVariable = new AnalizarVariable(primerToken, obtenerLineaComoSublista());
+            case VARIABLE -> {
+                analizarVariable = new AnalizarVariable(primerToken, obtenerLineaComoSublista());
+                analizarVariable.analizar();
+                if(analizarVariable.getErrorSintactico() != null) linea.setErrorSintactico(analizarVariable.getErrorSintactico());
             }
+        }
 
         return linea;
     }
