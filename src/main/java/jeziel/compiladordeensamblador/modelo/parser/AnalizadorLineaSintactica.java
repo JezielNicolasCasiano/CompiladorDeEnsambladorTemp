@@ -25,7 +25,8 @@ public class AnalizadorLineaSintactica {
          */
         primerToken = tokens.get(tokenActualContador);
         lineaActualContador = tokens.get(tokenActualContador).getLinea();
-        linea = new LineaAnalizada(lineaActualContador, obtenerLineaComoSublista());
+        List<Token> lineaComoSublista = obtenerLineaComoSublista();
+        linea = new LineaAnalizada(lineaActualContador, lineaComoSublista);
         //Declaracion de las clasese de analisis especifico
         AnalizarEtiqueta analizarEtiqueta;
         AnalizarInstruccion analizarInstruccion;
@@ -35,22 +36,22 @@ public class AnalizadorLineaSintactica {
         // Se utiliza un switch para mandarlos a clases dedicadas a la autenticacion de la sintaxis dependiendo de cual es el primer token de la linea
         switch(primerToken.getType()){
             case PSEUDOINSTRUCCION -> {
-                analizarPseudoinstruccion = new AnalizarPseudoinstruccion(primerToken, obtenerLineaComoSublista()); //Se manda la sublista completa de la linea a analizar
+                analizarPseudoinstruccion = new AnalizarPseudoinstruccion(primerToken, lineaComoSublista); //Se manda la sublista completa de la linea a analizar
                 analizarPseudoinstruccion.analizar();
                 if(analizarPseudoinstruccion.getErrorSintactico() != null) linea.setErrorSintactico(analizarPseudoinstruccion.getErrorSintactico());
             }
             case INSTRUCCION -> {
-                analizarInstruccion = new AnalizarInstruccion(primerToken, obtenerLineaComoSublista());
+                analizarInstruccion = new AnalizarInstruccion(primerToken, lineaComoSublista);
                 analizarInstruccion.analizar();
                 if(analizarInstruccion.getErrorSintactico() != null) linea.setErrorSintactico(analizarInstruccion.getErrorSintactico());
             }
             case ETIQUETA -> {
-                analizarEtiqueta = new AnalizarEtiqueta(primerToken, obtenerLineaComoSublista());
+                analizarEtiqueta = new AnalizarEtiqueta(primerToken, lineaComoSublista);
                 analizarEtiqueta.analizar();
                 if (analizarEtiqueta.getErrorSintactico() != null) linea.setErrorSintactico(analizarEtiqueta.getErrorSintactico());
             }
             case VARIABLE -> {
-                analizarVariable = new AnalizarVariable(primerToken, obtenerLineaComoSublista());
+                analizarVariable = new AnalizarVariable(primerToken, lineaComoSublista);
                 analizarVariable.analizar();
                 if(analizarVariable.getErrorSintactico() != null) linea.setErrorSintactico(analizarVariable.getErrorSintactico());
             }

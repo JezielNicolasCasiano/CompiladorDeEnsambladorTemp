@@ -24,9 +24,7 @@ public class Parser {
         linea por linea. En esta parte tiene que haber un ciclo que vaya cambiando la liena del analizador linea por linea, ademas de ir armando el arbol
         final.
          */
-        int i = analizadorLineaSintactica.getTokenActualContador();
-        while(i < tokens.size()){
-            i = analizadorLineaSintactica.getTokenActualContador();
+        while(analizadorLineaSintactica.getTokenActualContador() <= tokens.size()){
             LineaAnalizada linea = analizadorLineaSintactica.analizarLinea();
             if (linea != null && !linea.getTokens().isEmpty()) {
                 ArbolLineal.add(linea);
