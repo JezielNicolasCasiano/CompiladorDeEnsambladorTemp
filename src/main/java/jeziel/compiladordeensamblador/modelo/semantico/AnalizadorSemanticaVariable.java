@@ -122,6 +122,10 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
             String valStr = tokenValor.getValue();
             String innerValue = obtenerValorDeDup(valStr);
             if (!innerValue.isEmpty() && !innerValue.equals("?")) {
+                if ((innerValue.startsWith("'") && innerValue.endsWith("'")) || (innerValue.startsWith("\"") && innerValue.endsWith("\""))) {
+                    Token tempToken = new Token(TokenType.CADENA, innerValue, tokenValor.getLinea());
+                    return validarValorParaTipo(tempToken, esByte, esWord);
+                }
                 // Crear un token temporal para validar el valor interno
                 Token tempToken = new Token(TokenType.CONSTANTE, innerValue, tokenValor.getLinea());
                 // Autodetectar el subtipo de constante

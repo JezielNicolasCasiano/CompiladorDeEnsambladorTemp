@@ -157,16 +157,31 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
 
         AnalizadorSemantico analizadorSemantico = new AnalizadorSemantico(arbolSintactico);
         List<LineaAnalizadaSemanticamente> analisisSemantico = analizadorSemantico.analizar();
+        List<LineaAnalizadaSemanticamente> tablaDeSimbolos = analizadorSemantico.getTablaDeSimbolos();
 
         // Metodo de depuración en consola
         DepuradorSemantico.depurar(analisisSemantico);
 
         try {
+            // Cargar y mostrar la tabla de máquina en el panel derecho
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-maquina.fxml"));
             loader.setControllerFactory(c -> new ControladorTablaMaquina(analisisSemantico));
             Node tablaMaquinaNode = loader.load();
-
             panelPrincipal.setRight(tablaMaquinaNode);
+
+            // Cargar y mostrar la tabla de símbolos en el VBox inferior
+            FXMLLoader loaderCodigos = new FXMLLoader(getClass().getResource("/jeziel/compiladordeensamblador/Tabla-codigos.fxml"));
+            loaderCodigos.setControllerFactory(c -> new ControladorTablaCodigos(tablaDeSimbolos));
+            Node tablaCodigosNode = loaderCodigos.load();
+
+            if (tablaCodigosNode instanceof javafx.scene.layout.Region) {
+                ((javafx.scene.layout.Region) tablaCodigosNode).prefWidthProperty().bind(contenedorTabla.widthProperty());
+            }
+
+            if (contenedorTabla.getChildren().size() > 1) {
+                contenedorTabla.getChildren().subList(1, contenedorTabla.getChildren().size()).clear();
+            }
+            contenedorTabla.getChildren().add(tablaCodigosNode);
         } catch (IOException e) {
             e.printStackTrace();
         }

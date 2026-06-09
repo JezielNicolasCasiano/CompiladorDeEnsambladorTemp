@@ -3,9 +3,8 @@
 <?import javafx.scene.control.Pagination?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
 <AnchorPane fx:id="rootPane" prefHeight="555.0" prefWidth="795.0" stylesheets="@estilos.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="jeziel.compiladordeensamblador.controlador.ControladorTablaMaquina">
    <children>
-      <Pagination fx:id="paginationMaquina" layoutY="8.0" prefHeight="547.0" prefWidth="795.0" stylesheets="@estilos.css" />
+      <Pagination fx:id="paginationMaquina" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" stylesheets="@estilos.css" />
    </children>
 </AnchorPane>

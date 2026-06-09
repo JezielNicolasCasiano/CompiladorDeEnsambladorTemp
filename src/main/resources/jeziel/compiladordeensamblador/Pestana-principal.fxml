@@ -39,7 +39,7 @@
                <children>
                   <AnchorPane>
                      <children>
-                        <Button fx:id="codificarBoton" layoutX="1129.0" layoutY="6.0" mnemonicParsing="false" onAction="#codificar" text="Button" />
+                        <Button fx:id="codificarBoton" layoutX="1129.0" layoutY="6.0" mnemonicParsing="false" onAction="#codificar" text="Codificar" />
                      </children>
                   </AnchorPane>
                </children>
