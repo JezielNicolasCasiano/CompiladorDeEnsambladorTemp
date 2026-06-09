@@ -15,40 +15,46 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
 
     @Override
     public void analizar() {
-        String nombre = getPrimerToken().getValue();
+        boolean tieneIdentificador = (getPrimerToken().getType() == TokenType.VARIABLE);
 
-        //Validar que el símbolo no esté duplicado
-        for (LineaAnalizadaSemanticamente sym : getTablaDeSimbolos()) {
-            if (sym.getLineaAnalizada() != getLineaAnalizada()) {
-                Token symToken = sym.getLineaAnalizada().getTokens().getFirst();
-                String symNombre = symToken.getValue();
-                // Normalizar nombres (eliminar posibles dos puntos de etiquetas)
-                if (symNombre.endsWith(":")) {
-                    symNombre = symNombre.substring(0, symNombre.length() - 1);
-                }
-                if (symNombre.equalsIgnoreCase(nombre)) {
-                    ErrorSemantico error = new ErrorSemantico(getPrimerToken());
-                    error.setMensajeError("Símbolo duplicado: " + nombre);
-                    setErrorSemantico(error);
-                    return;
+        if (tieneIdentificador) {
+            String nombre = getPrimerToken().getValue();
+            //Validar que el símbolo no esté duplicado
+            for (LineaAnalizadaSemanticamente sym : getTablaDeSimbolos()) {
+                if (sym.getLineaAnalizada() != getLineaAnalizada()) {
+                    Token symToken = sym.getLineaAnalizada().getTokens().getFirst();
+                    String symNombre = symToken.getValue();
+                    // Normalizar nombres
+                    if (symNombre.endsWith(":")) {
+                        symNombre = symNombre.substring(0, symNombre.length() - 1);
+                    }
+                    if (symNombre.equalsIgnoreCase(nombre)) {
+                        ErrorSemantico error = new ErrorSemantico(getPrimerToken());
+                        error.setMensajeError("Símbolo duplicado: " + nombre);
+                        setErrorSemantico(error);
+                        return;
+                    }
                 }
             }
         }
 
         // Validar tipos y tamaños de los valores asignados
-        if (getLineaAAnalizar().size() < 3) {
+        int minSize = tieneIdentificador ? 3 : 2;
+        if (getLineaAAnalizar().size() < minSize) {
             return; //Ya se atrapó en sintáctico
         }
 
-        Token tokenTamano = getLineaAAnalizar().get(1);
+        Token tokenTamano = tieneIdentificador ? getLineaAAnalizar().get(1) : getPrimerToken();
         Object subtipoDirectiva = tokenTamano.getSub();
         boolean esByte = (subtipoDirectiva == TokenSubtype.Directiva.DB);
         boolean esWord = (subtipoDirectiva == TokenSubtype.Directiva.DW);
 
-        // Si es la estructura especial: VARIABLE PSEUDOINSTRUCCION CONSTANTE DUP
-        if (getLineaAAnalizar().size() == 4) {
-            Token tokenCount = getLineaAAnalizar().get(2);
-            Token tokenDup = getLineaAAnalizar().get(3);
+        int idxValor = tieneIdentificador ? 2 : 1;
+
+        int expectedSizeForDup = tieneIdentificador ? 4 : 3;
+        if (getLineaAAnalizar().size() == expectedSizeForDup) {
+            Token tokenCount = getLineaAAnalizar().get(idxValor);
+            Token tokenDup = getLineaAAnalizar().get(idxValor + 1);
             if (tokenCount.getType() == TokenType.CONSTANTE &&
                 tokenDup.getType() == TokenType.PSEUDOINSTRUCCION &&
                 tokenDup.getSub() == TokenSubtype.Directiva.DUP) {
@@ -84,7 +90,7 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
             }
         }
 
-        for (int i = 2; i < getLineaAAnalizar().size(); i += 2) {
+        for (int i = idxValor; i < getLineaAAnalizar().size(); i += 2) {
             Token tokenValor = getLineaAAnalizar().get(i);
             if (!validarValorParaTipo(tokenValor, esByte, esWord)) {
                 return;
@@ -105,7 +111,7 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
             }
             if (esWord && str.length() > 2) {
                 ErrorSemantico error = new ErrorSemantico(tokenValor);
-                error.setMensajeError("La cadena es demasiado larga para un WORD: '" + tokenValor.getValue() + "'");
+                error.setMensajeError("La cadena es demasiado larga");
                 setErrorSemantico(error);
                 return false;
             }
@@ -150,21 +156,21 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
             }
         } catch (NumberFormatException e) {
             ErrorSemantico error = new ErrorSemantico(tokenConst);
-            error.setMensajeError("Formato numérico inválido: " + tokenConst.getValue());
+            error.setMensajeError("Formato numérico inválido");
             setErrorSemantico(error);
             return false;
         }
 
         if (esByte && (value < 0 || value > 255)) {
             ErrorSemantico error = new ErrorSemantico(tokenConst);
-            error.setMensajeError("El valor " + tokenConst.getValue() + " excede el tamaño de un BYTE (0-255)");
+            error.setMensajeError("El valor excede el tamaño");
             setErrorSemantico(error);
             return false;
         }
 
         if (esWord && (value < 0 || value > 65535)) {
             ErrorSemantico error = new ErrorSemantico(tokenConst);
-            error.setMensajeError("El valor " + tokenConst.getValue() + " excede el tamaño de un WORD (0-65535)");
+            error.setMensajeError("El valor excede el tamaño");
             setErrorSemantico(error);
             return false;
         }

@@ -63,10 +63,26 @@ public class AnalizadorNodoSintactico {
             linea.setErrorSemantico(analizadorInst.getErrorSemantico());
             linea.setdDeTipoDeDireccionamiento(analizadorInst.getdDeTipoDeDireccionamiento());
         } else if (primerToken.getType() == TokenType.PSEUDOINSTRUCCION) {
-            AnalizadorSemanticaPseudoinstruccion analizadorPseudo = new AnalizadorSemanticaPseudoinstruccion(primerToken, lineaActual, tablaDeSimbolos);
-            analizadorPseudo.analizar();
-            linea.setErrorSemantico(analizadorPseudo.getErrorSemantico());
-            linea.setdDeTipoDeDireccionamiento("-");
+            if (primerToken.getSub() == TokenSubtype.Directiva.DB ||
+                primerToken.getSub() == TokenSubtype.Directiva.DW ||
+                primerToken.getSub() == TokenSubtype.Directiva.EQU) {
+                AnalizadorSemanticaVariable analizadorVar = new AnalizadorSemanticaVariable(primerToken, lineaActual, tablaDeSimbolos);
+                analizadorVar.analizar();
+                linea.setErrorSemantico(analizadorVar.getErrorSemantico());
+                linea.setdDeTipoDeDireccionamiento("-");
+                if (primerToken.getSub() == TokenSubtype.Directiva.DB) {
+                    linea.setTamanoInstruccion("BYTE");
+                } else if (primerToken.getSub() == TokenSubtype.Directiva.DW) {
+                    linea.setTamanoInstruccion("WORD");
+                } else if (primerToken.getSub() == TokenSubtype.Directiva.EQU) {
+                    linea.setTamanoInstruccion("EQU");
+                }
+            } else {
+                AnalizadorSemanticaPseudoinstruccion analizadorPseudo = new AnalizadorSemanticaPseudoinstruccion(primerToken, lineaActual, tablaDeSimbolos);
+                analizadorPseudo.analizar();
+                linea.setErrorSemantico(analizadorPseudo.getErrorSemantico());
+                linea.setdDeTipoDeDireccionamiento("-");
+            }
         } else {
             linea.setdDeTipoDeDireccionamiento("-");
         }

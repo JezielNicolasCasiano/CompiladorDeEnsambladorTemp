@@ -14,17 +14,25 @@ public class AnalizarVariable extends AnalizadorGeneral{
 
     @Override
     public void analizar() {
-        if (getLineaAAnalizar().size() < 3) {
-            setErrorSintactico(new ErrorSintactico(getLineaAAnalizar().getLast()));
+        List<Token> tokens = getLineaAAnalizar();
+        if (tokens.isEmpty()) return;
+
+        boolean tieneIdentificador = (tokens.get(0).getType() == TokenType.VARIABLE);
+        int idxTamano = tieneIdentificador ? 1 : 0;
+        int idxValor = tieneIdentificador ? 2 : 1;
+
+        int minSize = tieneIdentificador ? 3 : 2;
+
+        if (tokens.size() < minSize) {
+            setErrorSintactico(new ErrorSintactico(tokens.get(tokens.size() - 1)));
             getErrorSintactico().setMensajeError("Declaración incompleta");
             return;
         }
 
-        Token tokenNombre = getLineaAAnalizar().get(0);
-        Token tokenTamano = getLineaAAnalizar().get(1);
-        Token tokenValor = getLineaAAnalizar().get(2);
+        Token tokenTamano = tokens.get(idxTamano);
+        Token tokenValor = tokens.get(idxValor);
 
-        // Validar que el segundo token sea una pseudoinstruccion de tamaño válida
+        // Validar que el token de tamaño sea una pseudoinstruccion de tamaño válida
         if (tokenTamano.getType() != TokenType.PSEUDOINSTRUCCION) {
             setErrorSintactico(new ErrorSintactico(tokenTamano));
             getErrorSintactico().setMensajeError("Tamaño invalido");
@@ -41,11 +49,11 @@ public class AnalizarVariable extends AnalizadorGeneral{
             return;
         }
 
-        // Si es la estructura especial: VARIABLE PSEUDOINSTRUCCION CONSTANTE DUP
-        // por ejemplo: var1 db 32 dup(0)
-        if (getLineaAAnalizar().size() == 4) {
-            Token tokenCount = getLineaAAnalizar().get(2);
-            Token tokenDup = getLineaAAnalizar().get(3);
+
+        int expectedSizeForDup = tieneIdentificador ? 4 : 3;
+        if (tokens.size() == expectedSizeForDup) {
+            Token tokenCount = tokens.get(idxValor);
+            Token tokenDup = tokens.get(idxValor + 1);
             if (tokenCount.getType() == TokenType.CONSTANTE &&
                 tokenDup.getType() == TokenType.PSEUDOINSTRUCCION &&
                 tokenDup.getSub() == TokenSubtype.Directiva.DUP) {
@@ -61,8 +69,8 @@ public class AnalizarVariable extends AnalizadorGeneral{
         }
 
         // Validar si es un arreglo separado por comas
-        if (getLineaAAnalizar().size() > 3) {
-            validarArreglo(3);
+        if (tokens.size() > minSize) {
+            validarArreglo(idxValor + 1);
         }
     }
 
@@ -91,7 +99,7 @@ public class AnalizarVariable extends AnalizadorGeneral{
             } else {
                 if (!esValorValido(actual)) {
                     setErrorSintactico(new ErrorSintactico(actual));
-                    getErrorSintactico().setMensajeError("Valor de arreglo inváli");
+                    getErrorSintactico().setMensajeError("Valor de arreglo inválido");
                     return;
                 }
                 esperarComa = true;
