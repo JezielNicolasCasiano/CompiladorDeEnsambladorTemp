@@ -41,6 +41,18 @@ public class AnalizarVariable extends AnalizadorGeneral{
             return;
         }
 
+        // Si es la estructura especial: VARIABLE PSEUDOINSTRUCCION CONSTANTE DUP
+        // por ejemplo: var1 db 32 dup(0)
+        if (getLineaAAnalizar().size() == 4) {
+            Token tokenCount = getLineaAAnalizar().get(2);
+            Token tokenDup = getLineaAAnalizar().get(3);
+            if (tokenCount.getType() == TokenType.CONSTANTE &&
+                tokenDup.getType() == TokenType.PSEUDOINSTRUCCION &&
+                tokenDup.getSub() == TokenSubtype.Directiva.DUP) {
+                return; // Es sintácticamente correcto
+            }
+        }
+
         //Validar que el valor inicial sea de un tipo permitido
         if (!esValorValido(tokenValor)) {
             setErrorSintactico(new ErrorSintactico(tokenValor));
@@ -63,25 +75,32 @@ public class AnalizarVariable extends AnalizadorGeneral{
                 (t == TokenType.PSEUDOINSTRUCCION && token.getSub() == TokenSubtype.Directiva.DUP);
     }
 
-    // Método auxiliar para validar arreglos de datos
     private void validarArreglo(int indiceInicio) {
+        boolean esperarComa = true;
+
         for (int i = indiceInicio; i < getLineaAAnalizar().size(); i++) {
             Token actual = getLineaAAnalizar().get(i);
 
-            if (i % 2 != 0) {
+            if (esperarComa) {
                 if (actual.getType() != TokenType.SEPARADOR) {
                     setErrorSintactico(new ErrorSintactico(actual));
-                    getErrorSintactico().setMensajeError("Se esperaba serparador (coma)");
+                    getErrorSintactico().setMensajeError("Se esperaba separador");
                     return;
                 }
-            }
-            else {
+                esperarComa = false; // El siguiente token debe ser un valor
+            } else {
                 if (!esValorValido(actual)) {
                     setErrorSintactico(new ErrorSintactico(actual));
-                    getErrorSintactico().setMensajeError("Valor de arreglo inválido.");
+                    getErrorSintactico().setMensajeError("Valor de arreglo inváli");
                     return;
                 }
+                esperarComa = true;
             }
+        }
+
+        if (!esperarComa && getLineaAAnalizar().size() > indiceInicio) {
+            setErrorSintactico(new ErrorSintactico(getLineaAAnalizar().getLast()));
+            getErrorSintactico().setMensajeError("Declaración de arreglo incompleta");
         }
     }
 }

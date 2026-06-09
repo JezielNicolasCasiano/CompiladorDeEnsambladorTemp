@@ -45,10 +45,49 @@ public class AnalizadorSemanticaVariable extends AnalizadorSemanticoGeneral {
         boolean esByte = (subtipoDirectiva == TokenSubtype.Directiva.DB);
         boolean esWord = (subtipoDirectiva == TokenSubtype.Directiva.DW);
 
+        // Si es la estructura especial: VARIABLE PSEUDOINSTRUCCION CONSTANTE DUP
+        if (getLineaAAnalizar().size() == 4) {
+            Token tokenCount = getLineaAAnalizar().get(2);
+            Token tokenDup = getLineaAAnalizar().get(3);
+            if (tokenCount.getType() == TokenType.CONSTANTE &&
+                tokenDup.getType() == TokenType.PSEUDOINSTRUCCION &&
+                tokenDup.getSub() == TokenSubtype.Directiva.DUP) {
+
+                long countValue;
+                try {
+                    String lexeme = tokenCount.getValue();
+                    Object constSubtype = tokenCount.getSub();
+                    if (constSubtype == TokenSubtype.Constante.HEXADECIMAL) {
+                        String hex = lexeme.substring(0, lexeme.length() - 1);
+                        countValue = Long.parseLong(hex, 16);
+                    } else if (constSubtype == TokenSubtype.Constante.BINARIO) {
+                        String bin = lexeme.substring(0, lexeme.length() - 1);
+                        countValue = Long.parseLong(bin, 2);
+                    } else {
+                        countValue = Long.parseLong(lexeme);
+                    }
+                } catch (NumberFormatException e) {
+                    ErrorSemantico error = new ErrorSemantico(tokenCount);
+                    error.setMensajeError("Formato de factor de repetición numérico inválido");
+                    setErrorSemantico(error);
+                    return;
+                }
+
+                if (countValue <= 0) {
+                    ErrorSemantico error = new ErrorSemantico(tokenCount);
+                    error.setMensajeError("El factor de repetición debe ser un número entero positivo.");
+                    setErrorSemantico(error);
+                    return;
+                }
+                validarValorParaTipo(tokenDup, esByte, esWord);
+                return;
+            }
+        }
+
         for (int i = 2; i < getLineaAAnalizar().size(); i += 2) {
             Token tokenValor = getLineaAAnalizar().get(i);
             if (!validarValorParaTipo(tokenValor, esByte, esWord)) {
-                return; //ErrorSemantico ya fue asignado
+                return;
             }
         }
     }
