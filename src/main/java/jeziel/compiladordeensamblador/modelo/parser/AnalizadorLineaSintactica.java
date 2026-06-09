@@ -15,7 +15,7 @@ public class AnalizadorLineaSintactica {
 
     public AnalizadorLineaSintactica(List<Token> tokens){
         this.tokens = tokens;
-        tokenActualContador = 0;
+        tokenActualContador = 1;
         primerToken = tokens.getFirst();
     }
 
@@ -23,7 +23,7 @@ public class AnalizadorLineaSintactica {
         /*En esta parte tiene que haber un ciclo que vaya analizando linea por linea y cuando alcance el limite y todo esta bien devolver la linea,
         el evento que devuelve la linea es que los siguientes tokens en su atributo linea sean diferente a la linea que tiene este anlizador como atributo
          */
-
+        lineaActualContador = tokens.get(tokenActualContador).getLinea();
         linea = new LineaAnalizada(lineaActualContador, obtenerLineaComoSublista());
         //Declaracion de las clasese de analisis especifico
         AnalizarEtiqueta analizarEtiqueta;
@@ -68,7 +68,7 @@ public class AnalizadorLineaSintactica {
             tokensLinea.add(tokens.get(tokenActualContador));
             tokenActualContador++;
         }
-
+        primerToken = tokens.get(tokenActualContador);
         return tokensLinea;
     }
 

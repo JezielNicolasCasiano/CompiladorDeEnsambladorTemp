@@ -28,8 +28,9 @@ public class Parser {
         while(i < tokens.size()){
             i = analizadorLineaSintactica.getTokenActualContador();
             LineaAnalizada linea = analizadorLineaSintactica.analizarLinea();
-            ArbolLineal.add(linea);
-            analizadorLineaSintactica.setTokenActualContador(analizadorLineaSintactica.getTokenActualContador()+1);
+            if (linea != null && !linea.getTokens().isEmpty()) {
+                ArbolLineal.add(linea);
+            }
         }
         return ArbolLineal;
     }
