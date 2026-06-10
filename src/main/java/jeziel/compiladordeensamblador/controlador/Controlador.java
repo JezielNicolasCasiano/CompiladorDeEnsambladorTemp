@@ -21,6 +21,7 @@ import jeziel.compiladordeensamblador.modelo.parser.LineaAnalizada;
 import jeziel.compiladordeensamblador.modelo.semantico.AnalizadorSemantico;
 import jeziel.compiladordeensamblador.modelo.semantico.LineaAnalizadaSemanticamente;
 import jeziel.compiladordeensamblador.modelo.semantico.DepuradorSemantico;
+import jeziel.compiladordeensamblador.modelo.codificador.GeneradorCodigo;
 import javafx.scene.Node;
 
 
@@ -158,6 +159,10 @@ public class Controlador implements LectorDeArchivosListener, Initializable {
         AnalizadorSemantico analizadorSemantico = new AnalizadorSemantico(arbolSintactico);
         List<LineaAnalizadaSemanticamente> analisisSemantico = analizadorSemantico.analizar();
         List<LineaAnalizadaSemanticamente> tablaDeSimbolos = analizadorSemantico.getTablaDeSimbolos();
+
+        // Generar código máquina para asociarlo a las líneas analizadas semánticamente
+        GeneradorCodigo generadorCodigo = new GeneradorCodigo(tablaDeSimbolos, 0x470);
+        generadorCodigo.generarParaPrograma(analisisSemantico);
 
         // Metodo de depuración en consola
         DepuradorSemantico.depurar(analisisSemantico);

@@ -238,7 +238,6 @@ public class AnalizadorSemantico {
             case JS:
             case LOOPNE:
             case JG:
-            case JMP:
             case JNBE:
                 return 2;
 

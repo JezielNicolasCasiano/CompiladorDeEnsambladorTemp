@@ -35,7 +35,10 @@ public class AnalizarPseudoinstruccion extends AnalizadorGeneral {
             case END:
                 validarEnd(tokens);
                 break;
-
+            case DUP:
+                setErrorSintactico(new ErrorSintactico(tokens.get(0)));
+                getErrorSintactico().setMensajeError("Primer token invalido");
+                break;
             case DATA:
             case CODE:
             case STACK:
@@ -47,7 +50,6 @@ public class AnalizarPseudoinstruccion extends AnalizadorGeneral {
             case ENDS:
                 validarSinParametros(tokens);
                 break;
-
             case PROC:
             case ENDP:
             case MACRO:
@@ -55,6 +57,7 @@ public class AnalizarPseudoinstruccion extends AnalizadorGeneral {
             case SEGMENT:
                 validarUnParametroIdentificador(tokens);
                 break;
+
 
             default:
                 break;
