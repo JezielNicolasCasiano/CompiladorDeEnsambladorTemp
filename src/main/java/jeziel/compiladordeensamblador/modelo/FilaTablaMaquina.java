@@ -40,6 +40,8 @@ public class FilaTablaMaquina {
             resultado = lineaSemantica.getLineaAnalizada().getErrorSintactico().getMensajeError();
         } else if (lineaSemantica.getErrorSemantico() != null) {
             resultado = lineaSemantica.getErrorSemantico().getMensajeError();
+        } else if (lineaSemantica.getCodigoMaquina() != null) {
+            resultado = lineaSemantica.getCodigoMaquina();
         }
 
         String direccion = lineaSemantica.getDireccion() != null ? lineaSemantica.getDireccion() : "";

@@ -13,7 +13,7 @@ public enum Opcode {
     IMUL(0b1111011, Formato.SOLO_W), // w
     INC_MEM(0b1111111, Formato.SOLO_W), // w
     INC_REG(0b01000, Formato.REGISTRO), // Los 3 bits del reg van pegados aquí
-    NEG(0b111101, Formato.SOLO_W),
+    NEG(0b1111011, Formato.SOLO_W),
     //SALTOS
     JNS_CORTO(0b01111001, Formato.COMPLETO),
     JNS_LARGO(0b0000111110001001, Formato.COMPLETO),

@@ -43,17 +43,20 @@ public class AnalizadorSemantico {
         this.analizadorNodoSintactico.reset();
 
         Integer pc = null;
+        Integer nextPc = null;
 
         while (analizadorNodoSintactico.getLineaSintacticaActual() < arbolSintactico.size()) {
             LineaAnalizadaSemanticamente lineaSem = analizadorNodoSintactico.analizar(tablaDeSimbolos);
             if (lineaSem != null) {
-                boolean isStart = false;
                 List<Token> tokens = lineaSem.getLineaAnalizada().getTokens();
                 if (tokens != null && !tokens.isEmpty()) {
                     Token primerToken = tokens.getFirst();
                     if (esPseudoinstruccionInicio(primerToken)) {
-                        isStart = true;
-                        pc = 0x470; // starts at 470h
+                        if (pc == null) {
+                            pc = 0x470;
+                        } else {
+                            nextPc = 0x470;
+                        }
                     }
                 }
 
@@ -62,6 +65,12 @@ public class AnalizadorSemantico {
                     lineaSem.setDireccion(String.format("%04X", pc));
                 } else {
                     lineaSem.setDireccion("-");
+                }
+
+                // Apply deferred PC reset if scheduled
+                if (nextPc != null) {
+                    pc = nextPc;
+                    nextPc = null;
                 }
 
                 // If correct (no syntax/semantic error), increase PC
@@ -131,7 +140,7 @@ public class AnalizadorSemantico {
 
         // 2. Si es una instrucción
         if (primerToken.getType() == TokenType.INSTRUCCION) {
-            return calcularTamanoInstruccion(lineaSem.getLineaAnalizada());
+            return calcularTamanoInstruccion(lineaSem);
         }
 
         // En cualquier otro caso (etiquetas, pseudoinstrucciones como segment, ends, org, etc.), el tamaño es 0.
@@ -210,8 +219,12 @@ public class AnalizadorSemantico {
         return totalBytes;
     }
 
-    private int calcularTamanoInstruccion(LineaAnalizada linea) {
-        if (linea == null || linea.getTokens().isEmpty()) {
+    private int calcularTamanoInstruccion(LineaAnalizadaSemanticamente lineaSem) {
+        if (lineaSem == null || lineaSem.getLineaAnalizada() == null) {
+            return 0;
+        }
+        LineaAnalizada linea = lineaSem.getLineaAnalizada();
+        if (linea.getTokens().isEmpty()) {
             return 0;
         }
         Token primerToken = linea.getTokens().getFirst();
@@ -240,6 +253,22 @@ public class AnalizadorSemantico {
             case JG:
             case JNBE:
                 return 2;
+
+            case JMP:
+                if (tokens.size() >= 2) {
+                    Token dest = tokens.get(1);
+                    String nombre = dest.getValue();
+                    LineaAnalizadaSemanticamente sym = jeziel.compiladordeensamblador.modelo.codificador.HelperGenerador.buscarEnTabla(nombre, tablaDeSimbolos);
+                    if (sym != null && sym.getDireccion() != null && !sym.getDireccion().equals("-")) {
+                        int destinoDir = jeziel.compiladordeensamblador.modelo.codificador.HelperGenerador.parsearDireccionSemantica(sym.getDireccion());
+                        int pcVal = jeziel.compiladordeensamblador.modelo.codificador.HelperGenerador.parsearDireccionSemantica(lineaSem.getDireccion());
+                        int disp = destinoDir - (pcVal + 2);
+                        if (disp >= -128 && disp <= 127) {
+                            return 2;
+                        }
+                    }
+                }
+                return 3;
 
             case DIV:
             case IMUL:

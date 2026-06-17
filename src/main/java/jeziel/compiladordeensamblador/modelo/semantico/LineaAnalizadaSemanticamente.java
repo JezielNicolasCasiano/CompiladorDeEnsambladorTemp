@@ -9,12 +9,13 @@ public class LineaAnalizadaSemanticamente {
     private String direccion;
     private String dDeTipoDeDireccionamiento;
     private ErrorSemantico errorSemantico;
+    private String codigoMaquina;
 
     public LineaAnalizadaSemanticamente(LineaAnalizada lineaAnalizada) {
         this.lineaAnalizada = lineaAnalizada;
     }
 
-    //getters y setters
+    // getters y setters
 
     public LineaAnalizada getLineaAnalizada() {
         return lineaAnalizada;
@@ -54,5 +55,13 @@ public class LineaAnalizadaSemanticamente {
 
     public void setErrorSemantico(ErrorSemantico errorSemantico) {
         this.errorSemantico = errorSemantico;
+    }
+
+    public String getCodigoMaquina() {
+        return codigoMaquina;
+    }
+
+    public void setCodigoMaquina(String codigoMaquina) {
+        this.codigoMaquina = codigoMaquina;
     }
 }

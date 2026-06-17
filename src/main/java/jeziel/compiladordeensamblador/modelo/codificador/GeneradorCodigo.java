@@ -273,7 +273,20 @@ public class GeneradorCodigo {
     private String codificarJMP(Token dest) {
         int dispCorto = calcularDesplazamiento(dest, 2, direccionActual, tablaDeSimbolos);
         int dispLargo = calcularDesplazamiento(dest, 3, direccionActual, tablaDeSimbolos);
-        return toBin8(Opcode.JMP.binarioBase) + " " + toBin8(dispLargo & 0xFF) + " " + toBin8((dispLargo >> 8) & 0xFF);
+        
+        // Verificamos si es un salto hacia atrás que cabe en un JMP short (para coincidir con el tamaño estimado en el semántico)
+        String nombre = dest.getValue();
+        LineaAnalizadaSemanticamente sym = HelperGenerador.buscarEnTabla(nombre, tablaDeSimbolos);
+        if (sym != null && sym.getDireccion() != null) {
+            int destinoDir = HelperGenerador.parsearDireccionSemantica(sym.getDireccion());
+            if (destinoDir < direccionActual && dispCorto >= -128 && dispCorto <= 127) {
+                // JMP short: Opcode 0xEB + 1 byte de desplazamiento
+                return toBin8(0xEB) + " " + toBin8(dispCorto & 0xFF);
+            }
+        }
+        
+        // JMP near: Opcode 0xE9 + 2 bytes de desplazamiento
+        return toBin8(0xE9) + " " + toBin8(dispLargo & 0xFF) + " " + toBin8((dispLargo >> 8) & 0xFF);
     }
 
     private String codificarSaltoCorto(Opcode opcode, Token dest) {
