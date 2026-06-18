@@ -83,7 +83,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
         if (esVariableOSimbolo(operando)) {
             if (!existeSimbolo(operando.getValue())) {
                 ErrorSemantico error = new ErrorSemantico(operando);
-                error.setMensajeError("Símbolo no definido " + operando.getValue());
+                error.setMensajeError("Símbolo no definido");
                 setErrorSemantico(error);
             }
         }
@@ -114,7 +114,7 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
 
         if (!existeSimbolo(operando.getValue())) {
             ErrorSemantico error = new ErrorSemantico(operando);
-            error.setMensajeError("Símbolo de salto no definido " + operando.getValue());
+            error.setMensajeError("Símbolo no definido");
             setErrorSemantico(error);
         }
     }
@@ -127,13 +127,13 @@ public class AnalizadorSemanticaInstruccion extends AnalizadorSemanticoGeneral {
         // Validar que los símbolos estén definidos
         if (esVariableOSimbolo(op1) && !existeSimbolo(op1.getValue())) {
             ErrorSemantico error = new ErrorSemantico(op1);
-            error.setMensajeError("Símbolo no definido " + op1.getValue());
+            error.setMensajeError("Símbolo no definido");
             setErrorSemantico(error);
             return;
         }
         if (esVariableOSimbolo(op2) && !existeSimbolo(op2.getValue())) {
             ErrorSemantico error = new ErrorSemantico(op2);
-            error.setMensajeError("Símbolo no definido " + op2.getValue());
+            error.setMensajeError("Símbolo no definido");
             setErrorSemantico(error);
             return;
         }

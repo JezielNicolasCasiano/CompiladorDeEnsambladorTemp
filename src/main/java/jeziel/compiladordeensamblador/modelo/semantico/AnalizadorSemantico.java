@@ -12,6 +12,7 @@ public class AnalizadorSemantico {
     private List<LineaAnalizada> arbolSintactico;
     private AnalizadorNodoSintactico analizadorNodoSintactico;
     private List<LineaAnalizadaSemanticamente> tablaDeSimbolos;
+    private List<LineaAnalizadaSemanticamente> lineasSimbolosProcesadas;
     private List<LineaAnalizadaSemanticamente> analisisSemantico;
 
     public AnalizadorSemantico(List<LineaAnalizada> arbolSintactico) {
@@ -22,12 +23,23 @@ public class AnalizadorSemantico {
     // para todos los demas tokens
     public List<LineaAnalizadaSemanticamente> analizarBuscandoSimbolos(){
         this.tablaDeSimbolos = new ArrayList<>();
+        this.lineasSimbolosProcesadas = new ArrayList<>();
         this.analizadorNodoSintactico = new AnalizadorNodoSintactico(arbolSintactico);
 
         while (analizadorNodoSintactico.getLineaSintacticaActual() < arbolSintactico.size()) {
             LineaAnalizadaSemanticamente sym = analizadorNodoSintactico.buscarSimbolos(tablaDeSimbolos);
             if (sym != null) {
-                tablaDeSimbolos.add(sym);
+                lineasSimbolosProcesadas.add(sym);
+                boolean esDuplicado = false;
+                if (sym.getErrorSemantico() != null) {
+                    String msg = sym.getErrorSemantico().getMensajeError();
+                    if (msg != null && msg.startsWith("Símbolo duplicado")) {
+                        esDuplicado = true;
+                    }
+                }
+                if (!esDuplicado) {
+                    tablaDeSimbolos.add(sym);
+                }
             }
         }
         return tablaDeSimbolos;
@@ -35,7 +47,7 @@ public class AnalizadorSemantico {
 
     public List<LineaAnalizadaSemanticamente> analizar() {
         // Asegurar que la tabla de símbolos está construida
-        if (this.tablaDeSimbolos == null) {
+        if (this.tablaDeSimbolos == null || this.lineasSimbolosProcesadas == null) {
             analizarBuscandoSimbolos();
         }
 
@@ -46,7 +58,7 @@ public class AnalizadorSemantico {
         Integer nextPc = null;
 
         while (analizadorNodoSintactico.getLineaSintacticaActual() < arbolSintactico.size()) {
-            LineaAnalizadaSemanticamente lineaSem = analizadorNodoSintactico.analizar(tablaDeSimbolos);
+            LineaAnalizadaSemanticamente lineaSem = analizadorNodoSintactico.analizar(tablaDeSimbolos, lineasSimbolosProcesadas);
             if (lineaSem != null) {
                 List<Token> tokens = lineaSem.getLineaAnalizada().getTokens();
                 if (tokens != null && !tokens.isEmpty()) {
@@ -278,10 +290,10 @@ public class AnalizadorSemantico {
                     if (op.getType() == TokenType.REGISTRO) {
                         return 2;
                     } else { // Memoria
-                        if (op.getType() == TokenType.COMPUESTO && op.getValue().contains("[")) {
+                        if (op.getType() == TokenType.COMPUESTO && esDireccionamientoIndirecto(op.getValue())) {
                             return 2; // indirecto
                         }
-                        return 4; // directo var
+                        return 4; // directo var / directo bp
                     }
                 }
                 return 2;
@@ -296,10 +308,10 @@ public class AnalizadorSemantico {
                             return 2;
                         }
                     } else { // Memoria
-                        if (op.getType() == TokenType.COMPUESTO && op.getValue().contains("[")) {
+                        if (op.getType() == TokenType.COMPUESTO && esDireccionamientoIndirecto(op.getValue())) {
                             return 2; // indirecto
                         }
-                        return 4; // directo var
+                        return 4; // directo var / directo bp
                     }
                 }
                 return 1;
@@ -310,7 +322,7 @@ public class AnalizadorSemantico {
                     if (op1.getType() == TokenType.REGISTRO) {
                         return 2;
                     } else {
-                        if (op1.getType() == TokenType.COMPUESTO && op1.getValue().contains("[")) {
+                        if (op1.getType() == TokenType.COMPUESTO && esDireccionamientoIndirecto(op1.getValue())) {
                             return 2;
                         }
                         return 4;
@@ -321,14 +333,13 @@ public class AnalizadorSemantico {
             case LDS:
                 if (tokens.size() >= 4) {
                     Token op2 = tokens.get(3);
-                    if (op2.getType() == TokenType.COMPUESTO && op2.getValue().contains("[")) {
+                    if (op2.getType() == TokenType.COMPUESTO && esDireccionamientoIndirecto(op2.getValue())) {
                         return 2;
                     }
                     return 4;
                 }
                 return 2;
 
-            case ADD:
             case MOV:
                 if (tokens.size() >= 4) {
                     Token op1 = tokens.get(1);
@@ -337,25 +348,42 @@ public class AnalizadorSemantico {
                     if (op1.getType() == TokenType.REGISTRO && op2.getType() == TokenType.REGISTRO) {
                         return 2;
                     }
-                    
                     if (op1.getType() == TokenType.REGISTRO && op2.getType() == TokenType.CONSTANTE) {
-                        // Registro a inmediato
-                        if (esRegistroDe16Bits(op1)) {
-                            return 3;
-                        } else {
-                            return 2;
-                        }
+                        return esRegistroDe16Bits(op1) ? 3 : 2;
                     }
-
                     if (op1.getType() != TokenType.REGISTRO && op2.getType() == TokenType.CONSTANTE) {
-                        // Memoria a inmediato
-                        boolean isIndirect = (op1.getType() == TokenType.COMPUESTO && op1.getValue().contains("["));
+                        boolean isIndirect = (op1.getType() == TokenType.COMPUESTO && esDireccionamientoIndirecto(op1.getValue()));
                         return isIndirect ? 4 : 6;
                     }
-
-                    // Uno es memoria y el otro registro
                     Token memOp = (op1.getType() == TokenType.REGISTRO) ? op2 : op1;
-                    boolean isIndirect = (memOp.getType() == TokenType.COMPUESTO && memOp.getValue().contains("["));
+                    boolean isIndirect = (memOp.getType() == TokenType.COMPUESTO && esDireccionamientoIndirecto(memOp.getValue()));
+                    return isIndirect ? 2 : 4;
+                }
+                return 2;
+
+            case ADD:
+                if (tokens.size() >= 4) {
+                    Token op1 = tokens.get(1);
+                    Token op2 = tokens.get(3);
+
+                    if (op1.getType() == TokenType.REGISTRO && op2.getType() == TokenType.REGISTRO) {
+                        return 2;
+                    }
+                    if (op1.getType() == TokenType.REGISTRO && op2.getType() == TokenType.CONSTANTE) {
+                        if (esRegistroDe16Bits(op1)) {
+                            // ADD reg16, imm: 3 bytes si cabe en byte con signo, 4 si no
+                            long val = obtenerValorNumerico(op2);
+                            return (val >= -128 && val <= 127) ? 3 : 4;
+                        } else {
+                            return 3; // ADD reg8, imm: 3 bytes en el codificador
+                        }
+                    }
+                    if (op1.getType() != TokenType.REGISTRO && op2.getType() == TokenType.CONSTANTE) {
+                        boolean isIndirect = (op1.getType() == TokenType.COMPUESTO && esDireccionamientoIndirecto(op1.getValue()));
+                        return isIndirect ? 4 : 6;
+                    }
+                    Token memOp = (op1.getType() == TokenType.REGISTRO) ? op2 : op1;
+                    boolean isIndirect = (memOp.getType() == TokenType.COMPUESTO && esDireccionamientoIndirecto(memOp.getValue()));
                     return isIndirect ? 2 : 4;
                 }
                 return 2;
@@ -394,6 +422,14 @@ public class AnalizadorSemantico {
         } catch (NumberFormatException e) {
             return -1;
         }
+    }
+
+    private boolean esDireccionamientoIndirecto(String val) {
+        if (val == null) return false;
+        String limpio = val.replace("[", "").replace("]", "").trim().toUpperCase();
+        return limpio.equals("BX") || limpio.equals("SI") || limpio.equals("DI") ||
+               limpio.equals("BX+SI") || limpio.equals("BX+DI") ||
+               limpio.equals("BP+SI") || limpio.equals("BP+DI");
     }
 
     public List<LineaAnalizadaSemanticamente> getTablaDeSimbolos() {

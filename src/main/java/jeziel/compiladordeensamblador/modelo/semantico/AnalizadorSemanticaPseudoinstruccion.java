@@ -58,7 +58,7 @@ public class AnalizadorSemanticaPseudoinstruccion extends AnalizadorSemanticoGen
         if (op.getType() == TokenType.VARIABLE || op.getType() == TokenType.IDENTIFICADOR) {
             if (!existeSimbolo(op.getValue())) {
                 ErrorSemantico error = new ErrorSemantico(op);
-                error.setMensajeError("Símbolo de punto de entrada no definido: " + op.getValue());
+                error.setMensajeError("Símbolo no definido");
                 setErrorSemantico(error);
             }
         }

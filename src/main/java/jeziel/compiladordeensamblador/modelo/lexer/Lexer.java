@@ -1,4 +1,5 @@
 package jeziel.compiladordeensamblador.modelo.lexer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -133,22 +134,33 @@ public class Lexer {
         String upper = value.toUpperCase();
         switch (type) {
             case INSTRUCCION:
-                try { return TokenSubtype.Instruccion.valueOf(upper); }
-                catch (IllegalArgumentException e) { return null; }
+                try {
+                    return TokenSubtype.Instruccion.valueOf(upper);
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
 
             case PSEUDOINSTRUCCION:
                 if (upper.startsWith("DUP")) {
                     return TokenSubtype.Directiva.DUP;
                 }
-                try { return TokenSubtype.Directiva.valueOf(upper.replace(" ", "_").replace(".", "")); }
-                catch (IllegalArgumentException e) { return null; }
+                try {
+                    return TokenSubtype.Directiva.valueOf(upper.replace(" ", "_").replace(".", ""));
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
             case REGISTRO:
-                try { return TokenSubtype.Registro.valueOf(upper); }
-                catch (IllegalArgumentException e) { return null; }
+                try {
+                    return TokenSubtype.Registro.valueOf(upper);
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
 
             case CONSTANTE:
-                if (upper.endsWith("H")) return TokenSubtype.Constante.HEXADECIMAL;
-                if (upper.endsWith("B")) return TokenSubtype.Constante.BINARIO;
+                if (upper.endsWith("H"))
+                    return TokenSubtype.Constante.HEXADECIMAL;
+                if (upper.endsWith("B"))
+                    return TokenSubtype.Constante.BINARIO;
                 return TokenSubtype.Constante.DECIMAL;
 
             default:

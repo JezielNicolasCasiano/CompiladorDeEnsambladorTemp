@@ -29,7 +29,7 @@ public class AnalizadorSemanticaEtiqueta extends AnalizadorSemanticoGeneral {
                 }
                 if (symNombre.equalsIgnoreCase(nombre)) {
                     ErrorSemantico error = new ErrorSemantico(getPrimerToken());
-                    error.setMensajeError("Símbolo duplicado (etiqueta): " + nombre);
+                    error.setMensajeError("Símbolo duplicado");
                     setErrorSemantico(error);
                     return;
                 }

@@ -21,7 +21,7 @@ public class AnalizadorNodoSintactico {
         this.lineaSintacticaActual = 0;
     }
 
-    public LineaAnalizadaSemanticamente analizar(List<LineaAnalizadaSemanticamente> tablaDeSimbolos){
+    public LineaAnalizadaSemanticamente analizar(List<LineaAnalizadaSemanticamente> tablaDeSimbolos, List<LineaAnalizadaSemanticamente> lineasSimbolosProcesadas){
         if (lineaSintacticaActual >= arbolSintactico.size()) {
             return null;
         }
@@ -45,7 +45,8 @@ public class AnalizadorNodoSintactico {
         // Si es una variable o etiqueta, ya fueron procesadas en buscarSimbolos.
         // Las buscamos y retornamos
         if (primerToken.getType() == TokenType.VARIABLE || primerToken.getType() == TokenType.ETIQUETA) {
-            for (LineaAnalizadaSemanticamente sym : tablaDeSimbolos) {
+            List<LineaAnalizadaSemanticamente> listaBusqueda = (lineasSimbolosProcesadas != null) ? lineasSimbolosProcesadas : tablaDeSimbolos;
+            for (LineaAnalizadaSemanticamente sym : listaBusqueda) {
                 if (sym.getLineaAnalizada() == lineaActual) {
                     lineaSintacticaActual++;
                     return sym;
