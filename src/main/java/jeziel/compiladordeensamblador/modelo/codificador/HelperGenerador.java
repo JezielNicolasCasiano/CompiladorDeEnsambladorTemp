@@ -2,6 +2,7 @@ package jeziel.compiladordeensamblador.modelo.codificador;
 
 import jeziel.compiladordeensamblador.modelo.lexer.Token;
 import jeziel.compiladordeensamblador.modelo.lexer.TokenType;
+import jeziel.compiladordeensamblador.modelo.semantico.ErrorSemantico;
 import jeziel.compiladordeensamblador.modelo.semantico.LineaAnalizadaSemanticamente;
 
 import java.util.List;
@@ -57,9 +58,9 @@ public class HelperGenerador {
     static int calcularDesplazamiento(Token dest, int tamInstruccion, int direccionActual, List<LineaAnalizadaSemanticamente> tablaDeSimbolos) {
         String nombre = dest.getValue();
         LineaAnalizadaSemanticamente sym = buscarEnTabla(nombre, tablaDeSimbolos);
+        int destinoDir = parsearDireccionSemantica(sym.getDireccion());
 
-        if (sym != null) {
-            int destinoDir = parsearDireccionSemantica(sym.getDireccion());
+        if (sym != null && destinoDir < direccionActual) {
             return destinoDir - (direccionActual + tamInstruccion);
         }
         return 0;

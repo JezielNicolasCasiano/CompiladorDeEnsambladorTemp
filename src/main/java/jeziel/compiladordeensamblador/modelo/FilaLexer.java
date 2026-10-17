@@ -31,8 +31,13 @@ public class FilaLexer {
 
     public static FilaLexer crearDesdeToken(int indice, Token token, Map<TokenType, String> descripciones) {
         String desc;
-        if (token.getType() == TokenType.CONSTANTE) {
+        if (token.getType() == TokenType.CONSTANTE ) {
             desc = "Constante (numérica " + String.valueOf(token.getSub()).toLowerCase() + ")";
+        } else {
+            desc = descripciones.getOrDefault(token.getType(), "Elemento inválido");
+        }
+        if(token.getType() == TokenType.CADENA) {
+            desc = "Constante (cadena)";
         } else {
             desc = descripciones.getOrDefault(token.getType(), "Elemento inválido");
         }
